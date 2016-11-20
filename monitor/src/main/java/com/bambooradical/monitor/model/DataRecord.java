@@ -26,7 +26,7 @@ public class DataRecord implements Serializable {
     private Float voltage;
     private String location;
     private String error;
-    @Temporal(javax.persistence.TemporalType.DATE)
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date recordDate;
 
     public DataRecord() {
@@ -53,5 +53,53 @@ public class DataRecord implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Float getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(Float temperature) {
+        this.temperature = temperature;
+    }
+
+    public Float getHumidity() {
+        return humidity;
+    }
+
+    public void setHumidity(Float humidity) {
+        this.humidity = humidity;
+    }
+
+    public Float getVoltage() {
+        return voltage;
+    }
+
+    public void setVoltage(Float voltage) {
+        this.voltage = voltage;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getError() {
+        return error;
+    }
+
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public Date getRecordDate() {
+        return recordDate;
+    }
+
+    public void setRecordDate(Date recordDate) {
+        this.recordDate = recordDate;
     }
 }
