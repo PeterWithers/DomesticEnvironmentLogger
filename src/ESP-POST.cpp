@@ -40,7 +40,14 @@ void sendMonitoredData() {
         telemetryString += "Humidity: ";
         telemetryString += event.relative_humidity;
         telemetryString += "%<br/>";
-    }
+    }    
+    telemetryString += "ADC: ";
+    telemetryString += analogRead(A0);
+    telemetryString += "<br/>";
+    telemetryString += "voltage: ";
+    telemetryString += (analogRead(A0) / 69.0);
+    telemetryString += "v";
+
     Serial.print(telemetryString);
 }
 
@@ -53,7 +60,7 @@ void setup() {
         Serial.println(".");
     }
     Serial.println("Connected: ");
-    Serial.println(ssid);    
+    Serial.println(ssid);
     dht.begin();
 }
 
