@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 Peter Withers
  */
-package com.bambooradical.controller;
+package com.bambooradical.monitor.controller;
 
 import com.bambooradical.monitor.model.DataRecord;
 import com.bambooradical.monitor.repository.DataRecordRepository;
@@ -41,5 +41,11 @@ public class DataRecordController {
     public @ResponseBody
     List<DataRecord> listRecords() {
         return dataRecordRepository.findAll();
+    }
+
+    @RequestMapping("/")
+    public @ResponseBody
+    String getHtml() {
+        return "<body><a href=\"add?temperature=0&humidity=0&voltage=0&location=test\">add</a></body>";
     }
 }
