@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author : Peter Withers <peter@gthb-bambooradical.com>
  */
 @RestController
+@RequestMapping("/monitor")
 public class DataRecordController {
 
     @Autowired
