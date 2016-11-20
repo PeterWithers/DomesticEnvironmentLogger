@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.Temporal;
 import org.springframework.data.annotation.Id;
 
 /**
@@ -25,6 +26,7 @@ public class DataRecord implements Serializable {
     private Float voltage;
     private String location;
     private String error;
+    @Temporal(javax.persistence.TemporalType.DATE)
     private Date recordDate;
 
     public DataRecord() {
