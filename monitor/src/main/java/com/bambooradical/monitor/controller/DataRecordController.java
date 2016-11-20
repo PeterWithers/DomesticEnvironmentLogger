@@ -8,24 +8,22 @@ import com.bambooradical.monitor.repository.DataRecordRepository;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @created: 19/11/2016 23:48:12
  * @author : Peter Withers <peter@gthb-bambooradical.com>
  */
-@Controller
+@RestController
 public class DataRecordController {
 
     @Autowired
     DataRecordRepository dataRecordRepository;
 
     @RequestMapping("/add")
-    public @ResponseBody
-    DataRecord addRecord(
+    public DataRecord addRecord(
             @RequestParam(value = "temperature", required = true) Float temperature,
             @RequestParam(value = "humidity", required = true) Float humidity,
             @RequestParam(value = "voltage", required = true) Float voltage,
@@ -38,14 +36,12 @@ public class DataRecordController {
     }
 
     @RequestMapping("/list")
-    public @ResponseBody
-    List<DataRecord> listRecords() {
+    public List<DataRecord> listRecords() {
         return dataRecordRepository.findAll();
     }
 
     @RequestMapping("/")
-    public @ResponseBody
-    String getHtml() {
+    public String getHtml() {
         return "<body><a href=\"add?temperature=0&humidity=0&voltage=0&location=test\">add</a></body>";
     }
 }
