@@ -47,47 +47,65 @@ public class DataRecordController {
         StringBuilder humidityBuilder = new StringBuilder();
         StringBuilder temperatureBuilder = new StringBuilder();
         for (final DataRecord record : dataRecordRepository.findAll()) {
-            voltageBuilder.append("[\'");
-            voltageBuilder.append(record.getRecordDate().toString());
-            voltageBuilder.append("\',");
+            voltageBuilder.append("{ x: ");
+            voltageBuilder.append(record.getRecordDate().getTime());
+            voltageBuilder.append(", y: ");
             voltageBuilder.append(record.getVoltage());
-            voltageBuilder.append("],");
-            humidityBuilder.append("[\'");
-            humidityBuilder.append(record.getHumidity().toString());
-            humidityBuilder.append("\',");
-            humidityBuilder.append(record.getVoltage());
-            humidityBuilder.append("],");
-            temperatureBuilder.append("[\'");
-            temperatureBuilder.append(record.getTemperature().toString());
-            temperatureBuilder.append("\',");
-            temperatureBuilder.append(record.getVoltage());
-            temperatureBuilder.append("],");
+            voltageBuilder.append("},");
+            humidityBuilder.append("{ x: ");
+            humidityBuilder.append(record.getRecordDate().getTime());
+            humidityBuilder.append(", y: ");
+            humidityBuilder.append(record.getHumidity());
+            humidityBuilder.append("},");
+            temperatureBuilder.append("{ x: ");
+            temperatureBuilder.append(record.getRecordDate().getTime());
+            temperatureBuilder.append(", y: ");
+            temperatureBuilder.append(record.getTemperature());
+            temperatureBuilder.append("},");
         }
         String chartJs = "$(document).ready(function(){\n"
-                + "  var plot1 = $.jqplot('chart1', [["
+                + "var chart = new CanvasJS.Chart(\"chartContainer\",\n"
+                + "    {\n"
+                + "      title:{\n"
+                + "      text: \"Temperature and Humidity\"  \n"
+                + "      },\n"
+                + "      data: [\n"
+                + "      {        \n"
+                + "        type: \"line\",\n"
+                + "xValueType: \"dateTime\","
+                + "        dataPoints: [\n"
                 + temperatureBuilder.toString()
-                + "],["
+                + "      \n"
+                + "        ]\n"
+                + "      },\n"
+                + "        {        \n"
+                + "        type: \"line\",\n"
+                + "xValueType: \"dateTime\","
+                + "        dataPoints: [\n"
                 + humidityBuilder.toString()
-                + "],["
+                + "      \n"
+                + "        ]\n"
+                + "      },\n"
+                + "        {        \n"
+                + "        type: \"line\",\n"
+                + "xValueType: \"dateTime\","
+                + "        dataPoints: [\n"
                 + voltageBuilder.toString()
-                + "]], {\n"
-                + "    title:'Temperature and Humidity',\n"
-                + "    axes:{\n"
-                + "        xaxis:{\n"
-                + "            renderer:$.jqplot.DateAxisRenderer\n"
-                + "        }\n"
-                + "    },\n"
-                + "    series:[{lineWidth:4, markerOptions:{style:'square'}}]\n"
-                + "  });\n"
+                + "      \n"
+                + "        ]\n"
+                + "      },\n"
+                + "      ]\n"
+                + "    });\n"
+                + "\n"
+                + "    chart.render();"
                 + "});";
         return "<head>"
                 + "<script src=\"webjars/jquery/jquery.min.js\"></script>"
-                + "<script type=\"text/javascript\" src=\"js/jquery.jqplot.js\"></script>\n"
-                + "<script type=\"text/javascript\" src=\"js/jqplot.dateAxisRenderer.js\"></script>\n"
-                + "<link rel=\"stylesheet\" type=\"text/css\" href=\"js/jquery.jqplot.css\" />"
+                + "<script type=\"text/javascript\" src=\"js/canvasjs.min.js\"></script>\n"
                 + "<script type=\"text/javascript\">" + chartJs + "</script></head>"
-                + "<body><a href=\"add?temperature=0&humidity=0&voltage=0&location=test\">add</a>"
-                + "<div id=\"chart1\"></div>"
+                + "<body>"
+//                + "<a href=\"add?temperature=0&humidity=0&voltage=0&location=test\">add</a>"
+                + "<div id=\"chartContainer\"></div>"
                 + "</body>";
     }
 }
