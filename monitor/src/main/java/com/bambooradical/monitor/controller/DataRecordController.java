@@ -53,12 +53,12 @@ public class DataRecordController {
             voltageBuilder.append(record.getVoltage());
             voltageBuilder.append("],");
             humidityBuilder.append("[\'");
-            humidityBuilder.append(record.getRecordDate().toString());
+            humidityBuilder.append(record.getHumidity().toString());
             humidityBuilder.append("\',");
             humidityBuilder.append(record.getVoltage());
             humidityBuilder.append("],");
             temperatureBuilder.append("[\'");
-            temperatureBuilder.append(record.getRecordDate().toString());
+            temperatureBuilder.append(record.getTemperature().toString());
             temperatureBuilder.append("\',");
             temperatureBuilder.append(record.getVoltage());
             temperatureBuilder.append("],");
