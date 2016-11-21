@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author : Peter Withers <peter@gthb-bambooradical.com>
  */
 @RestController
-@RequestMapping("/monitor")
+//@RequestMapping("/monitor")
 public class DataRecordController {
 
     @Autowired
@@ -41,8 +41,53 @@ public class DataRecordController {
         return dataRecordRepository.findAll();
     }
 
-    @RequestMapping("/")
+    @RequestMapping("/chart")
     public String getHtml() {
-        return "<body><a href=\"add?temperature=0&humidity=0&voltage=0&location=test\">add</a></body>";
+        StringBuilder voltageBuilder = new StringBuilder();
+        StringBuilder humidityBuilder = new StringBuilder();
+        StringBuilder temperatureBuilder = new StringBuilder();
+        for (final DataRecord record : dataRecordRepository.findAll()) {
+            voltageBuilder.append("[\'");
+            voltageBuilder.append(record.getRecordDate().toString());
+            voltageBuilder.append("\',");
+            voltageBuilder.append(record.getVoltage());
+            voltageBuilder.append("],");
+            humidityBuilder.append("[\'");
+            humidityBuilder.append(record.getRecordDate().toString());
+            humidityBuilder.append("\',");
+            humidityBuilder.append(record.getVoltage());
+            humidityBuilder.append("],");
+            temperatureBuilder.append("[\'");
+            temperatureBuilder.append(record.getRecordDate().toString());
+            temperatureBuilder.append("\',");
+            temperatureBuilder.append(record.getVoltage());
+            temperatureBuilder.append("],");
+        }
+        String chartJs = "$(document).ready(function(){\n"
+                + "  var plot1 = $.jqplot('chart1', [["
+                + temperatureBuilder.toString()
+                + "],["
+                + humidityBuilder.toString()
+                + "],["
+                + voltageBuilder.toString()
+                + "]], {\n"
+                + "    title:'Temperature and Humidity',\n"
+                + "    axes:{\n"
+                + "        xaxis:{\n"
+                + "            renderer:$.jqplot.DateAxisRenderer\n"
+                + "        }\n"
+                + "    },\n"
+                + "    series:[{lineWidth:4, markerOptions:{style:'square'}}]\n"
+                + "  });\n"
+                + "});";
+        return "<head>"
+                + "<script src=\"webjars/jquery/jquery.min.js\"></script>"
+                + "<script type=\"text/javascript\" src=\"js/jquery.jqplot.js\"></script>\n"
+                + "<script type=\"text/javascript\" src=\"js/jqplot.dateAxisRenderer.js\"></script>\n"
+                + "<link rel=\"stylesheet\" type=\"text/css\" href=\"js/jquery.jqplot.css\" />"
+                + "<script type=\"text/javascript\">" + chartJs + "</script></head>"
+                + "<body><a href=\"add?temperature=0&humidity=0&voltage=0&location=test\">add</a>"
+                + "<div id=\"chart1\"></div>"
+                + "</body>";
     }
 }
