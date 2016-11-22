@@ -41,28 +41,107 @@ public class DataRecordController {
         return dataRecordRepository.findAll();
     }
 
-    @RequestMapping("/chart")
-    public String getHtml() {
-        StringBuilder voltageBuilder = new StringBuilder();
-        StringBuilder humidityBuilder = new StringBuilder();
+    private String getTemperatureArray() {
         StringBuilder temperatureBuilder = new StringBuilder();
+        temperatureBuilder.append("[\n");
         for (final DataRecord record : dataRecordRepository.findAll()) {
-            voltageBuilder.append("{ x: ");
-            voltageBuilder.append(record.getRecordDate().getTime());
-            voltageBuilder.append(", y: ");
-            voltageBuilder.append(record.getVoltage());
-            voltageBuilder.append("},");
-            humidityBuilder.append("{ x: ");
-            humidityBuilder.append(record.getRecordDate().getTime());
-            humidityBuilder.append(", y: ");
-            humidityBuilder.append(record.getHumidity());
-            humidityBuilder.append("},");
             temperatureBuilder.append("{ x: ");
             temperatureBuilder.append(record.getRecordDate().getTime());
             temperatureBuilder.append(", y: ");
             temperatureBuilder.append(record.getTemperature());
             temperatureBuilder.append("},");
         }
+        temperatureBuilder.append("]");
+        return temperatureBuilder.toString();
+    }
+
+    private String getHumidityArray() {
+        StringBuilder humidityBuilder = new StringBuilder();
+        humidityBuilder.append("[\n");
+        for (final DataRecord record : dataRecordRepository.findAll()) {
+            humidityBuilder.append("{ x: ");
+            humidityBuilder.append(record.getRecordDate().getTime());
+            humidityBuilder.append(", y: ");
+            humidityBuilder.append(record.getHumidity());
+            humidityBuilder.append("},");
+        }
+        humidityBuilder.append("]");
+        return humidityBuilder.toString();
+    }
+
+    private String getVoltageArray() {
+        StringBuilder voltageBuilder = new StringBuilder();
+        voltageBuilder.append("[\n");
+        for (final DataRecord record : dataRecordRepository.findAll()) {
+            voltageBuilder.append("{ x: ");
+            voltageBuilder.append(record.getRecordDate().getTime());
+            voltageBuilder.append(", y: ");
+            voltageBuilder.append(record.getVoltage());
+            voltageBuilder.append("},");
+        }
+        voltageBuilder.append("]");
+        return voltageBuilder.toString();
+    }
+
+    private String getVoltageData() {
+        StringBuilder voltageBuilder = new StringBuilder();
+        voltageBuilder.append("        {        \n"
+                + "        type: \"line\",\n"
+                + "xValueType: \"dateTime\","
+                + "        dataPoints: [\n");
+        for (final DataRecord record : dataRecordRepository.findAll()) {
+            voltageBuilder.append("{ x: ");
+            voltageBuilder.append(record.getRecordDate().getTime());
+            voltageBuilder.append(", y: ");
+            voltageBuilder.append(record.getVoltage());
+            voltageBuilder.append("},");
+        }
+        voltageBuilder.append("      \n"
+                + "      ]\n"
+                + "    }");
+        return voltageBuilder.toString();
+    }
+
+    private String getHumidityData() {
+        StringBuilder humidityBuilder = new StringBuilder();
+        humidityBuilder.append("        {        \n"
+                + "        type: \"line\",\n"
+                + "xValueType: \"dateTime\","
+                + "        dataPoints: [\n");
+        for (final DataRecord record : dataRecordRepository.findAll()) {
+            humidityBuilder.append("{ x: ");
+            humidityBuilder.append(record.getRecordDate().getTime());
+            humidityBuilder.append(", y: ");
+            humidityBuilder.append(record.getHumidity());
+            humidityBuilder.append("},");
+        }
+        humidityBuilder.append("      \n"
+                + "        ]\n"
+                + "      }\n");
+        return humidityBuilder.toString();
+    }
+
+    private String getTemperatureData() {
+        StringBuilder temperatureBuilder = new StringBuilder();
+        temperatureBuilder.append("      {        \n"
+                + "        type: \"line\",\n"
+                + "xValueType: \"dateTime\","
+                + "        dataPoints: [\n");
+        for (final DataRecord record : dataRecordRepository.findAll()) {
+            temperatureBuilder.append("{ x: ");
+            temperatureBuilder.append(record.getRecordDate().getTime());
+            temperatureBuilder.append(", y: ");
+            temperatureBuilder.append(record.getTemperature());
+            temperatureBuilder.append("},");
+        }
+        temperatureBuilder.append("      \n"
+                + "        ]\n"
+                + "      }\n");
+        return temperatureBuilder.toString();
+    }
+
+    @RequestMapping("/chart")
+    public String getChart() {
         String chartJs = "$(document).ready(function(){\n"
                 + "var chart = new CanvasJS.Chart(\"chartContainer\",\n"
                 + "    {\n"
@@ -70,42 +149,157 @@ public class DataRecordController {
                 + "      text: \"Temperature and Humidity\"  \n"
                 + "      },\n"
                 + "      data: [\n"
-                + "      {        \n"
-                + "        type: \"line\",\n"
-                + "xValueType: \"dateTime\","
-                + "        dataPoints: [\n"
-                + temperatureBuilder.toString()
-                + "      \n"
-                + "        ]\n"
-                + "      },\n"
-                + "        {        \n"
-                + "        type: \"line\",\n"
-                + "xValueType: \"dateTime\","
-                + "        dataPoints: [\n"
-                + humidityBuilder.toString()
-                + "      \n"
-                + "        ]\n"
-                + "      },\n"
-                + "        {        \n"
-                + "        type: \"line\",\n"
-                + "xValueType: \"dateTime\","
-                + "        dataPoints: [\n"
-                + voltageBuilder.toString()
-                + "      \n"
-                + "        ]\n"
-                + "      },\n"
-                + "      ]\n"
-                + "    });\n"
+                + getTemperatureData()
+                + ","
+                + getHumidityData()
+                + ","
+                + getVoltageData()
+                + "]});\n"
                 + "\n"
                 + "    chart.render();"
                 + "});";
         return "<head>"
-                + "<script src=\"webjars/jquery/jquery.min.js\"></script>"
-                + "<script type=\"text/javascript\" src=\"js/canvasjs.min.js\"></script>\n"
+                + "<script src=\"/js/jquery.min.js\"></script>"
+                + "<script type=\"text/javascript\" src=\"/js/canvasjs.min.js\"></script>\n"
                 + "<script type=\"text/javascript\">" + chartJs + "</script></head>"
-                + "<body>"
-//                + "<a href=\"add?temperature=0&humidity=0&voltage=0&location=test\">add</a>"
+                + "<a href=\"chart\">combined</a>"
+                + "<br/>"
+                + "<a href=\"charts\">separate</a>"
+                + "<br/>"
+                + "<a href=\"list\">list</a>"
+                + "<br/>"
                 + "<div id=\"chartContainer\"></div>"
+                + "</body>";
+    }
+
+    @RequestMapping("/charts")
+    public String getCharts() {
+
+        String chartJs = "$(document).ready(function(){\n"
+                //                + "var temperatureChart = new CanvasJS.Chart(\"temperatureContainer\",\n"
+                //                + "    {\n"
+                //                + "      title:{\n"
+                //                + "      text: \"Temperature\"  \n"
+                //                + "      },\n"
+                //                + "      data: [\n"
+                //                + getTemperatureData()
+                //                + "]});\n"
+                //                + "\n"
+                //                + "    temperatureChart.render();"
+                //                + "var humidityChart = new CanvasJS.Chart(\"humidityContainer\",\n"
+                //                + "    {\n"
+                //                + "      title:{\n"
+                //                + "      text: \"Humidity\"  \n"
+                //                + "      },\n"
+                //                + "      data: [\n"
+                //                + getHumidityData()
+                //                + "]});\n"
+                //                + "\n"
+                //                + "    humidityChart.render();"
+                //                + "var voltageChart = new CanvasJS.Chart(\"voltageContainer\",\n"
+                //                + "    {\n"
+                //                + "      title:{\n"
+                //                + "      text: \"Voltage\"  \n"
+                //                + "      },\n"
+                //                + "      data: [\n"
+                //                + getVoltageData()
+                //                + "]});\n"
+                //                + "\n"
+                //                + "    voltageChart.render();"
+                + "\n"
+                + "var temperatureContainer = $(\"#temperatureContainer\");\n"
+                + "var temperatureChart = new Chart(temperatureContainer, {\n"
+                + "    type: 'line',\n"
+                + "    data: {\n"
+                + "        datasets: [{\n"
+                + "            label: 'Temperature',\n"
+                + "            data: "
+                + getTemperatureArray()
+                + "        }]\n"
+                + "    },\n"
+                + "    options: {\n"
+                + "        responsive: true,\n"
+                + "        maintainAspectRatio: true,\n"
+                + "        scales: {\n"
+                + "            xAxes: [{\n"
+                + "                type: 'time',\n"
+                + "                time: {\n"
+                + "                    displayFormats: {\n"
+                + "                        quarter: 'YYYY MMM D h:mm:ss'\n"
+                + "                    }\n"
+                + "                }\n"
+                + "            }]"
+                + "        }\n"
+                + "    }"
+                + "});"
+                + "var humidityContainer = $(\"#humidityContainer\");\n"
+                + "var humidityChart = new Chart(humidityContainer, {\n"
+                + "    type: 'line',\n"
+                + "    data: {\n"
+                + "        datasets: [{\n"
+                + "            label: 'Humidity',\n"
+                + "            data: "
+                + getHumidityArray()
+                + "        }]\n"
+                + "    },\n"
+                + "    options: {\n"
+                + "        responsive: true,\n"
+                + "        maintainAspectRatio: true,\n"
+                + "        scales: {\n"
+                + "            xAxes: [{\n"
+                + "                type: 'time',\n"
+                + "                time: {\n"
+                + "                    displayFormats: {\n"
+                + "                        quarter: 'YYYY MMM D h:mm:ss'\n"
+                + "                    }\n"
+                + "                }\n"
+                + "            }]"
+                + "        }\n"
+                + "    }"
+                + "});"
+                + "var voltageContainer = $(\"#voltageContainer\");\n"
+                + "var voltageChart = new Chart(voltageContainer, {\n"
+                + "    type: 'line',\n"
+                + "    data: {\n"
+                + "        datasets: [{\n"
+                + "            label: 'Voltage',\n"
+                + "            data: "
+                + getVoltageArray()
+                + "        }]\n"
+                + "    },\n"
+                + "    options: {\n"
+                + "        responsive: true,\n"
+                + "        maintainAspectRatio: true,\n"
+                + "        scales: {\n"
+                + "            xAxes: [{\n"
+                + "                type: 'time',\n"
+                + "                time: {\n"
+                + "                    displayFormats: {\n"
+                + "                        quarter: 'YYYY MMM D h:mm:ss'\n"
+                + "                    }\n"
+                + "                }\n"
+                + "            }]"
+                + "        }\n"
+                + "    }"
+                + "});"
+                + "});";
+        return "<head>"
+                + "<script src=\"/js/jquery.min.js\"></script>"
+                + "<script src=\"/js/moment.js\"></script>"
+                + "<script src=\"/js/Chart.min.js\"></script>"
+                //                + "<script type=\"text/javascript\" src=\"/js/canvasjs.min.js\"></script>\n"
+                + "<script type=\"text/javascript\">" + chartJs + "</script></head>"
+                + "<a href=\"chart\">combined</a>"
+                + "<br/>"
+                + "<a href=\"charts\">separate</a>"
+                + "<br/>"
+                + "<a href=\"list\">list</a>"
+                + "<br/>"
+                + "<canvas id=\"temperatureContainer\" width=\"800px\" height=\"400px\"></canvas>"
+                + "<br/>"
+                + "<canvas id=\"humidityContainer\" width=\"800px\" height=\"400px\"></canvas>"
+                + "<br/>"
+                + "<canvas id=\"voltageContainer\" width=\"800px\" height=\"400px\"></canvas>"
                 + "</body>";
     }
 }
