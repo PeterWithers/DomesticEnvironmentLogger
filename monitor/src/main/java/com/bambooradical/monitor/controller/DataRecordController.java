@@ -43,10 +43,10 @@ public class DataRecordController {
         return dataRecordRepository.findAll();
     }
 
-    private String getTemperatureArray(final Pageable pageable) {
+    private String getTemperatureArray(final String sensorLocation, final Pageable pageable) {
         StringBuilder temperatureBuilder = new StringBuilder();
         temperatureBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findAll(pageable)) {
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCase(sensorLocation, pageable)) {
             final Float temperature = record.getTemperature();
             if (temperature != null) {
                 temperatureBuilder.append("{ x: ");
@@ -60,10 +60,10 @@ public class DataRecordController {
         return temperatureBuilder.toString();
     }
 
-    private String getHumidityArray(final Pageable pageable) {
+    private String getHumidityArray(final String sensorLocation, final Pageable pageable) {
         StringBuilder humidityBuilder = new StringBuilder();
         humidityBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findAll(pageable)) {
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCase(sensorLocation, pageable)) {
             final Float humidity = record.getHumidity();
             if (humidity != null) {
                 humidityBuilder.append("{ x: ");
@@ -77,15 +77,17 @@ public class DataRecordController {
         return humidityBuilder.toString();
     }
 
-    private String getVoltageArray(final Pageable pageable) {
+    private String getVoltageArray(final String sensorLocation, final Pageable pageable) {
         StringBuilder voltageBuilder = new StringBuilder();
         voltageBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findAll(pageable)) {
-            voltageBuilder.append("{ x: ");
-            voltageBuilder.append(record.getRecordDate().getTime());
-            voltageBuilder.append(", y: ");
-            voltageBuilder.append(record.getVoltage());
-            voltageBuilder.append("},");
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCase(sensorLocation, pageable)) {
+            if (record.getVoltage() < 100) { //@todo: remove this < once the invalid data is removed
+                voltageBuilder.append("{ x: ");
+                voltageBuilder.append(record.getRecordDate().getTime());
+                voltageBuilder.append(", y: ");
+                voltageBuilder.append(record.getVoltage());
+                voltageBuilder.append("},");
+            }
         }
         voltageBuilder.append("]");
         return voltageBuilder.toString();
@@ -239,12 +241,32 @@ public class DataRecordController {
                 + "var temperatureChart = new Chart(temperatureContainer, {\n"
                 + "    type: 'line',\n"
                 + "    data: {\n"
-                + "        datasets: [{\n"
+                + "        datasets: ["
+                + "{\n"
                 //                + "        lineTension: 0\n"
-                + "            label: 'Temperature',\n"
+                + "            label: 'Temperature 2',\n"
+                + "            backgroundColor: \"rgba(179,181,198,0.2)\",\n"
+                + "            borderColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(179,181,198,1)\","
                 + "            data: "
-                + getTemperatureArray(pageable)
-                + "        }]\n"
+                + getTemperatureArray("s", pageable)
+                + "        },"
+                + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'Temperature 1',\n"
+                + "            backgroundColor: \"rgba(255,99,132,0.2)\",\n"
+                + "            borderColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+                + "            data: "
+                + getTemperatureArray("t", pageable)
+                + "        }"
+                + "]\n"
                 + "    },\n"
                 + "    options: {\n"
                 + "        bezierCurve : false,\n"
@@ -266,11 +288,30 @@ public class DataRecordController {
                 + "var humidityChart = new Chart(humidityContainer, {\n"
                 + "    type: 'line',\n"
                 + "    data: {\n"
-                + "        datasets: [{\n"
-                + "            label: 'Humidity',\n"
+                + "        datasets: ["
+                + "{\n"
+                + "            label: 'Humidity 2',\n"
+                + "            backgroundColor: \"rgba(179,181,198,0.2)\",\n"
+                + "            borderColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(179,181,198,1)\","
                 + "            data: "
-                + getHumidityArray(pageable)
-                + "        }]\n"
+                + getHumidityArray("s", pageable)
+                + "        },"
+                + "{\n"
+                + "            label: 'Humidity 1',\n"
+                + "            backgroundColor: \"rgba(255,99,132,0.2)\",\n"
+                + "            borderColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+                + "            data: "
+                + getHumidityArray("t", pageable)
+                + "        }"
+                + "]\n"
                 + "    },\n"
                 + "    options: {\n"
                 + "        bezierCurve : false,\n"
@@ -292,11 +333,30 @@ public class DataRecordController {
                 + "var voltageChart = new Chart(voltageContainer, {\n"
                 + "    type: 'line',\n"
                 + "    data: {\n"
-                + "        datasets: [{\n"
-                + "            label: 'Voltage',\n"
+                + "        datasets: ["
+                + "{\n"
+                + "            label: 'Voltage 2',\n"
+                + "            backgroundColor: \"rgba(179,181,198,0.2)\",\n"
+                + "            borderColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(179,181,198,1)\","
                 + "            data: "
-                + getVoltageArray(pageable)
-                + "        }]\n"
+                + getVoltageArray("s", pageable)
+                + "        },"
+                + "{\n"
+                + "            label: 'Voltage 1',\n"
+                + "            backgroundColor: \"rgba(255,99,132,0.2)\",\n"
+                + "            borderColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+                + "            data: "
+                + getVoltageArray("t", pageable)
+                + "        }"
+                + "]\n"
                 + "    },\n"
                 + "    options: {\n"
                 + "        bezierCurve : false,\n"
