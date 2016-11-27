@@ -8,6 +8,8 @@ import com.bambooradical.monitor.repository.DataRecordRepository;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,38 +43,44 @@ public class DataRecordController {
         return dataRecordRepository.findAll();
     }
 
-    private String getTemperatureArray() {
+    private String getTemperatureArray(final Pageable pageable) {
         StringBuilder temperatureBuilder = new StringBuilder();
         temperatureBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findAll()) {
-            temperatureBuilder.append("{ x: ");
-            temperatureBuilder.append(record.getRecordDate().getTime());
-            temperatureBuilder.append(", y: ");
-            temperatureBuilder.append(record.getTemperature());
-            temperatureBuilder.append("},");
+        for (final DataRecord record : dataRecordRepository.findAll(pageable)) {
+            final Float temperature = record.getTemperature();
+            if (temperature != null) {
+                temperatureBuilder.append("{ x: ");
+                temperatureBuilder.append(record.getRecordDate().getTime());
+                temperatureBuilder.append(", y: ");
+                temperatureBuilder.append(temperature);
+                temperatureBuilder.append("},");
+            }
         }
         temperatureBuilder.append("]");
         return temperatureBuilder.toString();
     }
 
-    private String getHumidityArray() {
+    private String getHumidityArray(final Pageable pageable) {
         StringBuilder humidityBuilder = new StringBuilder();
         humidityBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findAll()) {
-            humidityBuilder.append("{ x: ");
-            humidityBuilder.append(record.getRecordDate().getTime());
-            humidityBuilder.append(", y: ");
-            humidityBuilder.append(record.getHumidity());
-            humidityBuilder.append("},");
+        for (final DataRecord record : dataRecordRepository.findAll(pageable)) {
+            final Float humidity = record.getHumidity();
+            if (humidity != null) {
+                humidityBuilder.append("{ x: ");
+                humidityBuilder.append(record.getRecordDate().getTime());
+                humidityBuilder.append(", y: ");
+                humidityBuilder.append(humidity);
+                humidityBuilder.append("},");
+            }
         }
         humidityBuilder.append("]");
         return humidityBuilder.toString();
     }
 
-    private String getVoltageArray() {
+    private String getVoltageArray(final Pageable pageable) {
         StringBuilder voltageBuilder = new StringBuilder();
         voltageBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findAll()) {
+        for (final DataRecord record : dataRecordRepository.findAll(pageable)) {
             voltageBuilder.append("{ x: ");
             voltageBuilder.append(record.getRecordDate().getTime());
             voltageBuilder.append(", y: ");
@@ -173,8 +181,28 @@ public class DataRecordController {
     }
 
     @RequestMapping("/charts")
-    public String getCharts() {
-
+    public String getCharts(@RequestParam(value = "page", required = false) Integer page, @RequestParam(value = "size", required = false, defaultValue = "1000") int size) {
+        long totalRecords = dataRecordRepository.count();
+        if (size > totalRecords) {
+            size = (int) totalRecords;
+            page = 0;
+        }
+        if (page == null) {
+            page = (int) (totalRecords / size);
+        }
+        if (page < 0) {
+            page = 0;
+        }
+        while (size * (page) > totalRecords) {
+            page--;
+        }
+        final Pageable pageable = new PageRequest(page, size);
+        final String pagebleMenu = ""
+                + "<a href=\"charts?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize() * 2 + "\">zoom-</a>&nbsp;"
+                + "<a href=\"charts?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize() / 2 + "\">zoom+</a>&nbsp;"
+                + "<a href=\"charts?page=" + (pageable.getPageNumber() - 1) + "&size=" + pageable.getPageSize() + "\">prev</a>&nbsp;"
+                + "<a href=\"charts?page=" + (pageable.getPageNumber() + 1) + "&size=" + pageable.getPageSize() + "\">next</a><br/>"
+                + "";
         String chartJs = "$(document).ready(function(){\n"
                 //                + "var temperatureChart = new CanvasJS.Chart(\"temperatureContainer\",\n"
                 //                + "    {\n"
@@ -212,12 +240,14 @@ public class DataRecordController {
                 + "    type: 'line',\n"
                 + "    data: {\n"
                 + "        datasets: [{\n"
+                //                + "        lineTension: 0\n"
                 + "            label: 'Temperature',\n"
                 + "            data: "
-                + getTemperatureArray()
+                + getTemperatureArray(pageable)
                 + "        }]\n"
                 + "    },\n"
                 + "    options: {\n"
+                + "        bezierCurve : false,\n"
                 + "        responsive: true,\n"
                 + "        maintainAspectRatio: true,\n"
                 + "        scales: {\n"
@@ -239,10 +269,11 @@ public class DataRecordController {
                 + "        datasets: [{\n"
                 + "            label: 'Humidity',\n"
                 + "            data: "
-                + getHumidityArray()
+                + getHumidityArray(pageable)
                 + "        }]\n"
                 + "    },\n"
                 + "    options: {\n"
+                + "        bezierCurve : false,\n"
                 + "        responsive: true,\n"
                 + "        maintainAspectRatio: true,\n"
                 + "        scales: {\n"
@@ -264,10 +295,11 @@ public class DataRecordController {
                 + "        datasets: [{\n"
                 + "            label: 'Voltage',\n"
                 + "            data: "
-                + getVoltageArray()
+                + getVoltageArray(pageable)
                 + "        }]\n"
                 + "    },\n"
                 + "    options: {\n"
+                + "        bezierCurve : false,\n"
                 + "        responsive: true,\n"
                 + "        maintainAspectRatio: true,\n"
                 + "        scales: {\n"
@@ -295,6 +327,7 @@ public class DataRecordController {
                 + "<br/>"
                 + "<a href=\"list\">list</a>"
                 + "<br/>"
+                + pagebleMenu
                 + "<canvas id=\"temperatureContainer\" width=\"800px\" height=\"400px\"></canvas>"
                 + "<br/>"
                 + "<canvas id=\"humidityContainer\" width=\"800px\" height=\"400px\"></canvas>"
