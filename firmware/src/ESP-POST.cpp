@@ -16,12 +16,14 @@
 
 const char* ssid = "";
 const char* password = "";
-const char* reportingServer = "192.168.1.23";
-const int httpPort = 8084;
-String locationString = "testing%20board";
+const char* reportingServer = "";
+const int httpPort = 80;
+String locationString = "third%20testing%20board";
 
 #define DHTPIN        4
 #define DHTTYPE       DHT22
+
+ADC_MODE(ADC_VCC);
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
@@ -51,7 +53,7 @@ void sendMonitoredData() {
         telemetryString += event.relative_humidity;
         telemetryString += "%<br/>";
         url+=event.relative_humidity;
-    }    
+    }
     telemetryString += "ADC: ";
     telemetryString += analogRead(A0);
     telemetryString += "<br/>";
@@ -59,7 +61,8 @@ void sendMonitoredData() {
     telemetryString += (analogRead(A0) / 69.0);
     telemetryString += "v";
     url+="&voltage=";
-    url+=(analogRead(A0) / 69.0);
+    //url += (analogRead(A0) / 69.0);
+    url += (ESP.getVcc() / 1000.0);
 
     Serial.println(telemetryString);
     WiFiClient client;
@@ -72,7 +75,7 @@ void sendMonitoredData() {
     url+="&error=";
     url+= errorString;
     Serial.println(url);
-  
+
     String connectionString = "GET ";
     connectionString += url;
     connectionString += " HTTP/1.1\r\n";
@@ -90,7 +93,7 @@ void sendMonitoredData() {
             return;
         }
     }
-  
+
     while(client.available()){
         String line = client.readStringUntil('\r');
         Serial.print(line);
@@ -100,6 +103,7 @@ void sendMonitoredData() {
 void setup() {
     Serial.begin(115200);
     delay(10);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
@@ -114,5 +118,5 @@ void loop() {
     Serial.println("IP Address");
     Serial.println(WiFi.localIP());
     sendMonitoredData();
-    delay(30000);
+    delay(20 * 60 * 1000);
 }
