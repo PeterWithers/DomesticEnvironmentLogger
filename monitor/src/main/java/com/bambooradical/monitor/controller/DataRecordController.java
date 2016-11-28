@@ -8,8 +8,10 @@ import com.bambooradical.monitor.repository.DataRecordRepository;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -268,13 +270,13 @@ public class DataRecordController {
                 + "        },"
                 + "{\n"
                 //                + "        lineTension: 0\n"
-                + "            label: 'Temperature 1',\n"
+                + "            label: 'Temperature 3',\n"
                 + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
                 + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
-                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(75, 192, 192, 1)\",\n"
                 + "            pointBorderColor: \"#fff\",\n"
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
-                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+                + "            pointHoverBorderColor: \"rgba(75, 192, 192, 1)\","
                 + "            data: "
                 + getTemperatureArray("th", pageable)
                 + "        }"
@@ -324,7 +326,7 @@ public class DataRecordController {
                 + getHumidityArray("te", pageable)
                 + "        },"
                 + "{\n"
-                + "            label: 'Humidity 1',\n"
+                + "            label: 'Humidity 3',\n"
                 + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
                 + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
                 + "            pointBackgroundColor: \"rgba(75, 192, 192, 1)\",\n"
@@ -380,29 +382,13 @@ public class DataRecordController {
                 + getVoltageArray("te", pageable)
                 + "        },"
                 + "{\n"
-                + "            label: 'Voltage 1',\n"
-//backgroundColor: [
-//                'rgba(255, 99, 132, 0.2)',
-//                'rgba(54, 162, 235, 0.2)',
-//                'rgba(255, 206, 86, 0.2)',
-//                'rgba(75, 192, 192, 0.2)',
-//                'rgba(153, 102, 255, 0.2)',
-//                'rgba(255, 159, 64, 0.2)'
-//            ],
-//            borderColor: [
-//                'rgba(255,99,132,1)',
-//                'rgba(54, 162, 235, 1)',
-//                'rgba(255, 206, 86, 1)',
-//                'rgba(75, 192, 192, 1)',
-//                'rgba(153, 102, 255, 1)',
-//                'rgba(255, 159, 64, 1)'
-//            ],                
+                + "            label: 'Voltage 3',\n"
                 + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
                 + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
-                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(75, 192, 192, 1)\",\n"
                 + "            pointBorderColor: \"#fff\",\n"
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
-                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+                + "            pointHoverBorderColor: \"rgba(75, 192, 192, 1)\","
                 + "            data: "
                 + getVoltageArray("th", pageable)
                 + "        }"
@@ -426,9 +412,9 @@ public class DataRecordController {
                 + "});"
                 + "});";
         return "<head>"
-                + "<script src=\"/js/jquery.min.js\"></script>"
-                + "<script src=\"/js/moment.js\"></script>"
-                + "<script src=\"/js/Chart.min.js\"></script>"
+                + "<script src=\"/monitor/js/jquery.min.js\"></script>"
+                + "<script src=\"/monitor/js/moment.js\"></script>"
+                + "<script src=\"/monitor/js/Chart.min.js\"></script>"
                 //                + "<script type=\"text/javascript\" src=\"/js/canvasjs.min.js\"></script>\n"
                 + "<script type=\"text/javascript\">" + chartJs + "</script></head>"
                 + "<a href=\"chart\">combined</a>"
