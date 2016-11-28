@@ -264,7 +264,19 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
                 + "            data: "
-                + getTemperatureArray("t", pageable)
+                + getTemperatureArray("te", pageable)
+                + "        },"
+                + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'Temperature 1',\n"
+                + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
+                + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+                + "            data: "
+                + getTemperatureArray("th", pageable)
                 + "        }"
                 + "]\n"
                 + "    },\n"
@@ -309,7 +321,18 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
                 + "            data: "
-                + getHumidityArray("t", pageable)
+                + getHumidityArray("te", pageable)
+                + "        },"
+                + "{\n"
+                + "            label: 'Humidity 1',\n"
+                + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
+                + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(75, 192, 192, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(75, 192, 192, 1)\","
+                + "            data: "
+                + getHumidityArray("th", pageable)
                 + "        }"
                 + "]\n"
                 + "    },\n"
@@ -354,7 +377,34 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
                 + "            data: "
-                + getVoltageArray("t", pageable)
+                + getVoltageArray("te", pageable)
+                + "        },"
+                + "{\n"
+                + "            label: 'Voltage 1',\n"
+//backgroundColor: [
+//                'rgba(255, 99, 132, 0.2)',
+//                'rgba(54, 162, 235, 0.2)',
+//                'rgba(255, 206, 86, 0.2)',
+//                'rgba(75, 192, 192, 0.2)',
+//                'rgba(153, 102, 255, 0.2)',
+//                'rgba(255, 159, 64, 0.2)'
+//            ],
+//            borderColor: [
+//                'rgba(255,99,132,1)',
+//                'rgba(54, 162, 235, 1)',
+//                'rgba(255, 206, 86, 1)',
+//                'rgba(75, 192, 192, 1)',
+//                'rgba(153, 102, 255, 1)',
+//                'rgba(255, 159, 64, 1)'
+//            ],                
+                + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
+                + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+                + "            data: "
+                + getVoltageArray("th", pageable)
                 + "        }"
                 + "]\n"
                 + "    },\n"
