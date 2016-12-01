@@ -4,7 +4,9 @@
 package com.bambooradical.monitor.repository;
 
 import com.bambooradical.monitor.model.DataRecord;
+import java.util.Date;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -13,5 +15,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface DataRecordRepository extends JpaRepository<DataRecord, Long> {
 
-    List<DataRecordRepository> findByLocationStartsWithIgnoreCase(String location);
+    List<DataRecord> findByLocationStartsWithIgnoreCase(String location, final Pageable pageable);
+
+    List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetween(String location, Date startDate, Date endDate);
 }

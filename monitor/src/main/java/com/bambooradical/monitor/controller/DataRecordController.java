@@ -5,11 +5,10 @@ package com.bambooradical.monitor.controller;
 
 import com.bambooradical.monitor.model.DataRecord;
 import com.bambooradical.monitor.repository.DataRecordRepository;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,10 +42,10 @@ public class DataRecordController {
         return dataRecordRepository.findAll();
     }
 
-    private String getTemperatureArray(final Pageable pageable) {
+    private String getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder temperatureBuilder = new StringBuilder();
         temperatureBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findAll(pageable)) {
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetween(sensorLocation, startDate, endDate)) {
             final Float temperature = record.getTemperature();
             if (temperature != null) {
                 temperatureBuilder.append("{ x: ");
@@ -60,10 +59,10 @@ public class DataRecordController {
         return temperatureBuilder.toString();
     }
 
-    private String getHumidityArray(final Pageable pageable) {
+    private String getHumidityArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder humidityBuilder = new StringBuilder();
         humidityBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findAll(pageable)) {
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetween(sensorLocation, startDate, endDate)) {
             final Float humidity = record.getHumidity();
             if (humidity != null) {
                 humidityBuilder.append("{ x: ");
@@ -77,15 +76,17 @@ public class DataRecordController {
         return humidityBuilder.toString();
     }
 
-    private String getVoltageArray(final Pageable pageable) {
+    private String getVoltageArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder voltageBuilder = new StringBuilder();
         voltageBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findAll(pageable)) {
-            voltageBuilder.append("{ x: ");
-            voltageBuilder.append(record.getRecordDate().getTime());
-            voltageBuilder.append(", y: ");
-            voltageBuilder.append(record.getVoltage());
-            voltageBuilder.append("},");
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetween(sensorLocation, startDate, endDate)) {
+            if (record.getVoltage() < 100) { //@todo: remove this < once the invalid data is removed
+                voltageBuilder.append("{ x: ");
+                voltageBuilder.append(record.getRecordDate().getTime());
+                voltageBuilder.append(", y: ");
+                voltageBuilder.append(record.getVoltage());
+                voltageBuilder.append("},");
+            }
         }
         voltageBuilder.append("]");
         return voltageBuilder.toString();
@@ -181,27 +182,20 @@ public class DataRecordController {
     }
 
     @RequestMapping("/charts")
-    public String getCharts(@RequestParam(value = "page", required = false) Integer page, @RequestParam(value = "size", required = false, defaultValue = "1000") int size) {
-        long totalRecords = dataRecordRepository.count();
-        if (size > totalRecords) {
-            size = (int) totalRecords;
-            page = 0;
-        }
-        if (page == null) {
-            page = (int) (totalRecords / size);
-        }
-        if (page < 0) {
-            page = 0;
-        }
-        while (size * (page) > totalRecords) {
-            page--;
-        }
-        final Pageable pageable = new PageRequest(page, size);
+    public String getCharts(@RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "14") int spanDays) {
+//        long totalRecords = dataRecordRepository.count();
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, startDay);
+        Date endDate = calendar.getTime();
+
+        calendar.add(Calendar.DAY_OF_MONTH, -spanDays);
+        Date startDate = calendar.getTime();
+
         final String pagebleMenu = ""
-                + "<a href=\"charts?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize() * 2 + "\">zoom-</a>&nbsp;"
-                + "<a href=\"charts?page=" + pageable.getPageNumber() + "&size=" + pageable.getPageSize() / 2 + "\">zoom+</a>&nbsp;"
-                + "<a href=\"charts?page=" + (pageable.getPageNumber() - 1) + "&size=" + pageable.getPageSize() + "\">prev</a>&nbsp;"
-                + "<a href=\"charts?page=" + (pageable.getPageNumber() + 1) + "&size=" + pageable.getPageSize() + "\">next</a><br/>"
+                + "<a href=\"charts?start=" + startDay + "&span=" + (spanDays * 2) + "\">zoom-</a>&nbsp;"
+                + "<a href=\"charts?start=" + startDay + "&span=" + (spanDays / 2) + "\">zoom+</a>&nbsp;"
+                + "<a href=\"charts?start=" + (startDay - spanDays) + "&span=" + spanDays + "\">prev</a>&nbsp;"
+                + "<a href=\"charts?start=" + (startDay + spanDays) + "&span=" + spanDays + "\">next</a><br/>"
                 + "";
         String chartJs = "$(document).ready(function(){\n"
                 //                + "var temperatureChart = new CanvasJS.Chart(\"temperatureContainer\",\n"
@@ -239,12 +233,44 @@ public class DataRecordController {
                 + "var temperatureChart = new Chart(temperatureContainer, {\n"
                 + "    type: 'line',\n"
                 + "    data: {\n"
-                + "        datasets: [{\n"
+                + "        datasets: ["
+                + "{\n"
                 //                + "        lineTension: 0\n"
-                + "            label: 'Temperature',\n"
+                + "            label: 'Temperature 2',\n"
+                + "            backgroundColor: \"rgba(179,181,198,0.2)\",\n"
+                + "            borderColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(179,181,198,1)\","
                 + "            data: "
-                + getTemperatureArray(pageable)
-                + "        }]\n"
+                + getTemperatureArray("s", startDate, endDate)
+                + "        },"
+                + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'Temperature 1',\n"
+                + "            backgroundColor: \"rgba(255,99,132,0.2)\",\n"
+                + "            borderColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+                + "            data: "
+                + getTemperatureArray("te", startDate, endDate)
+                + "        },"
+                + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'Temperature 3',\n"
+                + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
+                + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(75, 192, 192, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(75, 192, 192, 1)\","
+                + "            data: "
+                + getTemperatureArray("th", startDate, endDate)
+                + "        }"
+                + "]\n"
                 + "    },\n"
                 + "    options: {\n"
                 + "        bezierCurve : false,\n"
@@ -255,8 +281,9 @@ public class DataRecordController {
                 + "                type: 'time',\n"
                 + "                time: {\n"
                 + "                    displayFormats: {\n"
-                + "                        quarter: 'YYYY MMM D h:mm:ss'\n"
-                + "                    }\n"
+                + "                        quarter: 'YYYY MMM D H:mm:ss'\n"
+                + "                    },\n"
+                + "                    tooltipFormat: 'YYYY MMM D H:mm:ss'\n"
                 + "                }\n"
                 + "            }]"
                 + "        }\n"
@@ -266,11 +293,41 @@ public class DataRecordController {
                 + "var humidityChart = new Chart(humidityContainer, {\n"
                 + "    type: 'line',\n"
                 + "    data: {\n"
-                + "        datasets: [{\n"
-                + "            label: 'Humidity',\n"
+                + "        datasets: ["
+                + "{\n"
+                + "            label: 'Humidity 2',\n"
+                + "            backgroundColor: \"rgba(179,181,198,0.2)\",\n"
+                + "            borderColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(179,181,198,1)\","
                 + "            data: "
-                + getHumidityArray(pageable)
-                + "        }]\n"
+                + getHumidityArray("s", startDate, endDate)
+                + "        },"
+                + "{\n"
+                + "            label: 'Humidity 1',\n"
+                + "            backgroundColor: \"rgba(255,99,132,0.2)\",\n"
+                + "            borderColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+                + "            data: "
+                + getHumidityArray("te", startDate, endDate)
+                + "        },"
+                + "{\n"
+                + "            label: 'Humidity 3',\n"
+                + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
+                + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(75, 192, 192, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(75, 192, 192, 1)\","
+                + "            data: "
+                + getHumidityArray("th", startDate, endDate)
+                + "        }"
+                + "]\n"
                 + "    },\n"
                 + "    options: {\n"
                 + "        bezierCurve : false,\n"
@@ -281,8 +338,9 @@ public class DataRecordController {
                 + "                type: 'time',\n"
                 + "                time: {\n"
                 + "                    displayFormats: {\n"
-                + "                        quarter: 'YYYY MMM D h:mm:ss'\n"
-                + "                    }\n"
+                + "                        quarter: 'YYYY MMM D H:mm:ss'\n"
+                + "                    },\n"
+                + "                    tooltipFormat: 'YYYY MMM D H:mm:ss'\n"
                 + "                }\n"
                 + "            }]"
                 + "        }\n"
@@ -292,11 +350,41 @@ public class DataRecordController {
                 + "var voltageChart = new Chart(voltageContainer, {\n"
                 + "    type: 'line',\n"
                 + "    data: {\n"
-                + "        datasets: [{\n"
-                + "            label: 'Voltage',\n"
+                + "        datasets: ["
+                + "{\n"
+                + "            label: 'Voltage 2',\n"
+                + "            backgroundColor: \"rgba(179,181,198,0.2)\",\n"
+                + "            borderColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(179,181,198,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(179,181,198,1)\","
                 + "            data: "
-                + getVoltageArray(pageable)
-                + "        }]\n"
+                + getVoltageArray("s", startDate, endDate)
+                + "        },"
+                + "{\n"
+                + "            label: 'Voltage 1',\n"
+                + "            backgroundColor: \"rgba(255,99,132,0.2)\",\n"
+                + "            borderColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+                + "            data: "
+                + getVoltageArray("te", startDate, endDate)
+                + "        },"
+                + "{\n"
+                + "            label: 'Voltage 3',\n"
+                + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
+                + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(75, 192, 192, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(75, 192, 192, 1)\","
+                + "            data: "
+                + getVoltageArray("th", startDate, endDate)
+                + "        }"
+                + "]\n"
                 + "    },\n"
                 + "    options: {\n"
                 + "        bezierCurve : false,\n"
@@ -307,8 +395,9 @@ public class DataRecordController {
                 + "                type: 'time',\n"
                 + "                time: {\n"
                 + "                    displayFormats: {\n"
-                + "                        quarter: 'YYYY MMM D h:mm:ss'\n"
-                + "                    }\n"
+                + "                        quarter: 'YYYY MMM D H:mm:ss'\n"
+                + "                    },\n"
+                + "                    tooltipFormat: 'YYYY MMM D H:mm:ss'\n"
                 + "                }\n"
                 + "            }]"
                 + "        }\n"
@@ -316,9 +405,9 @@ public class DataRecordController {
                 + "});"
                 + "});";
         return "<head>"
-                + "<script src=\"/js/jquery.min.js\"></script>"
-                + "<script src=\"/js/moment.js\"></script>"
-                + "<script src=\"/js/Chart.min.js\"></script>"
+                + "<script src=\"/monitor/js/jquery.min.js\"></script>"
+                + "<script src=\"/monitor/js/moment.js\"></script>"
+                + "<script src=\"/monitor/js/Chart.min.js\"></script>"
                 //                + "<script type=\"text/javascript\" src=\"/js/canvasjs.min.js\"></script>\n"
                 + "<script type=\"text/javascript\">" + chartJs + "</script></head>"
                 + "<a href=\"chart\">combined</a>"
