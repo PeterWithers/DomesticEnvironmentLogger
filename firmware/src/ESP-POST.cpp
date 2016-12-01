@@ -18,12 +18,29 @@ const char* ssid = "";
 const char* password = "";
 const char* reportingServer = "";
 const int httpPort = 80;
+
+/*
+String locationString = "testing%20board";
+*/
+
+String locationString = "second%20testing%20board";
+#define VCC_VOLTAGE_MONITOR 
+#define BUTTON_MESSAGE
+
+/*
 String locationString = "third%20testing%20board";
+#define POWER_DHT_VIA_GPIO
+#define VCC_VOLTAGE_MONITOR
+*/
 
 #define DHTPIN        4
+#define DHTPOWERPIN   5
+#define BUTTONPIN   5
 #define DHTTYPE       DHT22
 
-ADC_MODE(ADC_VCC);
+#ifdef VCC_VOLTAGE_MONITOR
+    ADC_MODE(ADC_VCC);
+#endif
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
@@ -61,8 +78,12 @@ void sendMonitoredData() {
     telemetryString += (analogRead(A0) / 69.0);
     telemetryString += "v";
     url+="&voltage=";
-    //url += (analogRead(A0) / 69.0);
-    url += (ESP.getVcc() / 1000.0);
+    #ifdef VCC_VOLTAGE_MONITOR
+        // battery 3.83v = "voltage":2.61
+        url += (ESP.getVcc() / 1000.0);
+    #else
+        url += (analogRead(A0) / 69.0);
+    #endif
 
     Serial.println(telemetryString);
     WiFiClient client;
@@ -103,6 +124,13 @@ void sendMonitoredData() {
 void setup() {
     Serial.begin(115200);
     delay(10);
+    #ifdef POWER_DHT_VIA_GPIO
+        pinMode(DHTPOWERPIN, OUTPUT);
+        digitalWrite(DHTPOWERPIN, 1);
+    #endif
+    #ifdef BUTTON_MESSAGE
+        pinMode(BUTTONPIN, INPUT);
+    #endif
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
