@@ -17,18 +17,22 @@
 const char* ssid = "";
 const char* password = "";
 const char* reportingServer = "";
+const char* messageServer = "";
+const char* buttonMessage = "";
+const char* messageServerPath = "";
 const int httpPort = 80;
+const int messagePort = 81;
 
 /*
 String locationString = "testing%20board";
 */
 
-String locationString = "second%20testing%20board";
+String locationString = "third%20testing%20board";
 #define VCC_VOLTAGE_MONITOR 
 #define BUTTON_MESSAGE
 
 /*
-String locationString = "third%20testing%20board";
+String locationString = "second%20testing%20board";
 #define POWER_DHT_VIA_GPIO
 #define VCC_VOLTAGE_MONITOR
 */
@@ -43,6 +47,40 @@ String locationString = "third%20testing%20board";
 #endif
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
+
+void sendMessage() {
+    WiFiClient client;
+    if (!client.connect(messageServer, messagePort)) {
+        Serial.println("connection failed");
+        return;
+    }
+    String connectionString = "GET ";
+    connectionString += messageServerPath;
+    connectionString += "&text=";
+    connectionString += buttonMessage;
+    connectionString += "&username=";
+    connectionString += locationString;
+    connectionString += "&pretty=1";
+    connectionString += " HTTPS/1.1\r\n";
+    connectionString += "Host: ";
+    connectionString += messageServer;
+    connectionString +="\r\n";
+    connectionString +="Connection: close\r\n\r\n";
+    Serial.println(connectionString);
+    client.print(connectionString);
+    unsigned long timeout = millis();
+    while (client.available() == 0) {
+        if (millis() - timeout > 5000) {
+            Serial.println("timeout");
+            client.stop();
+            return;
+        }
+    }
+    while(client.available()){
+        String line = client.readStringUntil('\r');
+        Serial.print(line);
+    }
+}
 
 void sendMonitoredData() {
     String errorString = "";
@@ -140,6 +178,7 @@ void setup() {
     Serial.println("Connected: ");
     Serial.println(ssid);
     dht.begin();
+    //sendMessage();
 }
 
 void loop() {
