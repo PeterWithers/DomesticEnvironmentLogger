@@ -10,6 +10,7 @@
  */
 
 #include <ESP8266WiFi.h>
+#include <WiFiClientSecure.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
@@ -21,7 +22,7 @@ const char* messageServer = "";
 const char* buttonMessage = "";
 const char* messageServerPath = "";
 const int httpPort = 80;
-const int messagePort = 81;
+const int httpsPort = 443;
 
 /*
 String locationString = "testing%20board";
@@ -49,8 +50,8 @@ String locationString = "second%20testing%20board";
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
 void sendMessage() {
-    WiFiClient client;
-    if (!client.connect(messageServer, messagePort)) {
+    WiFiClientSecure client;
+    if (!client.connect(messageServer, httpsPort)) {
         Serial.println("connection failed");
         return;
     }
@@ -61,7 +62,7 @@ void sendMessage() {
     connectionString += "&username=";
     connectionString += locationString;
     connectionString += "&pretty=1";
-    connectionString += " HTTPS/1.1\r\n";
+    connectionString += " HTTP/1.1\r\n";
     connectionString += "Host: ";
     connectionString += messageServer;
     connectionString +="\r\n";
