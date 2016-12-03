@@ -11,6 +11,7 @@
 
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
+#include <WiFiUdp.h>
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
@@ -27,11 +28,20 @@ const char* startMessage = "restarted";
 const int httpPort = 80;
 const int httpsPort = 443;
 
+// UDP is used to broadcast button events
+IPAddress broadcastIp(192, 168, 1, 255);
+WiFiUDP udp;
+unsigned int localUdpPort = 2233;
+
 const unsigned long dataSendDelayMs = 20 * 60 * 1000;
 const unsigned long buttonDataSendDelayMs = 30 * 1000;
 volatile unsigned long lastDataSentMs = -dataSendDelayMs; // set to a value that will trigger the data send on start up
 volatile unsigned long onBoardButtonDataSentMs = 0;
+volatile unsigned long externalButton1DataSentMs = 0;
+volatile unsigned long externalButton2DataSentMs = 0;
 volatile int onBoardButtonChanged = 0;
+volatile int externalButton1Changed = 0;
+volatile int externalButton2Changed = 0;
 
 /*
 String locationString = "testing%20board";
@@ -47,11 +57,13 @@ String locationString = "second%20testing%20board";
 #define VCC_VOLTAGE_MONITOR
 */
 
-#define DHTPIN        4
-#define DHTPOWERPIN   5
-#define BUTTONPIN   5
-#define ON_BOARD_BUTTON   0
-#define DHTTYPE       DHT22
+#define DHTPIN              4
+#define DHTPOWERPIN         5
+#define BUTTONPIN           5
+#define ON_BOARD_BUTTON     0
+#define EXTERNAL_BUTTON1    1
+#define EXTERNAL_BUTTON2    3
+#define DHTTYPE             DHT22
 
 #ifdef VCC_VOLTAGE_MONITOR
     ADC_MODE(ADC_VCC);
@@ -173,18 +185,34 @@ void onBoardButtonChangeInterrupt() {
     onBoardButtonChanged++;
 }
 
+void externalButton1ChangeInterrupt() {
+    externalButton2Changed++;
+}
+
+void externalButton2ChangeInterrupt() {
+    externalButton2Changed++;
+}
+
 void setup() {
-    Serial.begin(115200);
+    #ifndef BUTTON_MESSAGE
+        Serial.begin(115200);
+    #endif
     delay(10);
     #ifdef POWER_DHT_VIA_GPIO
         pinMode(DHTPOWERPIN, OUTPUT);
         digitalWrite(DHTPOWERPIN, 1);
     #endif
+    pinMode(BUTTONPIN, INPUT); // todo: should this use a pull up also
     #ifdef BUTTON_MESSAGE
-        pinMode(BUTTONPIN, INPUT);
         pinMode(ON_BOARD_BUTTON, INPUT);
         digitalWrite(ON_BOARD_BUTTON, 1);
         attachInterrupt(ON_BOARD_BUTTON, onBoardButtonChangeInterrupt, CHANGE);
+        pinMode(EXTERNAL_BUTTON1, INPUT);
+        digitalWrite(EXTERNAL_BUTTON1, 1);
+        attachInterrupt(EXTERNAL_BUTTON1, externalButton1ChangeInterrupt, CHANGE);
+        pinMode(EXTERNAL_BUTTON2, INPUT);
+        digitalWrite(EXTERNAL_BUTTON2, 1);
+        attachInterrupt(EXTERNAL_BUTTON2, externalButton2ChangeInterrupt, CHANGE);
     #endif
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
@@ -205,15 +233,36 @@ void loop() {
         sendMonitoredData();
         lastDataSentMs = millis();
     }
-    if (onBoardButtonChanged > 0) {
+    if (onBoardButtonChanged > 0 || externalButton1Changed > 0 || externalButton2Changed > 0) {
+        udp.beginPacketMulticast(broadcastIp, localUdpPort, WiFi.localIP());
+        if (onBoardButtonChanged > 0) udp.write(buttonMessage0);
+        if (externalButton1Changed > 0) udp.write(buttonMessage1);
+        if (externalButton2Changed > 0) udp.write(buttonMessage1);
+        udp.endPacket();
         Serial.print("onBoardButtonChanged: ");
         Serial.println(onBoardButtonChanged);
-        if (onBoardButtonDataSentMs + buttonDataSendDelayMs < millis()) {
+        Serial.print(" externalButton1Changed: ");
+        Serial.println(externalButton1Changed);
+        Serial.print(" externalButton2Changed: ");
+        Serial.println(externalButton2Changed);
+        if (onBoardButtonChanged && onBoardButtonDataSentMs + buttonDataSendDelayMs < millis()) {
             onBoardButtonDataSentMs = millis();
-            Serial.println("sending button message");
+            Serial.println("sending button0 message");
             sendMessage(buttonMessage0);
         }
+        if (externalButton1Changed && externalButton1DataSentMs + buttonDataSendDelayMs < millis()) {
+            externalButton1DataSentMs = millis();
+            Serial.println("sending button1 message");
+            sendMessage(buttonMessage1);
+        }
+        if (externalButton2Changed && externalButton2DataSentMs + buttonDataSendDelayMs < millis()) {
+            externalButton2DataSentMs = millis();
+            Serial.println("sending button2 message");
+            sendMessage(buttonMessage2);
+        }
         onBoardButtonChanged = 0;
+        externalButton1Changed = 0;
+        externalButton2Changed = 0;
     }
     delay(1000);
     Serial.print(".");
