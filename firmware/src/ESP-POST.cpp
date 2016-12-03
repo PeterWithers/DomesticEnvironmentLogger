@@ -31,7 +31,7 @@ const unsigned long dataSendDelayMs = 20 * 60 * 1000;
 const unsigned long buttonDataSendDelayMs = 30 * 1000;
 volatile unsigned long lastDataSentMs = -dataSendDelayMs; // set to a value that will trigger the data send on start up
 volatile unsigned long onBoardButtonDataSentMs = 0;
-volatile bool onBoardButtonChanged = false;
+volatile int onBoardButtonChanged = 0;
 
 /*
 String locationString = "testing%20board";
@@ -170,7 +170,7 @@ void sendMonitoredData() {
 }
 
 void onBoardButtonChangeInterrupt() {
-    onBoardButtonChanged = true;
+    onBoardButtonChanged++;
 }
 
 void setup() {
@@ -183,6 +183,7 @@ void setup() {
     #ifdef BUTTON_MESSAGE
         pinMode(BUTTONPIN, INPUT);
         pinMode(ON_BOARD_BUTTON, INPUT);
+        digitalWrite(ON_BOARD_BUTTON, 1);
         attachInterrupt(ON_BOARD_BUTTON, onBoardButtonChangeInterrupt, CHANGE);
     #endif
     WiFi.mode(WIFI_STA);
@@ -204,14 +205,15 @@ void loop() {
         sendMonitoredData();
         lastDataSentMs = millis();
     }
-    if (onBoardButtonChanged) {
-        Serial.println("onBoardButtonChanged");
+    if (onBoardButtonChanged > 0) {
+        Serial.print("onBoardButtonChanged: ");
+        Serial.println(onBoardButtonChanged);
         if (onBoardButtonDataSentMs + buttonDataSendDelayMs < millis()) {
             onBoardButtonDataSentMs = millis();
             Serial.println("sending button message");
             sendMessage(buttonMessage0);
         }
-        onBoardButtonChanged = false;
+        onBoardButtonChanged = 0;
     }
     delay(1000);
     Serial.print(".");
