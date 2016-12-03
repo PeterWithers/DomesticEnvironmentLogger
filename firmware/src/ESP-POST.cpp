@@ -19,16 +19,25 @@ const char* ssid = "";
 const char* password = "";
 const char* reportingServer = "";
 const char* messageServer = "";
-const char* buttonMessage = "";
 const char* messageServerPath = "";
+const char* buttonMessage0 = "on%20board%20button";
+const char* buttonMessage1 = "external%20button%201";
+const char* buttonMessage2 = "external%20button%202";
+const char* startMessage = "restarted";
 const int httpPort = 80;
 const int httpsPort = 443;
+
+const unsigned long dataSendDelayMs = 20 * 60 * 1000;
+const unsigned long buttonDataSendDelayMs = 30 * 1000;
+volatile unsigned long lastDataSentMs = -dataSendDelayMs; // set to a value that will trigger the data send on start up
+volatile unsigned long onBoardButtonDataSentMs = 0;
+volatile bool onBoardButtonChanged = false;
 
 /*
 String locationString = "testing%20board";
 */
 
-String locationString = "third%20testing%20board";
+String locationString = "third%20testing%20messaging";
 #define VCC_VOLTAGE_MONITOR 
 #define BUTTON_MESSAGE
 
@@ -41,6 +50,7 @@ String locationString = "second%20testing%20board";
 #define DHTPIN        4
 #define DHTPOWERPIN   5
 #define BUTTONPIN   5
+#define ON_BOARD_BUTTON   0
 #define DHTTYPE       DHT22
 
 #ifdef VCC_VOLTAGE_MONITOR
@@ -49,7 +59,7 @@ String locationString = "second%20testing%20board";
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
-void sendMessage() {
+void sendMessage(String messageString) {
     WiFiClientSecure client;
     if (!client.connect(messageServer, httpsPort)) {
         Serial.println("connection failed");
@@ -58,10 +68,9 @@ void sendMessage() {
     String connectionString = "GET ";
     connectionString += messageServerPath;
     connectionString += "&text=";
-    connectionString += buttonMessage;
+    connectionString += messageString;
     connectionString += "&username=";
     connectionString += locationString;
-    connectionString += "&pretty=1";
     connectionString += " HTTP/1.1\r\n";
     connectionString += "Host: ";
     connectionString += messageServer;
@@ -160,6 +169,10 @@ void sendMonitoredData() {
     }
 }
 
+void onBoardButtonChangeInterrupt() {
+    onBoardButtonChanged = true;
+}
+
 void setup() {
     Serial.begin(115200);
     delay(10);
@@ -169,6 +182,8 @@ void setup() {
     #endif
     #ifdef BUTTON_MESSAGE
         pinMode(BUTTONPIN, INPUT);
+        pinMode(ON_BOARD_BUTTON, INPUT);
+        attachInterrupt(ON_BOARD_BUTTON, onBoardButtonChangeInterrupt, CHANGE);
     #endif
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
@@ -179,12 +194,25 @@ void setup() {
     Serial.println("Connected: ");
     Serial.println(ssid);
     dht.begin();
-    //sendMessage();
+    sendMessage(startMessage);
 }
 
 void loop() {
-    Serial.println("IP Address");
-    Serial.println(WiFi.localIP());
-    sendMonitoredData();
-    delay(20 * 60 * 1000);
+    if (lastDataSentMs + dataSendDelayMs < millis()) {
+        Serial.println("IP Address");
+        Serial.println(WiFi.localIP());
+        sendMonitoredData();
+        lastDataSentMs = millis();
+    }
+    if (onBoardButtonChanged) {
+        Serial.println("onBoardButtonChanged");
+        if (onBoardButtonDataSentMs + buttonDataSendDelayMs < millis()) {
+            onBoardButtonDataSentMs = millis();
+            Serial.println("sending button message");
+            sendMessage(buttonMessage0);
+        }
+        onBoardButtonChanged = false;
+    }
+    delay(1000);
+    Serial.print(".");
 }
