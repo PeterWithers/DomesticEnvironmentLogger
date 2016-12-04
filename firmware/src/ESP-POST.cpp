@@ -29,7 +29,6 @@ const int httpPort = 80;
 const int httpsPort = 443;
 
 // UDP is used to broadcast button events
-IPAddress broadcastIp(192, 168, 1, 255);
 WiFiUDP udp;
 unsigned int localUdpPort = 2233;
 
@@ -74,7 +73,7 @@ DHT_Unified dht(DHTPIN, DHTTYPE);
 void sendMessage(String messageString) {
     WiFiClientSecure client;
     if (!client.connect(messageServer, httpsPort)) {
-        Serial.println("connection failed");
+        //Serial.println("connection failed");
         return;
     }
     String connectionString = "GET ";
@@ -88,25 +87,25 @@ void sendMessage(String messageString) {
     connectionString += messageServer;
     connectionString +="\r\n";
     connectionString +="Connection: close\r\n\r\n";
-    Serial.println(connectionString);
+    //Serial.println(connectionString);
     client.print(connectionString);
     unsigned long timeout = millis();
     while (client.available() == 0) {
         if (millis() - timeout > 5000) {
-            Serial.println("timeout");
+            //Serial.println("timeout");
             client.stop();
             return;
         }
     }
     while(client.available()){
         String line = client.readStringUntil('\r');
-        Serial.print(line);
+        //Serial.print(line);
     }
 }
 
 void sendMonitoredData() {
     String errorString = "";
-    Serial.println(reportingServer);
+    //Serial.println(reportingServer);
     String url = "/monitor/add?temperature=";
     sensors_event_t event;
     dht.temperature().getEvent(&event);
@@ -145,17 +144,17 @@ void sendMonitoredData() {
         url += (analogRead(A0) / 69.0);
     #endif
 
-    Serial.println(telemetryString);
+    //Serial.println(telemetryString);
     WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
-        Serial.println("connection failed");
+        //Serial.println("connection failed");
         return;
     }
     url+="&location=";
     url+=locationString;
     url+="&error=";
     url+= errorString;
-    Serial.println(url);
+    //Serial.println(url);
 
     String connectionString = "GET ";
     connectionString += url;
@@ -164,12 +163,12 @@ void sendMonitoredData() {
     connectionString += reportingServer;
     connectionString +="\r\n";
     connectionString +="Connection: close\r\n\r\n";
-    Serial.println(connectionString);
+    //Serial.println(connectionString);
     client.print(connectionString);
     unsigned long timeout = millis();
     while (client.available() == 0) {
         if (millis() - timeout > 5000) {
-            Serial.println("timeout");
+            //Serial.println("timeout");
             client.stop();
             return;
         }
@@ -177,7 +176,7 @@ void sendMonitoredData() {
 
     while(client.available()){
         String line = client.readStringUntil('\r');
-        Serial.print(line);
+        //Serial.print(line);
     }
 }
 
@@ -195,7 +194,7 @@ void externalButton2ChangeInterrupt() {
 
 void setup() {
     #ifndef BUTTON_MESSAGE
-        Serial.begin(115200);
+        //Serial.begin(115200);
     #endif
     delay(10);
     #ifdef POWER_DHT_VIA_GPIO
@@ -204,60 +203,65 @@ void setup() {
     #endif
     pinMode(BUTTONPIN, INPUT); // todo: should this use a pull up also
     #ifdef BUTTON_MESSAGE
-        pinMode(ON_BOARD_BUTTON, INPUT);
-        digitalWrite(ON_BOARD_BUTTON, 1);
+        pinMode(ON_BOARD_BUTTON, INPUT_PULLUP);
+        //digitalWrite(ON_BOARD_BUTTON, 1);
         attachInterrupt(ON_BOARD_BUTTON, onBoardButtonChangeInterrupt, CHANGE);
-        pinMode(EXTERNAL_BUTTON1, INPUT);
-        digitalWrite(EXTERNAL_BUTTON1, 1);
+        pinMode(EXTERNAL_BUTTON1, INPUT_PULLUP);
+        //digitalWrite(EXTERNAL_BUTTON1, 1);
         attachInterrupt(EXTERNAL_BUTTON1, externalButton1ChangeInterrupt, CHANGE);
-        pinMode(EXTERNAL_BUTTON2, INPUT);
-        digitalWrite(EXTERNAL_BUTTON2, 1);
+        pinMode(EXTERNAL_BUTTON2, INPUT_PULLUP);
+        //digitalWrite(EXTERNAL_BUTTON2, 1);
         attachInterrupt(EXTERNAL_BUTTON2, externalButton2ChangeInterrupt, CHANGE);
     #endif
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        Serial.println(".");
+        //Serial.println(".");
     }
-    Serial.println("Connected: ");
-    Serial.println(ssid);
+    //Serial.println("Connected: ");
+    //Serial.println(ssid);
     dht.begin();
     sendMessage(startMessage);
 }
 
 void loop() {
     if (lastDataSentMs + dataSendDelayMs < millis()) {
-        Serial.println("IP Address");
-        Serial.println(WiFi.localIP());
+        //Serial.println("IP Address");
+        //Serial.println(WiFi.localIP());
         sendMonitoredData();
         lastDataSentMs = millis();
     }
     if (onBoardButtonChanged > 0 || externalButton1Changed > 0 || externalButton2Changed > 0) {
+        IPAddress broadcastIp;
+        broadcastIp = ~WiFi.subnetMask() | WiFi.gatewayIP();
         udp.beginPacketMulticast(broadcastIp, localUdpPort, WiFi.localIP());
         if (onBoardButtonChanged > 0) udp.write(buttonMessage0);
         if (externalButton1Changed > 0) udp.write(buttonMessage1);
         if (externalButton2Changed > 0) udp.write(buttonMessage1);
+        udp.write("\a\n");
         udp.endPacket();
-        Serial.print("onBoardButtonChanged: ");
-        Serial.println(onBoardButtonChanged);
-        Serial.print(" externalButton1Changed: ");
-        Serial.println(externalButton1Changed);
-        Serial.print(" externalButton2Changed: ");
-        Serial.println(externalButton2Changed);
+        udp.flush();
+        udp.stop(); // flush and stop added to address issues of the ESP hanging after send
+        //Serial.print("onBoardButtonChanged: ");
+        //Serial.println(onBoardButtonChanged);
+        //Serial.print(" externalButton1Changed: ");
+        //Serial.println(externalButton1Changed);
+        //Serial.print(" externalButton2Changed: ");
+        //Serial.println(externalButton2Changed);
         if (onBoardButtonChanged && onBoardButtonDataSentMs + buttonDataSendDelayMs < millis()) {
             onBoardButtonDataSentMs = millis();
-            Serial.println("sending button0 message");
+            //Serial.println("sending button0 message");
             sendMessage(buttonMessage0);
         }
         if (externalButton1Changed && externalButton1DataSentMs + buttonDataSendDelayMs < millis()) {
             externalButton1DataSentMs = millis();
-            Serial.println("sending button1 message");
+            //Serial.println("sending button1 message");
             sendMessage(buttonMessage1);
         }
         if (externalButton2Changed && externalButton2DataSentMs + buttonDataSendDelayMs < millis()) {
             externalButton2DataSentMs = millis();
-            Serial.println("sending button2 message");
+            //Serial.println("sending button2 message");
             sendMessage(buttonMessage2);
         }
         onBoardButtonChanged = 0;
@@ -265,5 +269,5 @@ void loop() {
         externalButton2Changed = 0;
     }
     delay(1000);
-    Serial.print(".");
+    //Serial.print(".");
 }
