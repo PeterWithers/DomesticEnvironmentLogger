@@ -4,7 +4,9 @@
 package com.bambooradical.monitor.controller;
 
 import com.bambooradical.monitor.model.DataRecord;
+import com.bambooradical.monitor.model.EnergyRecord;
 import com.bambooradical.monitor.repository.DataRecordRepository;
+import com.bambooradical.monitor.repository.EnergyRecordRepository;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -23,6 +25,8 @@ public class DataRecordController {
 
     @Autowired
     DataRecordRepository dataRecordRepository;
+    @Autowired
+    EnergyRecordRepository energyRecordRepository;
 
     @RequestMapping("/add")
     public DataRecord addRecord(
@@ -37,9 +41,25 @@ public class DataRecordController {
         return dataRecord;
     }
 
+    @RequestMapping("/addEnergy")
+    public EnergyRecord addEnergyRecord(
+            @RequestParam(value = "meterValue", required = true) Float meterValue,
+            @RequestParam(value = "meterNumber", required = true) String meterNumber,
+            @RequestParam(value = "error", required = false) String error
+    ) {
+        final EnergyRecord energyRecord = new EnergyRecord(meterValue, meterNumber, new Date());
+        energyRecordRepository.save(energyRecord);
+        return energyRecord;
+    }
+
     @RequestMapping("/list")
     public List<DataRecord> listRecords() {
         return dataRecordRepository.findAll();
+    }
+
+    @RequestMapping("/listEnergy")
+    public List<EnergyRecord> listEnergyRecords() {
+        return energyRecordRepository.findAll();
     }
 
     private String getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {
