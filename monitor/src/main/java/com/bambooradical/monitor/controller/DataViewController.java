@@ -22,12 +22,12 @@ public class DataViewController {
     @Autowired
     EnergyRecordRepository energyRecordRepository;
 
-    @RequestMapping("/")
+    @RequestMapping("/monitor")
     public String getChart(Model model) {
         return "dataviewer";
     }
 
-    @RequestMapping("/energy")
+    @RequestMapping("/monitor/energy")
     public String getEnergy(Model model) {
         model.addAttribute("energyData", energyRecordRepository.findAll());
         return "energyviewer";

@@ -437,7 +437,7 @@ public class DataRecordController {
                 + "<a href=\"list\">list</a>"
                 + "<br/>"
                 + "<br/>"
-                + "<a href=\"/energy\">addEnergy</a>"
+                + "<a href=\"energy\">addEnergy</a>"
                 + "<br/>"
                 + "<br/>"
                 + "<a href=\"listEnergy\">listEnergy</a>"
