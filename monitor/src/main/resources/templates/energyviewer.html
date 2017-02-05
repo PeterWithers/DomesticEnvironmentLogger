@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<!--
+ Copyright (C) 2016 Peter Withers
+ 
+ @since Feb 05, 2017 9:42 AM (creation date)
+ @author @author : Peter Withers <peter@gthb-bambooradical.com>
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Energy Viewer</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+    <body>
+        <div th:each="energyRecord : ${energyData}">
+            <span th:text="${energyRecord.getId()}"/>
+            <span th:text="${energyRecord.meterLocation}"/>
+            <span th:text="${energyRecord.meterValue}"/>
+            <span th:text="${energyRecord.recordDate}"/>
+        </div> 
+        <form action="addEnergy">
+            <select id="meterLocation" name="meterLocation">
+                <option value="G3a">G3a</option>
+                <option value="G4">G4</option>
+                <option value="W3">W3</option>
+                <option value="W3a">W3a</option>
+                <option value="W4">W4</option>
+                <option value="E3a">E3a</option>
+                <option value="E4">E4</option>
+            </select>
+            <input id="meterValue" name="meterValue" type="number" />
+            <input id="readingDate" name="readingDate" type="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
+            <button type="submit">Add</button>
+        </form>
+    </body>
+</html>
