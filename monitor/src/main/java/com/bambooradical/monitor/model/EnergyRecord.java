@@ -21,24 +21,18 @@ public class EnergyRecord implements Serializable {
     @GeneratedValue
     @javax.persistence.Id
     private Long id;
-    private Float meterValue;
-    private String meterNumber;
+    private String meterLocation;
+    private int meterValue;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date recordDate;
 
     public EnergyRecord() {
     }
 
-    public EnergyRecord(Float meterValue, String meterNumber, Date recordDate) {
+    public EnergyRecord(String meterLocation, int meterValue, Date recordDate) {
+        this.meterLocation = meterLocation;
         this.meterValue = meterValue;
-        this.meterNumber = meterNumber;
         this.recordDate = recordDate;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("Customer[id=%d, meterValue=%.2f, meterNumber='%s',  date='%s']", id,
-                meterValue, meterNumber, recordDate);
     }
 
     public Long getId() {
@@ -49,20 +43,20 @@ public class EnergyRecord implements Serializable {
         this.id = id;
     }
 
-    public Float getMeterValue() {
+    public String getMeterLocation() {
+        return meterLocation;
+    }
+
+    public void setMeterLocation(String meterLocation) {
+        this.meterLocation = meterLocation;
+    }
+
+    public int getMeterValue() {
         return meterValue;
     }
 
-    public void setMeterValue(Float meterValue) {
+    public void setMeterValue(int meterValue) {
         this.meterValue = meterValue;
-    }
-
-    public String getMeterNumber() {
-        return meterNumber;
-    }
-
-    public void setMeterNumber(String meterNumber) {
-        this.meterNumber = meterNumber;
     }
 
     public Date getRecordDate() {

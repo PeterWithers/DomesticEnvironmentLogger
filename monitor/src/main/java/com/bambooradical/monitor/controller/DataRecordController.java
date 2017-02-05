@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author : Peter Withers <peter@gthb-bambooradical.com>
  */
 @RestController
-//@RequestMapping("/monitor")
+@RequestMapping("/monitor")
 public class DataRecordController {
 
     @Autowired
@@ -42,14 +42,14 @@ public class DataRecordController {
     }
 
     @RequestMapping("/addEnergy")
-    public EnergyRecord addEnergyRecord(
-            @RequestParam(value = "meterValue", required = true) Float meterValue,
-            @RequestParam(value = "meterNumber", required = true) String meterNumber,
-            @RequestParam(value = "error", required = false) String error
+    public List<EnergyRecord> addEnergyRecord(
+            @RequestParam(value = "meterLocation", required = true) String meterLocation,
+            @RequestParam(value = "meterValue", required = true) int meterValue,
+            @RequestParam(value = "readingDate", required = true) Date readingDate
     ) {
-        final EnergyRecord energyRecord = new EnergyRecord(meterValue, meterNumber, new Date());
+        final EnergyRecord energyRecord = new EnergyRecord(meterLocation, meterValue, readingDate);
         energyRecordRepository.save(energyRecord);
-        return energyRecord;
+        return energyRecordRepository.findAll();
     }
 
     @RequestMapping("/list")
@@ -65,7 +65,7 @@ public class DataRecordController {
     private String getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder temperatureBuilder = new StringBuilder();
         temperatureBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetween(sensorLocation, startDate, endDate)) {
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
             final Float temperature = record.getTemperature();
             if (temperature != null) {
                 temperatureBuilder.append("{ x: ");
@@ -82,7 +82,7 @@ public class DataRecordController {
     private String getHumidityArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder humidityBuilder = new StringBuilder();
         humidityBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetween(sensorLocation, startDate, endDate)) {
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
             final Float humidity = record.getHumidity();
             if (humidity != null) {
                 humidityBuilder.append("{ x: ");
@@ -99,7 +99,7 @@ public class DataRecordController {
     private String getVoltageArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder voltageBuilder = new StringBuilder();
         voltageBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetween(sensorLocation, startDate, endDate)) {
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
             if (record.getVoltage() < 100) { //@todo: remove this < once the invalid data is removed
                 voltageBuilder.append("{ x: ");
                 voltageBuilder.append(record.getRecordDate().getTime());
@@ -425,9 +425,9 @@ public class DataRecordController {
                 + "});"
                 + "});";
         return "<head>"
-                + "<script src=\"/monitor/js/jquery.min.js\"></script>"
-                + "<script src=\"/monitor/js/moment.js\"></script>"
-                + "<script src=\"/monitor/js/Chart.min.js\"></script>"
+                + "<script src=\"/js/jquery.min.js\"></script>"
+                + "<script src=\"/js/moment.js\"></script>"
+                + "<script src=\"/js/Chart.min.js\"></script>"
                 //                + "<script type=\"text/javascript\" src=\"/js/canvasjs.min.js\"></script>\n"
                 + "<script type=\"text/javascript\">" + chartJs + "</script></head>"
                 + "<a href=\"chart\">combined</a>"
@@ -435,6 +435,17 @@ public class DataRecordController {
                 + "<a href=\"charts\">separate</a>"
                 + "<br/>"
                 + "<a href=\"list\">list</a>"
+                + "<br/>"
+                + "<br/>"
+                + "<form action=\"addEnergy\">\n"
+                + "meterLocation: <input type=\"text\" name=\"meterLocation\"><br>\n"
+                + "meterValue: <input type=\"number\" name=\"meterValue\"><br>\n"
+                + "readingDate: <input type=\"date\" name=\"readingDate\"><br>\n"
+                + "  <input type=\"submit\" value=\"Submit\">\n"
+                + "</form>"
+                + "<br/>"
+                + "<br/>"
+                + "<a href=\"listEnergy\">listEnergy</a>"
                 + "<br/>"
                 + pagebleMenu
                 + "<canvas id=\"temperatureContainer\" width=\"800px\" height=\"400px\"></canvas>"

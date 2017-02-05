@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface DataRecordRepository extends JpaRepository<DataRecord, Long> {
 
-    List<DataRecord> findByLocationStartsWithIgnoreCase(String location, final Pageable pageable);
+    List<DataRecord> findByLocationStartsWithIgnoreCaseOrderByRecordDateAsc(String location, final Pageable pageable);
 
-    List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetween(String location, Date startDate, Date endDate);
+    List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate);
 }
