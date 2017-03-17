@@ -12,9 +12,16 @@
         <script src="/js/jquery.min.js"></script>
         <script src="/js/moment.js"></script>
         <script src="/js/Chart.min.js"></script>
-        <script type="text/javascript">
+        <script th:inline="javascript">
+            /*<![CDATA[*/
             $(document).ready(function () {
-
+                var energyDataG3a = /*[[${energyDataG3a}]]*/ [];
+                var energyDataG4 = /*[[${energyDataG4}]]*/ [];
+                var energyDataW3 = /*[[${energyDataW3}]]*/ [];
+                var energyDataW3a = /*[[${energyDataW3a}]]*/ [];
+                var energyDataW4 = /*[[${energyDataW4}]]*/ [];
+                var energyDataE3a = /*[[${energyDataE3a}]]*/ [];
+                var energyDataE4 = /*[[${energyDataE4}]]*/ [];
                 var energyContainer = $("#energyContainer");
                 var energyChart = new Chart(energyContainer, {
                     type: 'line',
@@ -26,56 +33,56 @@
                                 pointBackgroundColor: "rgba(179,181,198,1)",
                                 pointBorderColor: "#fff",
                                 pointHoverBackgroundColor: "#fff",
-                                pointHoverBorderColor: "rgba(179,181,198,1)", data: [
-                                    {x: 1489683773795, y: 18.4}, {x: 1489684975414, y: 18.4}, ]}, {
+                                pointHoverBorderColor: "rgba(179,181,198,1)", data:
+                                        energyDataG3a}, {
                                 label: 'G4',
                                 backgroundColor: "rgba(179,151,198,0.2)",
                                 borderColor: "rgba(179,151,198,1)",
                                 pointBackgroundColor: "rgba(179,151,198,1)",
                                 pointBorderColor: "#fff",
                                 pointHoverBackgroundColor: "#fff",
-                                pointHoverBorderColor: "rgba(179,151,198,1)", data: [
-                                    {x: 1489684284340, y: 19.4}, {x: 1489685485920, y: 19.5}, ]}, {
+                                pointHoverBorderColor: "rgba(179,151,198,1)", data:
+                                        energyDataG4}, {
                                 label: 'W3',
                                 backgroundColor: "rgba(75, 192, 192, 0.2)",
                                 borderColor: "rgba(75, 192, 192, 1)",
                                 pointBackgroundColor: "rgba(75, 192, 192, 1)",
                                 pointBorderColor: "#fff",
                                 pointHoverBackgroundColor: "#fff",
-                                pointHoverBorderColor: "rgba(75, 192, 192, 1)", data: [
-                                    {x: 1489684284340, y: 17.4}, {x: 1489685485920, y: 11.5}, ]}, {
+                                pointHoverBorderColor: "rgba(75, 192, 192, 1)", data:
+                                        energyDataW3}, {
                                 label: 'W3a',
                                 backgroundColor: "rgba(75, 152, 192, 0.2)",
                                 borderColor: "rgba(75, 192, 152, 1)",
                                 pointBackgroundColor: "rgba(75, 152, 192, 1)",
                                 pointBorderColor: "#fff",
                                 pointHoverBackgroundColor: "#fff",
-                                pointHoverBorderColor: "rgba(75, 152, 192, 1)", data: [
-                                    {x: 1489684284340, y: 12.4}, {x: 1489685485920, y: 12.5}, ]}, {
+                                pointHoverBorderColor: "rgba(75, 152, 192, 1)", data:
+                                        energyDataW3a}, {
                                 label: 'W4',
                                 backgroundColor: "rgba(75, 192, 152, 0.2)",
                                 borderColor: "rgba(75, 192, 152, 1)",
                                 pointBackgroundColor: "rgba(75, 192, 152, 1)",
                                 pointBorderColor: "#fff",
                                 pointHoverBackgroundColor: "#fff",
-                                pointHoverBorderColor: "rgba(75, 192, 152, 1)", data: [
-                                    {x: 1489684284340, y: 15.4}, {x: 1489685485920, y: 13.5}, ]}, {
+                                pointHoverBorderColor: "rgba(75, 192, 152, 1)", data:
+                                        energyDataW4}, {
                                 label: 'E3a',
                                 backgroundColor: "rgba(255,99,132,0.2)",
                                 borderColor: "rgba(255,99,132,1)",
                                 pointBackgroundColor: "rgba(255,99,132,1)",
                                 pointBorderColor: "#fff",
                                 pointHoverBackgroundColor: "#fff",
-                                pointHoverBorderColor: "rgba(255,99,132,1)", data: [
-                                    {x: 1489684284340, y: 11.4}, {x: 1489685485920, y: 14.5}, ]}, {
+                                pointHoverBorderColor: "rgba(255,99,132,1)", data:
+                                        energyDataE3a}, {
                                 label: 'E4',
                                 backgroundColor: "rgba(255,129,132,0.2)",
                                 borderColor: "rgba(255,129,132,1)",
                                 pointBackgroundColor: "rgba(255,129,132,1)",
                                 pointBorderColor: "#fff",
                                 pointHoverBackgroundColor: "#fff",
-                                pointHoverBorderColor: "rgba(255,129,132,1)", data: [
-                                    {x: 1489683681559, y: 12.8}, {x: 1489684878915, y: 15.7}, ]}]
+                                pointHoverBorderColor: "rgba(255,129,132,1)", data:
+                                        energyDataE4}]
                     },
                     options: {
                         bezierCurve: false,
@@ -93,6 +100,7 @@
                                 }]}
                     }});
             });
+            /*]]>*/
         </script>
     </head>
     <body>
