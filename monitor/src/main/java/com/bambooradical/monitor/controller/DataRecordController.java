@@ -11,6 +11,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,8 +45,8 @@ public class DataRecordController {
     @RequestMapping("/addEnergy")
     public List<EnergyRecord> addEnergyRecord(
             @RequestParam(value = "meterLocation", required = true) String meterLocation,
-            @RequestParam(value = "meterValue", required = true) int meterValue,
-            @RequestParam(value = "readingDate", required = true) Date readingDate
+            @RequestParam(value = "meterValue", required = true) double meterValue,
+            @RequestParam(value = "readingDate", required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date readingDate
     ) {
         final EnergyRecord energyRecord = new EnergyRecord(meterLocation, meterValue, readingDate);
         energyRecordRepository.save(energyRecord);

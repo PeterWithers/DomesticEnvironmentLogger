@@ -22,14 +22,14 @@ public class EnergyRecord implements Serializable {
     @javax.persistence.Id
     private Long id;
     private String meterLocation;
-    private int meterValue;
+    private double meterValue;
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date recordDate;
 
     public EnergyRecord() {
     }
 
-    public EnergyRecord(String meterLocation, int meterValue, Date recordDate) {
+    public EnergyRecord(String meterLocation, double meterValue, Date recordDate) {
         this.meterLocation = meterLocation;
         this.meterValue = meterValue;
         this.recordDate = recordDate;
@@ -51,11 +51,11 @@ public class EnergyRecord implements Serializable {
         this.meterLocation = meterLocation;
     }
 
-    public int getMeterValue() {
+    public double getMeterValue() {
         return meterValue;
     }
 
-    public void setMeterValue(int meterValue) {
+    public void setMeterValue(double meterValue) {
         this.meterValue = meterValue;
     }
 

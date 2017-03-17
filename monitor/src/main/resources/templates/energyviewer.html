@@ -5,10 +5,95 @@
  @since Feb 05, 2017 9:42 AM (creation date)
  @author @author : Peter Withers <peter@gthb-bambooradical.com>
 -->
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>Energy Viewer</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <script src="/js/jquery.min.js"></script>
+        <script src="/js/moment.js"></script>
+        <script src="/js/Chart.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function () {
+
+                var energyContainer = $("#energyContainer");
+                var energyChart = new Chart(energyContainer, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                                label: 'G3a',
+                                backgroundColor: "rgba(179,181,198,0.2)",
+                                borderColor: "rgba(179,181,198,1)",
+                                pointBackgroundColor: "rgba(179,181,198,1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(179,181,198,1)", data: [
+                                    {x: 1489683773795, y: 18.4}, {x: 1489684975414, y: 18.4}, ]}, {
+                                label: 'G4',
+                                backgroundColor: "rgba(179,151,198,0.2)",
+                                borderColor: "rgba(179,151,198,1)",
+                                pointBackgroundColor: "rgba(179,151,198,1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(179,151,198,1)", data: [
+                                    {x: 1489684284340, y: 19.4}, {x: 1489685485920, y: 19.5}, ]}, {
+                                label: 'W3',
+                                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                                borderColor: "rgba(75, 192, 192, 1)",
+                                pointBackgroundColor: "rgba(75, 192, 192, 1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(75, 192, 192, 1)", data: [
+                                    {x: 1489684284340, y: 17.4}, {x: 1489685485920, y: 11.5}, ]}, {
+                                label: 'W3a',
+                                backgroundColor: "rgba(75, 152, 192, 0.2)",
+                                borderColor: "rgba(75, 192, 152, 1)",
+                                pointBackgroundColor: "rgba(75, 152, 192, 1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(75, 152, 192, 1)", data: [
+                                    {x: 1489684284340, y: 12.4}, {x: 1489685485920, y: 12.5}, ]}, {
+                                label: 'W4',
+                                backgroundColor: "rgba(75, 192, 152, 0.2)",
+                                borderColor: "rgba(75, 192, 152, 1)",
+                                pointBackgroundColor: "rgba(75, 192, 152, 1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(75, 192, 152, 1)", data: [
+                                    {x: 1489684284340, y: 15.4}, {x: 1489685485920, y: 13.5}, ]}, {
+                                label: 'E3a',
+                                backgroundColor: "rgba(255,99,132,0.2)",
+                                borderColor: "rgba(255,99,132,1)",
+                                pointBackgroundColor: "rgba(255,99,132,1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(255,99,132,1)", data: [
+                                    {x: 1489684284340, y: 11.4}, {x: 1489685485920, y: 14.5}, ]}, {
+                                label: 'E4',
+                                backgroundColor: "rgba(255,129,132,0.2)",
+                                borderColor: "rgba(255,129,132,1)",
+                                pointBackgroundColor: "rgba(255,129,132,1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(255,129,132,1)", data: [
+                                    {x: 1489683681559, y: 12.8}, {x: 1489684878915, y: 15.7}, ]}]
+                    },
+                    options: {
+                        bezierCurve: false,
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            xAxes: [{
+                                    type: 'time',
+                                    time: {
+                                        displayFormats: {
+                                            quarter: 'YYYY MMM D H:mm:ss'
+                                        },
+                                        tooltipFormat: 'YYYY MMM D H:mm:ss'
+                                    }
+                                }]}
+                    }});
+            });
+        </script>
     </head>
     <body>
         <div th:each="energyRecord : ${energyData}">
@@ -27,9 +112,11 @@
                 <option value="E3a">E3a</option>
                 <option value="E4">E4</option>
             </select>
-            <input id="meterValue" name="meterValue" type="number" />
+            <input id="meterValue" name="meterValue" type="number" step="0.001" />
             <input id="readingDate" name="readingDate" type="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
             <button type="submit">Add</button>
         </form>
+        <br/>
+        <canvas id="energyContainer" width="800" height="400"></canvas>
     </body>
 </html>
