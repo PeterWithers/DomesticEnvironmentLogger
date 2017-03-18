@@ -15,5 +15,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface EnergyRecordRepository extends JpaRepository<EnergyRecord, Long> {
 
-    List<EnergyRecord> findByMeterLocationStartsWithIgnoreCaseOrderByRecordDateAsc(String meterLocation, final Pageable pageable);
+    List<EnergyRecord> findByMeterLocationOrderByRecordDateAsc(String meterLocation, final Pageable pageable);
 }
