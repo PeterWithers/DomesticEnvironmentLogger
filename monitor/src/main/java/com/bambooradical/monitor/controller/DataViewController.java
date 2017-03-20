@@ -42,7 +42,11 @@ public class DataViewController {
         double offset = 0;
         for (EnergyRecord energyRecord : meterLocationsRecords) {
             if (previousEnergyRecord != null) {
-                returnList.add(new GraphPoint(previousEnergyRecord, energyRecord, linear, offset));
+                final GraphPoint graphPoint = new GraphPoint(previousEnergyRecord, energyRecord, linear, offset);
+                if (!linear) {
+                    returnList.add(new GraphPoint(previousEnergyRecord, graphPoint));
+                }
+                returnList.add(graphPoint);
             } else {
                 returnList.add(new GraphPoint(energyRecord));
                 offset = energyRecord.getMeterValue();

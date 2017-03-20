@@ -17,6 +17,12 @@ public class GraphPoint {
         this.y = 0;
     }
 
+    public GraphPoint(EnergyRecord previousEnergyRecord, GraphPoint graphPoint) {
+        final long currentX = previousEnergyRecord.getRecordDate().getTime();
+        this.x = currentX;// + (graphPoint.x - currentX) / 2;
+        this.y = graphPoint.getY();
+    }
+
     public GraphPoint(EnergyRecord previousEnergyRecord, EnergyRecord currentEnergyRecord, final boolean linear, final double offset) {
         int daysBetween = (int) ((currentEnergyRecord.getRecordDate().getTime() - previousEnergyRecord.getRecordDate().getTime()) / (1000 * 60 * 60 * 24));
         this.x = currentEnergyRecord.getRecordDate().getTime();
