@@ -182,7 +182,7 @@
             <span th:text="${energyRecord.meterValue}"/>
             <span th:text="${energyRecord.recordDate}"/>
         </div> 
-        <form action="addEnergy">
+        <form th:if="${addEnergy == true}" action="addEnergy">
             <select id="meterLocation" name="meterLocation">
                 <option value="G3a">G3a</option>
                 <option value="G4">G4</option>
@@ -195,8 +195,8 @@
             <input id="meterValue" name="meterValue" type="number" step="0.001" />
             <input id="readingDate" name="readingDate" type="date" th:value="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"/>
             <button type="submit">Add</button>
+            <br/>
         </form>
-        <br/>
         <a th:href="@{energy(start=${startDay},span=${spanDays * 2},linear=${linear})}">zoom-</a>&nbsp;
         <a th:href="@{energy(start=${startDay},span=${spanDays / 2},linear=${linear})}">zoom+</a>&nbsp;
         <a th:href="@{energy(start=${startDay - spanDays},span=${spanDays},linear=${linear})}">prev</a>&nbsp;

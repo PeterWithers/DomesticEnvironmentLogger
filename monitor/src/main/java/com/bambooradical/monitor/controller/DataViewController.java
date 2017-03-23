@@ -110,6 +110,7 @@ public class DataViewController {
 
     @RequestMapping("/monitor/energy")
     public String getEnergy(Model model, @RequestParam(value = "linear", required = false, defaultValue = "false") boolean linear,
+            @RequestParam(value = "add", required = false, defaultValue = "false") boolean addEnergy,
             @RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "256") int spanDays) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, startDay);
@@ -119,6 +120,7 @@ public class DataViewController {
         Date startDate = calendar.getTime();
 
         final PageRequest pageRequest = new PageRequest(0, 1000);
+        model.addAttribute("addEnergy", addEnergy);
         model.addAttribute("startDay", startDay);
         model.addAttribute("spanDays", spanDays);
         model.addAttribute("linear", linear);

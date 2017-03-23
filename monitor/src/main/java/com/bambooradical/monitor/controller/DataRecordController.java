@@ -438,10 +438,11 @@ public class DataRecordController {
                 + "<a href=\"list\">list</a>"
                 + "<br/>"
                 + "<br/>"
-                + "<a href=\"energy\">addEnergy</a>"
+                + "<a href=\"energy\">energy graph</a>"
                 + "<br/>"
+                + "<a href=\"energy?add=true\">add energy</a>"
                 + "<br/>"
-                + "<a href=\"listEnergy\">listEnergy</a>"
+                + "<a href=\"listEnergy\">energy JSON</a>"
                 + "<br/>"
                 + pagebleMenu
                 + "<canvas id=\"temperatureContainer\" width=\"800px\" height=\"400px\"></canvas>"
