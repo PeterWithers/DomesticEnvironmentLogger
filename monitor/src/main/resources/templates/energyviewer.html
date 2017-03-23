@@ -15,6 +15,9 @@
         <script th:inline="javascript">
             /*<![CDATA[*/
             $(document).ready(function () {
+                var temperatureData1 = /*[[${temperatureData1}]]*/ [];
+                var temperatureData2 = /*[[${temperatureData2}]]*/ [];
+                var temperatureData3 = /*[[${temperatureData3}]]*/ [];
                 var energyDataG3a = /*[[${energyDataG3a}]]*/ [];
                 var energyDataG4 = /*[[${energyDataG4}]]*/ [];
                 var energyDataW3 = /*[[${energyDataW3}]]*/ [];
@@ -99,6 +102,51 @@
                                     }
                                 }]}
                     }});
+                var temperatureContainer = $("#temperatureContainer");
+                var temperatureChart = new Chart(temperatureContainer, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                                label: 'Temperature 2',
+                                backgroundColor: "rgba(179,181,198,0.2)",
+                                borderColor: "rgba(179,181,198,1)",
+                                pointBackgroundColor: "rgba(179,181,198,1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(179,181,198,1)",
+                                data: temperatureData1}, {
+                                label: 'Temperature 1',
+                                backgroundColor: "rgba(255,99,132,0.2)",
+                                borderColor: "rgba(255,99,132,1)",
+                                pointBackgroundColor: "rgba(255,99,132,1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(255,99,132,1)", 
+                                data: temperatureData2}, {
+                                label: 'Temperature 3',
+                                backgroundColor: "rgba(75, 192, 192, 0.2)",
+                                borderColor: "rgba(75, 192, 192, 1)",
+                                pointBackgroundColor: "rgba(75, 192, 192, 1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(75, 192, 192, 1)", 
+                                data: temperatureData3}]
+                    },
+                    options: {
+                        bezierCurve: false,
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            xAxes: [{
+                                    type: 'time',
+                                    time: {
+                                        displayFormats: {
+                                            quarter: 'YYYY MMM D H:mm:ss'
+                                        },
+                                        tooltipFormat: 'YYYY MMM D H:mm:ss'
+                                    }
+                                }]}
+                    }});
             });
             /*]]>*/
         </script>
@@ -125,8 +173,12 @@
             <button type="submit">Add</button>
         </form>
         <br/>
-        <a href="energy?linear=true">linear</a><br/>
-        <a href="energy?linear=false">difference</a><br/>
+        <a th:href="@{energy(start=${startDay},span=${spanDays * 2},linear=${linear})}">zoom-</a>&nbsp;
+        <a th:href="@{energy(start=${startDay},span=${spanDays / 2},linear=${linear})}">zoom+</a>&nbsp;
+        <a th:href="@{energy(start=${startDay - spanDays},span=${spanDays},linear=${linear})}">prev</a>&nbsp;
+        <a th:href="@{energy(start=${startDay + spanDays},span=${spanDays},linear=${linear})}">next</a><br/>
+        <a th:href="@{energy(start=${startDay},span=${spanDays},linear=${!linear})}" th:text="${(linear)?'difference':'linear'}"></a><br/>
         <canvas id="energyContainer" width="800" height="400"></canvas>
+        <canvas id="temperatureContainer" width="800" height="400"></canvas>
     </body>
 </html>

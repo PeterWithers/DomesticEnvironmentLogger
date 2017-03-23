@@ -3,6 +3,7 @@
  */
 package com.bambooradical.monitor.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Entity;
@@ -23,6 +24,7 @@ public class EnergyRecord implements Serializable {
     private Long id;
     private String meterLocation;
     private double meterValue;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date recordDate;
 

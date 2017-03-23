@@ -4,7 +4,6 @@
 package com.bambooradical.monitor.repository;
 
 import com.bambooradical.monitor.model.EnergyRecord;
-import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

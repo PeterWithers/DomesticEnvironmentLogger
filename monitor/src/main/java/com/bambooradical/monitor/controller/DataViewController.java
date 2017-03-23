@@ -3,11 +3,14 @@
  */
 package com.bambooradical.monitor.controller;
 
+import com.bambooradical.monitor.model.DataRecord;
 import com.bambooradical.monitor.model.EnergyRecord;
 import com.bambooradical.monitor.model.GraphPoint;
+import com.bambooradical.monitor.model.RecordPoint;
 import com.bambooradical.monitor.repository.DataRecordRepository;
 import com.bambooradical.monitor.repository.EnergyRecordRepository;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +59,34 @@ public class DataViewController {
         return returnList;
     }
 
+    private List<RecordPoint> getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {
+        List<RecordPoint> returnList = new ArrayList<>();
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
+            final Float temperature = record.getTemperature();
+            if (temperature != null) {
+                returnList.add(new RecordPoint(record.getRecordDate().getTime(), temperature));
+            }
+        }
+        return returnList;
+    }
+
     @RequestMapping("/monitor/energy")
-    public String getEnergy(Model model, @RequestParam(value = "linear", required = false, defaultValue = "false") boolean linear) {
+    public String getEnergy(Model model, @RequestParam(value = "linear", required = false, defaultValue = "false") boolean linear,
+            @RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "14") int spanDays) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, startDay);
+        Date endDate = calendar.getTime();
+
+        calendar.add(Calendar.DAY_OF_MONTH, -spanDays);
+        Date startDate = calendar.getTime();
+
         final PageRequest pageRequest = new PageRequest(0, 1000);
+        model.addAttribute("startDay", startDay);
+        model.addAttribute("spanDays", spanDays);
+        model.addAttribute("linear", linear);
+        model.addAttribute("temperatureData1", getTemperatureArray("s", startDate, endDate));
+        model.addAttribute("temperatureData2", getTemperatureArray("te", startDate, endDate));
+        model.addAttribute("temperatureData3", getTemperatureArray("th", startDate, endDate));
         model.addAttribute("energyDataG3a", getGraphPointList("G3a", pageRequest, linear));
         model.addAttribute("energyDataG4", getGraphPointList("G4", pageRequest, linear));
         model.addAttribute("energyDataW3", getGraphPointList("W3", pageRequest, linear));
@@ -85,7 +113,7 @@ public class DataViewController {
         energyRecordRepository.save(new EnergyRecord("G3a", 3067.77295, new Date(1480395600000l)));
         energyRecordRepository.save(new EnergyRecord("G4", 10826.3447, new Date(1480395600000l)));
         energyRecordRepository.save(new EnergyRecord("G3a", 3062.95996, new Date(1480222800000l)));
-        energyRecordRepository.save(new EnergyRecord("G3a", 3014.09692, new Date(1477627200000l)));
+        energyRecordRepository.save(new EnergyRecord("G3a", 3014.09692, new Date(1477713600000l))); // this should be 2016-10-29
         energyRecordRepository.save(new EnergyRecord("G3a", 3005.94189, new Date(1477195200000l)));
         energyRecordRepository.save(new EnergyRecord("G3a", 3081.79199, new Date(1481173200000l)));
         energyRecordRepository.save(new EnergyRecord("W4", 631.0, new Date(1481173200000l)));
@@ -141,7 +169,7 @@ public class DataViewController {
         energyRecordRepository.save(new EnergyRecord("G4", 11091.9033, new Date(1488258000000l)));
         energyRecordRepository.save(new EnergyRecord("G3a", 3304.12891, new Date(1488258000000l)));
         energyRecordRepository.save(new EnergyRecord("W4", 631.0, new Date(1488258000000l)));
-        energyRecordRepository.save(new EnergyRecord("E3a", 29480.0, new Date(1488258000000l)));
+        energyRecordRepository.save(new EnergyRecord("E3a", 29470.0, new Date(1488258000000l))); // this should be 29470.0 and not 29480.0
         energyRecordRepository.save(new EnergyRecord("W3", 1825.0, new Date(1488258000000l)));
         energyRecordRepository.save(new EnergyRecord("W3a", 659.390015, new Date(1488258000000l)));
         return "redirect:/monitor/energy";
