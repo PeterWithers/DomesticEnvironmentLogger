@@ -38,8 +38,8 @@ public class DataViewController {
         return "dataviewer";
     }
 
-    private List<GraphPoint> getGraphPointList(String meterLocation, final Pageable pageable, final boolean linear) {
-        List<GraphPoint> returnList = new ArrayList<>();
+    private List<GraphPoint> getGraphPointList(String meterLocation, final Pageable pageable, final boolean linear, Date startDate, Date endDate) {
+        List<GraphPoint> workingList = new ArrayList<>();
         final List<EnergyRecord> meterLocationsRecords = energyRecordRepository.findByMeterLocationOrderByRecordDateAsc(meterLocation, pageable);
         EnergyRecord previousEnergyRecord = null;
         double offset = 0;
@@ -47,14 +47,30 @@ public class DataViewController {
             if (previousEnergyRecord != null) {
                 final GraphPoint graphPoint = new GraphPoint(previousEnergyRecord, energyRecord, linear, offset);
                 if (!linear) {
-                    returnList.add(new GraphPoint(previousEnergyRecord, graphPoint));
+                    workingList.add(new GraphPoint(previousEnergyRecord, graphPoint));
                 }
-                returnList.add(graphPoint);
+                workingList.add(graphPoint);
             } else {
-                returnList.add(new GraphPoint(energyRecord));
+                workingList.add(new GraphPoint(energyRecord));
                 offset = energyRecord.getMeterValue();
             }
             previousEnergyRecord = energyRecord;
+        }
+        List<GraphPoint> returnList = new ArrayList<>();
+        GraphPoint earlierGraphPoint = null;
+        for (GraphPoint graphPoint : workingList) {
+            if (graphPoint.getX() < startDate.getTime()) {
+                earlierGraphPoint = graphPoint;
+            } else if (graphPoint.getX() < endDate.getTime()) {
+                if (earlierGraphPoint != null) {
+                    returnList.add(new GraphPoint(startDate.getTime(), earlierGraphPoint.getY()));
+                    earlierGraphPoint = null;
+                }
+                returnList.add(graphPoint);
+            } else {
+                returnList.add(new GraphPoint(endDate.getTime(), graphPoint.getY()));
+                break;
+            }
         }
         return returnList;
     }
@@ -109,26 +125,26 @@ public class DataViewController {
         model.addAttribute("temperatureData1", getTemperatureArray("s", startDate, endDate));
         model.addAttribute("temperatureData2", getTemperatureArray("te", startDate, endDate));
         model.addAttribute("temperatureData3", getTemperatureArray("th", startDate, endDate));
-        model.addAttribute("energyDataG3a", getGraphPointList("G3a", pageRequest, linear));
-        model.addAttribute("energyDataG4", getGraphPointList("G4", pageRequest, linear));
-        model.addAttribute("energyDataW3", getGraphPointList("W3", pageRequest, linear));
-        model.addAttribute("energyDataW3a", getGraphPointList("W3a", pageRequest, linear));
-        model.addAttribute("energyDataW4", getGraphPointList("W4", pageRequest, linear));
-        model.addAttribute("energyDataE3a", getGraphPointList("E3a", pageRequest, linear));
-        model.addAttribute("energyDataE4", getGraphPointList("E4", pageRequest, linear));
+        model.addAttribute("energyDataG3a", getGraphPointList("G3a", pageRequest, linear, startDate, endDate));
+        model.addAttribute("energyDataG4", getGraphPointList("G4", pageRequest, linear, startDate, endDate));
+        model.addAttribute("energyDataW3", getGraphPointList("W3", pageRequest, linear, startDate, endDate));
+        model.addAttribute("energyDataW3a", getGraphPointList("W3a", pageRequest, linear, startDate, endDate));
+        model.addAttribute("energyDataW4", getGraphPointList("W4", pageRequest, linear, startDate, endDate));
+        model.addAttribute("energyDataE3a", getGraphPointList("E3a", pageRequest, linear, startDate, endDate));
+        model.addAttribute("energyDataE4", getGraphPointList("E4", pageRequest, linear, startDate, endDate));
         return "energyviewer";
     }
 
     @RequestMapping("/monitor/energy/insertdata")
     public String insertData(Model model) {
-        dataRecordRepository.save(new DataRecord(12.0f, 16.0f, 5.0f, "testdata", null, new Date(2017-1900, 0, 1)));
-        dataRecordRepository.save(new DataRecord(13.0f, 17.0f, 6.0f, "testdata", null, new Date(2017-1900, 2, 2)));
-        dataRecordRepository.save(new DataRecord(3.0f, 7.0f, 1.0f, "testdata", null, new Date(2017-1900, 2, 2)));
-        dataRecordRepository.save(new DataRecord(null, null, null, "testdata", null, new Date(2017-1900, 2, 7)));
-        dataRecordRepository.save(new DataRecord(null, null, null, "testdata", null, new Date(2017-1900, 2, 13)));
-        dataRecordRepository.save(new DataRecord(14.0f, 18.0f, 7.0f, "testdata", null, new Date(2017-1900, 2, 13)));
-        dataRecordRepository.save(new DataRecord(4.0f, 8.0f, 1.0f, "testdata", null, new Date(2017-1900, 2, 13)));
-        dataRecordRepository.save(new DataRecord(15.0f, 19.0f, 8.0f, "testdata", null, new Date(2017-1900, 2, 14)));
+        dataRecordRepository.save(new DataRecord(12.0f, 16.0f, 5.0f, "testdata", null, new Date(2017 - 1900, 0, 1)));
+        dataRecordRepository.save(new DataRecord(13.0f, 17.0f, 6.0f, "testdata", null, new Date(2017 - 1900, 2, 2)));
+        dataRecordRepository.save(new DataRecord(3.0f, 7.0f, 1.0f, "testdata", null, new Date(2017 - 1900, 2, 2)));
+        dataRecordRepository.save(new DataRecord(null, null, null, "testdata", null, new Date(2017 - 1900, 2, 7)));
+        dataRecordRepository.save(new DataRecord(null, null, null, "testdata", null, new Date(2017 - 1900, 2, 13)));
+        dataRecordRepository.save(new DataRecord(14.0f, 18.0f, 7.0f, "testdata", null, new Date(2017 - 1900, 2, 13)));
+        dataRecordRepository.save(new DataRecord(4.0f, 8.0f, 1.0f, "testdata", null, new Date(2017 - 1900, 2, 13)));
+        dataRecordRepository.save(new DataRecord(15.0f, 19.0f, 8.0f, "testdata", null, new Date(2017 - 1900, 2, 14)));
         energyRecordRepository.deleteAll();
         energyRecordRepository.save(new EnergyRecord("E3a", 29122.0, new Date(1472702400000l)));
         energyRecordRepository.save(new EnergyRecord("W3a", 568.442017, new Date(1472702400000l)));
