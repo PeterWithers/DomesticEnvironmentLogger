@@ -61,18 +61,40 @@ public class DataViewController {
 
     private List<RecordPoint> getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {
         List<RecordPoint> returnList = new ArrayList<>();
+        DataRecord recordMin = null;
+        DataRecord recordMax = null;
+        long currentTime = startDate.getTime();
+        int maxPoints = 100;
+        long timePerPoints = (endDate.getTime() - startDate.getTime()) / maxPoints;
         for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
+            recordMin = (recordMin == null) ? record : recordMin;
+            recordMax = (recordMax == null) ? record : recordMax;
+            if (record.getRecordDate().getTime() > currentTime + timePerPoints) {
+                currentTime = record.getRecordDate().getTime();
+                if (recordMin.getTemperature() != null) {
+                    returnList.add(new RecordPoint(recordMin.getRecordDate().getTime(), recordMin.getTemperature()));
+                }
+                if (recordMax.getTemperature() != null) {
+                    returnList.add(0, new RecordPoint(recordMax.getRecordDate().getTime(), recordMax.getTemperature()));
+                }
+                recordMin = record;
+                recordMax = record;
+            }
             final Float temperature = record.getTemperature();
             if (temperature != null) {
-                returnList.add(new RecordPoint(record.getRecordDate().getTime(), temperature));
+                recordMin = (recordMin.getTemperature() == null || recordMin.getTemperature() > record.getTemperature()) ? record : recordMin;
+                recordMax = (recordMax.getTemperature() == null || recordMax.getTemperature() < record.getTemperature()) ? record : recordMax;
             }
+        }
+        if (!returnList.isEmpty()) {
+            returnList.add(returnList.get(0)); // close the shape
         }
         return returnList;
     }
 
     @RequestMapping("/monitor/energy")
     public String getEnergy(Model model, @RequestParam(value = "linear", required = false, defaultValue = "false") boolean linear,
-            @RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "14") int spanDays) {
+            @RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "256") int spanDays) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, startDay);
         Date endDate = calendar.getTime();
@@ -99,6 +121,14 @@ public class DataViewController {
 
     @RequestMapping("/monitor/energy/insertdata")
     public String insertData(Model model) {
+        dataRecordRepository.save(new DataRecord(12.0f, 16.0f, 5.0f, "testdata", null, new Date(2017-1900, 0, 1)));
+        dataRecordRepository.save(new DataRecord(13.0f, 17.0f, 6.0f, "testdata", null, new Date(2017-1900, 2, 2)));
+        dataRecordRepository.save(new DataRecord(3.0f, 7.0f, 1.0f, "testdata", null, new Date(2017-1900, 2, 2)));
+        dataRecordRepository.save(new DataRecord(null, null, null, "testdata", null, new Date(2017-1900, 2, 7)));
+        dataRecordRepository.save(new DataRecord(null, null, null, "testdata", null, new Date(2017-1900, 2, 13)));
+        dataRecordRepository.save(new DataRecord(14.0f, 18.0f, 7.0f, "testdata", null, new Date(2017-1900, 2, 13)));
+        dataRecordRepository.save(new DataRecord(4.0f, 8.0f, 1.0f, "testdata", null, new Date(2017-1900, 2, 13)));
+        dataRecordRepository.save(new DataRecord(15.0f, 19.0f, 8.0f, "testdata", null, new Date(2017-1900, 2, 14)));
         energyRecordRepository.deleteAll();
         energyRecordRepository.save(new EnergyRecord("E3a", 29122.0, new Date(1472702400000l)));
         energyRecordRepository.save(new EnergyRecord("W3a", 568.442017, new Date(1472702400000l)));
