@@ -4,6 +4,7 @@
 package com.bambooradical.monitor.repository;
 
 import com.bambooradical.monitor.model.EnergyRecord;
+import java.util.Date;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,4 +16,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface EnergyRecordRepository extends JpaRepository<EnergyRecord, Long> {
 
     List<EnergyRecord> findByMeterLocationOrderByRecordDateAsc(String meterLocation, final Pageable pageable);
+
+    List<EnergyRecord> findByMeterLocationAndRecordDate(String meterLocation, Date recordDate);
 }

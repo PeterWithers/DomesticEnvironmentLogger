@@ -33,6 +33,11 @@ public class DataViewController {
     @Autowired
     EnergyRecordRepository energyRecordRepository;
 
+    @RequestMapping("/")
+    public String getRoot(Model model) {
+        return "redirect:/monitor/charts";
+    }
+
     @RequestMapping("/monitor")
     public String getChart(Model model) {
         return "dataviewer";
@@ -136,7 +141,7 @@ public class DataViewController {
         model.addAttribute("energyDataE4", getGraphPointList("E4", pageRequest, linear, startDate, endDate));
         return "energyviewer";
     }
-
+/*
     @RequestMapping("/monitor/energy/insertdata")
     public String insertData(Model model) {
         dataRecordRepository.save(new DataRecord(12.0f, 16.0f, 5.0f, "testdata", null, new Date(2017 - 1900, 0, 1)));
@@ -222,4 +227,5 @@ public class DataViewController {
         energyRecordRepository.save(new EnergyRecord("W3a", 659.390015, new Date(1488258000000l)));
         return "redirect:/monitor/energy";
     }
+*/
 }

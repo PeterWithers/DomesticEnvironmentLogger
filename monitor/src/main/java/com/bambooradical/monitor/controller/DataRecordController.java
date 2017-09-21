@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -51,6 +52,50 @@ public class DataRecordController {
         final EnergyRecord energyRecord = new EnergyRecord(meterLocation, meterValue, readingDate);
         energyRecordRepository.save(energyRecord);
         return energyRecordRepository.findAll();
+    }
+
+/*    @RequestMapping("/addList")
+    public long addRecordList(@RequestBody List<DataRecord> recordList) {
+        dataRecordRepository.save(recordList);
+        return dataRecordRepository.count();
+    }
+
+    @RequestMapping("/addEnergyList")
+    public long addEnergyRecordList(@RequestBody List<EnergyRecord> energyRecordList) {
+        energyRecordRepository.save(energyRecordList);
+        return energyRecordRepository.count();
+    }*/
+
+    @RequestMapping("/addList")
+    public String addRecordList(@RequestBody List<DataRecord> recordList) {
+        final long numberOfExisting = dataRecordRepository.count();
+        for (long currentIndex = numberOfExisting; currentIndex < recordList.size() && currentIndex < (numberOfExisting + 1000); currentIndex++) {
+            DataRecord dataRecord = recordList.get((int) currentIndex);
+         //for (DataRecord dataRecord : recordList) {
+            final List<DataRecord> existingRecords = dataRecordRepository.findByLocationAndRecordDate(dataRecord.getLocation(), dataRecord.getRecordDate());
+            while (existingRecords.size() > 1) {
+                dataRecordRepository.delete(existingRecords.remove(0));
+            }
+            if (existingRecords.isEmpty()) {
+                dataRecordRepository.save(dataRecord);
+            }
+        }
+//        return "Found " + dataRecordRepository.count() + " DataRecords";
+        return "Found " + dataRecordRepository.count() + " DataRecords out of " + recordList.size() + " uploaded";
+    }
+
+    @RequestMapping("/addEnergyList")
+    public String addEnergyRecordList(@RequestBody List<EnergyRecord> energyRecordList) {
+        for (EnergyRecord energyRecord : energyRecordList) {
+            final List<EnergyRecord> existingRecords = energyRecordRepository.findByMeterLocationAndRecordDate(energyRecord.getMeterLocation(), energyRecord.getRecordDate());
+            while (existingRecords.size() > 1) {
+                energyRecordRepository.delete(existingRecords.remove(0));
+            }
+            if (existingRecords.isEmpty()) {
+                energyRecordRepository.save(energyRecord);
+            }
+        }
+        return "Found " + energyRecordRepository.count() + " EnergyRecords";
     }
 
     @RequestMapping("/list")

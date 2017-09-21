@@ -17,5 +17,7 @@ public interface DataRecordRepository extends JpaRepository<DataRecord, Long> {
 
     List<DataRecord> findByLocationStartsWithIgnoreCaseOrderByRecordDateAsc(String location, final Pageable pageable);
 
+    List<DataRecord> findByLocationAndRecordDate(String location, Date recordDate);
+
     List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate);
 }
