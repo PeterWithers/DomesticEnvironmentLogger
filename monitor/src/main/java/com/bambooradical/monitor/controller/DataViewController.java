@@ -132,6 +132,7 @@ public class DataViewController {
         model.addAttribute("temperatureData1", getTemperatureArray("s", startDate, endDate));
         model.addAttribute("temperatureData2", getTemperatureArray("te", startDate, endDate));
         model.addAttribute("temperatureData3", getTemperatureArray("th", startDate, endDate));
+        model.addAttribute("temperatureData4", getTemperatureArray("aqu", startDate, endDate));
         model.addAttribute("energyDataG3a", getGraphPointList("G3a", pageRequest, linear, startDate, endDate));
         model.addAttribute("energyDataG4", getGraphPointList("G4", pageRequest, linear, startDate, endDate));
         model.addAttribute("energyDataW3", getGraphPointList("W3", pageRequest, linear, startDate, endDate));

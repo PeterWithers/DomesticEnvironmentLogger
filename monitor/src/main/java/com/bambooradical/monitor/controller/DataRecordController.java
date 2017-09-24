@@ -54,7 +54,7 @@ public class DataRecordController {
         return energyRecordRepository.findAll();
     }
 
-/*    @RequestMapping("/addList")
+    /*    @RequestMapping("/addList")
     public long addRecordList(@RequestBody List<DataRecord> recordList) {
         dataRecordRepository.save(recordList);
         return dataRecordRepository.count();
@@ -71,7 +71,7 @@ public class DataRecordController {
         final long numberOfExisting = dataRecordRepository.count();
         for (long currentIndex = numberOfExisting; currentIndex < recordList.size() && currentIndex < (numberOfExisting + 1000); currentIndex++) {
             DataRecord dataRecord = recordList.get((int) currentIndex);
-         //for (DataRecord dataRecord : recordList) {
+            //for (DataRecord dataRecord : recordList) {
             final List<DataRecord> existingRecords = dataRecordRepository.findByLocationAndRecordDate(dataRecord.getLocation(), dataRecord.getRecordDate());
             while (existingRecords.size() > 1) {
                 dataRecordRepository.delete(existingRecords.remove(0));
@@ -335,6 +335,18 @@ public class DataRecordController {
                 + "            pointHoverBorderColor: \"rgba(75, 192, 192, 1)\","
                 + "            data: "
                 + getTemperatureArray("th", startDate, endDate)
+                + "        },"
+                + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'Temperature 4',\n"
+                + "            backgroundColor: \"rgba(75, 92, 192, 0.2)\",\n"
+                + "            borderColor: \"rgba(75, 92, 192, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(75, 92, 192, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(75, 92, 192, 1)\","
+                + "            data: "
+                + getTemperatureArray("aqu", startDate, endDate)
                 + "        }"
                 + "]\n"
                 + "    },\n"
@@ -392,6 +404,17 @@ public class DataRecordController {
                 + "            pointHoverBorderColor: \"rgba(75, 192, 192, 1)\","
                 + "            data: "
                 + getHumidityArray("th", startDate, endDate)
+                + "        },"
+                + "{\n"
+                + "            label: 'Humidity 4',\n"
+                + "            backgroundColor: \"rgba(75, 92, 192, 0.2)\",\n"
+                + "            borderColor: \"rgba(75, 92, 192, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(75, 92, 192, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(75, 92, 192, 1)\","
+                + "            data: "
+                + getHumidityArray("aqu", startDate, endDate)
                 + "        }"
                 + "]\n"
                 + "    },\n"
