@@ -68,7 +68,7 @@ public class DataRecordController {
     
     @RequestMapping("/addList")
     public String addRecordList(@RequestBody List<DataRecord> recordList, @RequestParam(value = "start", required = false, defaultValue = "0") int startRecord) {
-        for (long currentIndex = (startRecord * 10000); currentIndex < recordList.size() && currentIndex < ((startRecord * 10000) + 10000); currentIndex++) {
+        for (long currentIndex = (startRecord * 1000); currentIndex < recordList.size() && currentIndex < ((startRecord * 1000) + 1000); currentIndex++) {
             DataRecord dataRecord = recordList.get((int) currentIndex);
             //for (DataRecord dataRecord : recordList) {
             final List<DataRecord> existingRecords = dataRecordRepository.findByLocationAndRecordDate(dataRecord.getLocation(), dataRecord.getRecordDate());
