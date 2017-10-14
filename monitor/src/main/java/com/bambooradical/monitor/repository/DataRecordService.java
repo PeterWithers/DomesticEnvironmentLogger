@@ -111,7 +111,7 @@ public class DataRecordService {
                     (float) currentEntity.getDouble("Voltage"),
                     currentEntity.getString("Location"),
                     currentEntity.getString("Error"),
-                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 100L)));
+                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
         }
         return resultList;
     }
@@ -136,7 +136,7 @@ public class DataRecordService {
                         (float) currentEntity.getDouble("Humidity"),
                         (float) currentEntity.getDouble("Voltage"), meterLocation,
                         currentEntity.getString("Error"),
-                        new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 100L)));
+                        new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
             }
         }
         return resultList;
