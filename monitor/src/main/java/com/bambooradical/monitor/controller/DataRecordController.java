@@ -73,8 +73,8 @@ public class DataRecordController {
         return energyRecordRepository.count();
     }*/
     @RequestMapping("/addList")
-    public String addRecordList(@RequestBody List<DataRecord> recordList, @RequestParam(value = "start", required = false, defaultValue = "0") int startRecord) {
-        for (long currentIndex = (startRecord * 1000); currentIndex < recordList.size() && currentIndex < ((startRecord * 1000) + 1000); currentIndex++) {
+    public String addRecordList(@RequestBody List<DataRecord> recordList, @RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
+        for (long currentIndex = (startRecord * recordsToDo); currentIndex < recordList.size() && currentIndex < ((startRecord * recordsToDo) + recordsToDo); currentIndex++) {
             DataRecord dataRecord = recordList.get((int) currentIndex);
             //for (DataRecord dataRecord : recordList) {
             final List<DataRecord> existingRecords = dataRecordService.findByLocationAndRecordDate(dataRecord.getLocation(), dataRecord.getRecordDate());
