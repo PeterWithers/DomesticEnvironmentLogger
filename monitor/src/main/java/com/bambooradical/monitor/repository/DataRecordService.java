@@ -13,12 +13,14 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -59,7 +61,16 @@ public class DataRecordService {
     }
 
     public long count() {
-        throw new UnsupportedOperationException();
+        long resultCount = 0;
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("DataRecord")
+                .build();
+        QueryResults<Entity> results = datastore.run(query);
+        while (results.hasNext()) {
+            results.next();
+            resultCount++;
+        }
+        return resultCount;
     }
 
     public Entity save(DataRecord dataRecord) {
@@ -80,15 +91,54 @@ public class DataRecordService {
         datastore.delete(key);
     }
 
-    public List<DataRecord> findByLocationStartsWithIgnoreCaseOrderByRecordDateAsc(String location, final Pageable pageable) {
-        throw new UnsupportedOperationException();
-    }
-
+//    public List<DataRecord> findByLocationStartsWithIgnoreCaseOrderByRecordDateAsc(String location, final Pageable pageable) {
+//        throw new UnsupportedOperationException();
+//    }
     public List<DataRecord> findByLocationAndRecordDate(String location, Date recordDate) {
-        throw new UnsupportedOperationException();
+        List<DataRecord> resultList = new ArrayList<>();
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("DataRecord")
+                .setFilter(CompositeFilter.and(
+                        PropertyFilter.eq("MeterLocation", location),
+                        PropertyFilter.eq("RecordDate", Timestamp.of(recordDate))))
+                .build();
+        QueryResults<Entity> results = datastore.run(query);
+        while (results.hasNext()) {
+            Entity currentEntity = results.next();
+            resultList.add(new DataRecord(
+                    (float) currentEntity.getDouble("Temperature"),
+                    (float) currentEntity.getDouble("Humidity"),
+                    (float) currentEntity.getDouble("Voltage"),
+                    currentEntity.getString("MeterLocation"),
+                    currentEntity.getString("Error"),
+                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 100L)));
+        }
+        return resultList;
     }
 
     public List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate) {
-        throw new UnsupportedOperationException();
+        List<DataRecord> resultList = new ArrayList<>();
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("DataRecord")
+                .setFilter(CompositeFilter.and(
+                        PropertyFilter.ge("RecordDate", Timestamp.of(startDate)),
+                        PropertyFilter.le("RecordDate", Timestamp.of(endDate))
+                ))
+                .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
+                .build();
+        QueryResults<Entity> results = datastore.run(query);
+        while (results.hasNext()) {
+            Entity currentEntity = results.next();
+            final String meterLocation = currentEntity.getString("MeterLocation");
+            if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
+                resultList.add(new DataRecord(
+                        (float) currentEntity.getDouble("Temperature"),
+                        (float) currentEntity.getDouble("Humidity"),
+                        (float) currentEntity.getDouble("Voltage"), meterLocation,
+                        currentEntity.getString("Error"),
+                        new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 100L)));
+            }
+        }
+        return resultList;
     }
 }
