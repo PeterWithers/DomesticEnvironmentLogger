@@ -13,6 +13,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -43,7 +44,6 @@ public class EnergyRecordService {
         List<EnergyRecord> resultList = new ArrayList<>();
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("EnergyRecord")
-                //                .setFilter(PropertyFilter.eq("RemoteAddress", "x"))
                 .build();
         QueryResults<Entity> results = datastore.run(query);
         while (results.hasNext()) {
@@ -57,7 +57,16 @@ public class EnergyRecordService {
     }
 
     public long count() {
-        throw new UnsupportedOperationException();
+        long resultCount = 0;
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("EnergyRecord")
+                .build();
+        QueryResults<Entity> results = datastore.run(query);
+        while (results.hasNext()) {
+            results.next();
+            resultCount++;
+        }
+        return resultCount;
     }
 
     public Entity save(EnergyRecord energyRecord) {
@@ -82,6 +91,7 @@ public class EnergyRecordService {
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("EnergyRecord")
                 .setFilter(PropertyFilter.eq("MeterLocation", meterLocation))
+                .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
                 .build();
         QueryResults<Entity> results = datastore.run(query);
         while (results.hasNext()) {
