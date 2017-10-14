@@ -13,6 +13,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
+import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -76,10 +77,38 @@ public class EnergyRecordService {
     }
 
     public List<EnergyRecord> findByMeterLocationOrderByRecordDateAsc(String meterLocation, final Pageable pageable) {
-        throw new UnsupportedOperationException();
+        // todo: handle Pageable values
+        List<EnergyRecord> resultList = new ArrayList<>();
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("EnergyRecord")
+                .setFilter(PropertyFilter.eq("MeterLocation", meterLocation))
+                .build();
+        QueryResults<Entity> results = datastore.run(query);
+        while (results.hasNext()) {
+            Entity currentEntity = results.next();
+            resultList.add(new EnergyRecord(
+                    currentEntity.getString("MeterLocation"),
+                    currentEntity.getDouble("MeterValue"),
+                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 100L)));
+        }
+        return resultList;
     }
 
     public List<EnergyRecord> findByMeterLocationAndRecordDate(String meterLocation, Date recordDate) {
-        throw new UnsupportedOperationException();
+        List<EnergyRecord> resultList = new ArrayList<>();
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("EnergyRecord")
+                .setFilter(PropertyFilter.eq("MeterLocation", meterLocation))
+                .setFilter(PropertyFilter.eq("RecordDate", Timestamp.of(recordDate)))
+                .build();
+        QueryResults<Entity> results = datastore.run(query);
+        while (results.hasNext()) {
+            Entity currentEntity = results.next();
+            resultList.add(new EnergyRecord(
+                    currentEntity.getString("MeterLocation"),
+                    currentEntity.getDouble("MeterValue"),
+                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 100L)));
+        }
+        return resultList;
     }
 }
