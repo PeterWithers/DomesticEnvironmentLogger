@@ -7,8 +7,8 @@ import com.bambooradical.monitor.model.DataRecord;
 import com.bambooradical.monitor.model.EnergyRecord;
 import com.bambooradical.monitor.model.GraphPoint;
 import com.bambooradical.monitor.model.RecordPoint;
-import com.bambooradical.monitor.repository.DataRecordRepository;
-import com.bambooradical.monitor.repository.EnergyRecordRepository;
+import com.bambooradical.monitor.repository.DataRecordService;
+import com.bambooradical.monitor.repository.EnergyRecordService;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -29,9 +29,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class DataViewController {
 
     @Autowired
-    DataRecordRepository dataRecordRepository;
+    DataRecordService dataRecordRepository;
     @Autowired
-    EnergyRecordRepository energyRecordRepository;
+    EnergyRecordService energyRecordRepository;
 
     @RequestMapping("/")
     public String getRoot(Model model) {
