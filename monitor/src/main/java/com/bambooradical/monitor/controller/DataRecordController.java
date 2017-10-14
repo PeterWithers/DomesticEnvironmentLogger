@@ -6,7 +6,9 @@ package com.bambooradical.monitor.controller;
 import com.bambooradical.monitor.model.DataRecord;
 import com.bambooradical.monitor.model.EnergyRecord;
 import com.bambooradical.monitor.repository.DataRecordRepository;
+import com.bambooradical.monitor.repository.DataRecordService;
 import com.bambooradical.monitor.repository.EnergyRecordRepository;
+import com.bambooradical.monitor.repository.EnergyRecordService;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -29,6 +31,10 @@ public class DataRecordController {
     DataRecordRepository dataRecordRepository;
     @Autowired
     EnergyRecordRepository energyRecordRepository;
+    @Autowired
+    DataRecordService dataRecordService;
+    @Autowired
+    EnergyRecordService energyRecordService;
 
     @RequestMapping("/add")
     public DataRecord addRecord(
@@ -40,6 +46,7 @@ public class DataRecordController {
     ) {
         final DataRecord dataRecord = new DataRecord(temperature, humidity, voltage, location, error, new Date());
         dataRecordRepository.save(dataRecord);
+        dataRecordService.save(dataRecord);
         return dataRecord;
     }
 
@@ -65,36 +72,35 @@ public class DataRecordController {
         energyRecordRepository.save(energyRecordList);
         return energyRecordRepository.count();
     }*/
-    
     @RequestMapping("/addList")
     public String addRecordList(@RequestBody List<DataRecord> recordList, @RequestParam(value = "start", required = false, defaultValue = "0") int startRecord) {
         for (long currentIndex = (startRecord * 1000); currentIndex < recordList.size() && currentIndex < ((startRecord * 1000) + 1000); currentIndex++) {
             DataRecord dataRecord = recordList.get((int) currentIndex);
             //for (DataRecord dataRecord : recordList) {
-            final List<DataRecord> existingRecords = dataRecordRepository.findByLocationAndRecordDate(dataRecord.getLocation(), dataRecord.getRecordDate());
+            final List<DataRecord> existingRecords = dataRecordService.findByLocationAndRecordDate(dataRecord.getLocation(), dataRecord.getRecordDate());
             while (existingRecords.size() > 1) {
-                dataRecordRepository.delete(existingRecords.remove(0));
+                dataRecordService.delete(existingRecords.remove(0));
             }
             if (existingRecords.isEmpty()) {
-                dataRecordRepository.save(dataRecord);
+                dataRecordService.save(dataRecord);
             }
         }
-//        return "Found " + dataRecordRepository.count() + " DataRecords";
-        return "Found " + dataRecordRepository.count() + " DataRecords out of " + recordList.size() + " uploaded";
+//        return "Found " + dataRecordService.count() + " DataRecords";
+        return "Found " + dataRecordService.count() + " DataRecords out of " + recordList.size() + " uploaded";
     }
 
     @RequestMapping("/addEnergyList")
     public String addEnergyRecordList(@RequestBody List<EnergyRecord> energyRecordList) {
         for (EnergyRecord energyRecord : energyRecordList) {
-            final List<EnergyRecord> existingRecords = energyRecordRepository.findByMeterLocationAndRecordDate(energyRecord.getMeterLocation(), energyRecord.getRecordDate());
+            final List<EnergyRecord> existingRecords = energyRecordService.findByMeterLocationAndRecordDate(energyRecord.getMeterLocation(), energyRecord.getRecordDate());
             while (existingRecords.size() > 1) {
-                energyRecordRepository.delete(existingRecords.remove(0));
+                energyRecordService.delete(existingRecords.remove(0));
             }
             if (existingRecords.isEmpty()) {
-                energyRecordRepository.save(energyRecord);
+                energyRecordService.save(energyRecord);
             }
         }
-        return "Found " + energyRecordRepository.count() + " EnergyRecords";
+        return "Found " + energyRecordService.count() + " EnergyRecords";
     }
 
     @RequestMapping("/list")
@@ -110,7 +116,7 @@ public class DataRecordController {
     private String getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder temperatureBuilder = new StringBuilder();
         temperatureBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
+        for (final DataRecord record : dataRecordService.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
             final Float temperature = record.getTemperature();
             if (temperature != null) {
                 temperatureBuilder.append("{ x: ");
@@ -127,7 +133,7 @@ public class DataRecordController {
     private String getHumidityArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder humidityBuilder = new StringBuilder();
         humidityBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
+        for (final DataRecord record : dataRecordService.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
             final Float humidity = record.getHumidity();
             if (humidity != null) {
                 humidityBuilder.append("{ x: ");
@@ -144,7 +150,7 @@ public class DataRecordController {
     private String getVoltageArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder voltageBuilder = new StringBuilder();
         voltageBuilder.append("[\n");
-        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
+        for (final DataRecord record : dataRecordService.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
             if (record.getVoltage() < 100) { //@todo: remove this < once the invalid data is removed
                 voltageBuilder.append("{ x: ");
                 voltageBuilder.append(record.getRecordDate().getTime());
@@ -163,7 +169,7 @@ public class DataRecordController {
                 + "        type: \"line\",\n"
                 + "xValueType: \"dateTime\","
                 + "        dataPoints: [\n");
-        for (final DataRecord record : dataRecordRepository.findAll()) {
+        for (final DataRecord record : dataRecordService.findAll()) {
             voltageBuilder.append("{ x: ");
             voltageBuilder.append(record.getRecordDate().getTime());
             voltageBuilder.append(", y: ");
@@ -182,7 +188,7 @@ public class DataRecordController {
                 + "        type: \"line\",\n"
                 + "xValueType: \"dateTime\","
                 + "        dataPoints: [\n");
-        for (final DataRecord record : dataRecordRepository.findAll()) {
+        for (final DataRecord record : dataRecordService.findAll()) {
             humidityBuilder.append("{ x: ");
             humidityBuilder.append(record.getRecordDate().getTime());
             humidityBuilder.append(", y: ");
@@ -201,7 +207,7 @@ public class DataRecordController {
                 + "        type: \"line\",\n"
                 + "xValueType: \"dateTime\","
                 + "        dataPoints: [\n");
-        for (final DataRecord record : dataRecordRepository.findAll()) {
+        for (final DataRecord record : dataRecordService.findAll()) {
             temperatureBuilder.append("{ x: ");
             temperatureBuilder.append(record.getRecordDate().getTime());
             temperatureBuilder.append(", y: ");
