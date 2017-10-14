@@ -99,7 +99,7 @@ public class EnergyRecordService {
             resultList.add(new EnergyRecord(
                     currentEntity.getString("MeterLocation"),
                     currentEntity.getDouble("MeterValue"),
-                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 100L)));
+                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
         }
         return resultList;
     }
@@ -117,7 +117,7 @@ public class EnergyRecordService {
             resultList.add(new EnergyRecord(
                     currentEntity.getString("MeterLocation"),
                     currentEntity.getDouble("MeterValue"),
-                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 100L)));
+                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
         }
         return resultList;
     }
