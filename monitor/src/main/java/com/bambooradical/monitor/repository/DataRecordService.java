@@ -53,7 +53,7 @@ public class DataRecordService {
                     (float) currentEntity.getDouble("Temperature"),
                     (float) currentEntity.getDouble("Humidity"),
                     (float) currentEntity.getDouble("Voltage"),
-                    currentEntity.getString("MeterLocation"),
+                    currentEntity.getString("Location"),
                     currentEntity.getString("Error"),
                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 100L)));
         }
@@ -99,7 +99,7 @@ public class DataRecordService {
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("DataRecord")
                 .setFilter(CompositeFilter.and(
-                        PropertyFilter.eq("MeterLocation", location),
+                        PropertyFilter.eq("Location", location),
                         PropertyFilter.eq("RecordDate", Timestamp.of(recordDate))))
                 .build();
         QueryResults<Entity> results = datastore.run(query);
@@ -109,7 +109,7 @@ public class DataRecordService {
                     (float) currentEntity.getDouble("Temperature"),
                     (float) currentEntity.getDouble("Humidity"),
                     (float) currentEntity.getDouble("Voltage"),
-                    currentEntity.getString("MeterLocation"),
+                    currentEntity.getString("Location"),
                     currentEntity.getString("Error"),
                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 100L)));
         }
@@ -129,7 +129,7 @@ public class DataRecordService {
         QueryResults<Entity> results = datastore.run(query);
         while (results.hasNext()) {
             Entity currentEntity = results.next();
-            final String meterLocation = currentEntity.getString("MeterLocation");
+            final String meterLocation = currentEntity.getString("Location");
             if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
                 resultList.add(new DataRecord(
                         (float) currentEntity.getDouble("Temperature"),
