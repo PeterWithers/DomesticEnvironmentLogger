@@ -84,7 +84,7 @@ public class DataRecordController {
                 dataRecordService.save(dataRecord);
             }
         }
-        return "Found " + dataRecordService.count() + " DataRecords out of " + dataRecordRepository.count() + " uploaded<br/><a href=\"?start=" + startRecord + 1 + "&count=" + recordsToDo + "\">next</a>";
+        return "Found " + dataRecordService.count() + " DataRecords out of " + dataRecordRepository.count() + " uploaded<br/><a href=\"?start=" + (startRecord + 1) + "&count=" + recordsToDo + "\">next</a>";
     }
 
     @RequestMapping("/migrateEnergy")
@@ -93,11 +93,14 @@ public class DataRecordController {
         final Page<EnergyRecord> recordsToMigrate = energyRecordRepository.findAll(pageRequest);
         for (EnergyRecord energyRecord : recordsToMigrate) {
             final List<EnergyRecord> existingEnergy = energyRecordService.findByMeterLocationAndRecordDate(energyRecord.getMeterLocation(), energyRecord.getRecordDate());
+//            while (existingEnergy.size() > 1) {
+//                energyRecordService.delete(existingEnergy.remove(0));
+//            }
             if (existingEnergy.isEmpty()) {
                 energyRecordService.save(energyRecord);
             }
         }
-        return "Found " + energyRecordService.count() + " EnergyRecords out of " + energyRecordRepository.count() + " uploaded<br/><a href=\"?start=" + startRecord + 1 + "&count=" + recordsToDo + "\">next</a>";
+        return "Found " + energyRecordService.count() + " EnergyRecords out of " + energyRecordRepository.count() + " uploaded<br/><a href=\"?start=" + (startRecord + 1) + "&count=" + recordsToDo + "\">next</a>";
     }
 
     @RequestMapping("/addList")
