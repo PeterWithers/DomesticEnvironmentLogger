@@ -50,8 +50,8 @@ public class DataRecordService {
         while (results.hasNext()) {
             Entity currentEntity = results.next();
             resultList.add(new DataRecord(
-                    (float) currentEntity.getDouble("Temperature"),
-                    (float) currentEntity.getDouble("Humidity"),
+                    (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                    (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
                     (float) currentEntity.getDouble("Voltage"),
                     currentEntity.getString("Location"),
                     currentEntity.getString("Error"),
@@ -75,11 +75,18 @@ public class DataRecordService {
 
     public Entity save(DataRecord dataRecord) {
         IncompleteKey key = keyFactory.setKind("DataRecord").newKey();
-        FullEntity entity = FullEntity.newBuilder(key)
+        final Float humidity = dataRecord.getHumidity();
+        final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
+        if (humidity != null) {
+            builder.set("Humidity", humidity);
+        }
+        final Float temperature = dataRecord.getTemperature();
+        if (temperature != null) {
+            builder.set("Temperature", temperature);
+        }
+        FullEntity entity = builder
                 .set("Error", dataRecord.getError())
-                .set("Humidity", dataRecord.getHumidity())
                 .set("Location", dataRecord.getLocation())
-                .set("Temperature", dataRecord.getTemperature())
                 .set("Voltage", dataRecord.getVoltage())
                 .set("RecordDate", Timestamp.of(dataRecord.getRecordDate()))
                 .build();
@@ -106,8 +113,8 @@ public class DataRecordService {
         while (results.hasNext()) {
             Entity currentEntity = results.next();
             resultList.add(new DataRecord(
-                    (float) currentEntity.getDouble("Temperature"),
-                    (float) currentEntity.getDouble("Humidity"),
+                    (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                    (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
                     (float) currentEntity.getDouble("Voltage"),
                     currentEntity.getString("Location"),
                     currentEntity.getString("Error"),
@@ -132,8 +139,8 @@ public class DataRecordService {
             final String meterLocation = currentEntity.getString("Location");
             if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
                 resultList.add(new DataRecord(
-                        (float) currentEntity.getDouble("Temperature"),
-                        (float) currentEntity.getDouble("Humidity"),
+                        (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                        (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
                         (float) currentEntity.getDouble("Voltage"), meterLocation,
                         currentEntity.getString("Error"),
                         new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
