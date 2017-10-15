@@ -13,7 +13,6 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
-import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import java.util.ArrayList;
 import java.util.Date;
@@ -91,7 +90,7 @@ public class EnergyRecordService {
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("EnergyRecord")
                 .setFilter(PropertyFilter.eq("MeterLocation", meterLocation))
-                .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
+                //.addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
                 .build();
         QueryResults<Entity> results = datastore.run(query);
         while (results.hasNext()) {
@@ -101,6 +100,9 @@ public class EnergyRecordService {
                     currentEntity.getDouble("MeterValue"),
                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
         }
+        resultList.sort((EnergyRecord o1, EnergyRecord o2) -> {
+            return o1.getRecordDate().compareTo(o2.getRecordDate());
+        });
         return resultList;
     }
 
