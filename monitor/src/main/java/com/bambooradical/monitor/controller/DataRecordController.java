@@ -76,15 +76,17 @@ public class DataRecordController {
     }*/
     @RequestMapping("/migrateRecords")
     public String migrateRecords(@RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
+        int addedCounter = 0;
         final PageRequest pageRequest = new PageRequest(startRecord, recordsToDo);
         final Page<DataRecord> recordsToMigrate = dataRecordRepository.findAll(pageRequest);
         for (DataRecord dataRecord : recordsToMigrate) {
             final List<DataRecord> existingRecords = dataRecordService.findByLocationAndRecordDate(dataRecord.getLocation(), dataRecord.getRecordDate());
             if (existingRecords.isEmpty()) {
                 dataRecordService.save(dataRecord);
+                addedCounter++;
             }
         }
-        return "Found " + dataRecordService.count() + " DataRecords out of " + dataRecordRepository.count() + " uploaded<br/><a href=\"?start=" + (startRecord + 1) + "&count=" + recordsToDo + "\">next</a>";
+        return "Added " + addedCounter + " DataRecords<br/><a href=\"?start=" + (startRecord + 1) + "&count=" + recordsToDo + "\">next</a>";
     }
 
     @RequestMapping("/migrateEnergy")
