@@ -13,6 +13,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -72,6 +74,32 @@ public class DataRecordController {
         energyRecordRepository.save(energyRecordList);
         return energyRecordRepository.count();
     }*/
+    @RequestMapping("/migrateRecords")
+    public String migrateRecords(@RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
+        final PageRequest pageRequest = new PageRequest(startRecord, recordsToDo);
+        final Page<DataRecord> recordsToMigrate = dataRecordRepository.findAll(pageRequest);
+        for (DataRecord dataRecord : recordsToMigrate) {
+            final List<DataRecord> existingRecords = dataRecordService.findByLocationAndRecordDate(dataRecord.getLocation(), dataRecord.getRecordDate());
+            if (existingRecords.isEmpty()) {
+                dataRecordService.save(dataRecord);
+            }
+        }
+        return "Found " + dataRecordService.count() + " DataRecords out of " + dataRecordRepository.count() + " uploaded<br/><a href=\"?start=" + startRecord + 1 + "&count=" + recordsToDo + "\">next</a>";
+    }
+
+    @RequestMapping("/migrateEnergy")
+    public String migrateEnergy(@RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
+        final PageRequest pageRequest = new PageRequest(startRecord, recordsToDo);
+        final Page<EnergyRecord> recordsToMigrate = energyRecordRepository.findAll(pageRequest);
+        for (EnergyRecord energyRecord : recordsToMigrate) {
+            final List<EnergyRecord> existingEnergy = energyRecordService.findByMeterLocationAndRecordDate(energyRecord.getMeterLocation(), energyRecord.getRecordDate());
+            if (existingEnergy.isEmpty()) {
+                energyRecordService.save(energyRecord);
+            }
+        }
+        return "Found " + energyRecordService.count() + " EnergyRecords out of " + energyRecordRepository.count() + " uploaded<br/><a href=\"?start=" + startRecord + 1 + "&count=" + recordsToDo + "\">next</a>";
+    }
+
     @RequestMapping("/addList")
     public String addRecordList(@RequestBody List<DataRecord> recordList, @RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
         for (long currentIndex = (startRecord * recordsToDo); currentIndex < recordList.size() && currentIndex < ((startRecord * recordsToDo) + recordsToDo); currentIndex++) {
