@@ -264,11 +264,14 @@ public class DataRecordService {
         } else {
             LocalDate start = new LocalDate(startDate);
             LocalDate end = new LocalDate(endDate);
+            int insertedDays = 0;
             for (LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
                 String dateKey = date.toString("yyyy-MM-dd");
                 if (!findDailyPeeks(location, dateKey, resultList)) {
-                    insertDailyPeeks(location, dateKey, date, resultList);
-                    break; // only insert one days data at a time
+                    if (insertedDays < 1) { // only insert only one days data in one request
+                        insertDailyPeeks(location, dateKey, date, resultList);
+                        insertedDays++;
+                    }
                 }
             }
         }
