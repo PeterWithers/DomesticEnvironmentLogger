@@ -129,7 +129,7 @@ public class DataRecordService {
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("DataRecord")
                 .setFilter(CompositeFilter.and(
-                        PropertyFilter.eq("Location", location),
+                        //                        PropertyFilter.eq("Location", location),
                         PropertyFilter.ge("RecordDate", Timestamp.of(date.toDate())),
                         PropertyFilter.le("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
                 )).build();
@@ -140,39 +140,42 @@ public class DataRecordService {
         DataRecord maxTemperatureRecord = null;
         while (results.hasNext()) {
             Entity currentEntity = results.next();
-            DataRecord currentRecord = new DataRecord(
-                    (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
-                    (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
-                    (float) currentEntity.getDouble("Voltage"),
-                    currentEntity.getString("Location"),
-                    currentEntity.getString("Error"),
-                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
-            if (currentRecord.getHumidity() != null) {
-                if (minHumidityRecord == null) {
-                    minHumidityRecord = currentRecord;
+            final String meterLocation = currentEntity.getString("Location");
+            if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
+                DataRecord currentRecord = new DataRecord(
+                        (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                        (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
+                        (float) currentEntity.getDouble("Voltage"),
+                        currentEntity.getString("Location"),
+                        currentEntity.getString("Error"),
+                        new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
+                if (currentRecord.getHumidity() != null) {
+                    if (minHumidityRecord == null) {
+                        minHumidityRecord = currentRecord;
+                    }
+                    if (maxHumidityRecord == null) {
+                        maxHumidityRecord = currentRecord;
+                    }
+                    if (minHumidityRecord.getHumidity() > currentRecord.getHumidity()) {
+                        minHumidityRecord = currentRecord;
+                    }
+                    if (maxHumidityRecord.getHumidity() < currentRecord.getHumidity()) {
+                        maxHumidityRecord = currentRecord;
+                    }
                 }
-                if (maxHumidityRecord == null) {
-                    maxHumidityRecord = currentRecord;
-                }
-                if (minHumidityRecord.getHumidity() > currentRecord.getHumidity()) {
-                    minHumidityRecord = currentRecord;
-                }
-                if (maxHumidityRecord.getHumidity() < currentRecord.getHumidity()) {
-                    maxHumidityRecord = currentRecord;
-                }
-            }
-            if (currentRecord.getTemperature() != null) {
-                if (minTemperatureRecord == null) {
-                    minTemperatureRecord = currentRecord;
-                }
-                if (maxTemperatureRecord == null) {
-                    maxTemperatureRecord = currentRecord;
-                }
-                if (minTemperatureRecord.getTemperature() > currentRecord.getTemperature()) {
-                    minTemperatureRecord = currentRecord;
-                }
-                if (maxTemperatureRecord.getTemperature() < currentRecord.getTemperature()) {
-                    maxTemperatureRecord = currentRecord;
+                if (currentRecord.getTemperature() != null) {
+                    if (minTemperatureRecord == null) {
+                        minTemperatureRecord = currentRecord;
+                    }
+                    if (maxTemperatureRecord == null) {
+                        maxTemperatureRecord = currentRecord;
+                    }
+                    if (minTemperatureRecord.getTemperature() > currentRecord.getTemperature()) {
+                        minTemperatureRecord = currentRecord;
+                    }
+                    if (maxTemperatureRecord.getTemperature() < currentRecord.getTemperature()) {
+                        maxTemperatureRecord = currentRecord;
+                    }
                 }
             }
         }
@@ -195,7 +198,7 @@ public class DataRecordService {
                 }
                 FullEntity entity = builder
                         .set("Error", currentRecord.getError())
-                        .set("Location", currentRecord.getLocation())
+                        .set("Location", location) //currentRecord.getLocation()) // insert the short location so that it can be directly used in the query
                         .set("Voltage", currentRecord.getVoltage())
                         .set("RecordDate", Timestamp.of(currentRecord.getRecordDate()))
                         .set("RecordDay", dateKey)
@@ -237,7 +240,6 @@ public class DataRecordService {
             Query<Entity> query = Query.newEntityQueryBuilder()
                     .setKind("DataRecord")
                     .setFilter(CompositeFilter.and(
-                            PropertyFilter.eq("Location", location),
                             PropertyFilter.ge("RecordDate", Timestamp.of(startDate)),
                             PropertyFilter.le("RecordDate", Timestamp.of(endDate))
                     ))
