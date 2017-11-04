@@ -179,6 +179,9 @@ public class DataRecordService {
                 }
             }
         }
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String dateToday = formatter.format(new Date());
+        boolean isToday = dateKey.equals(dateToday);
         for (DataRecord currentRecord : new DataRecord[]{
             minHumidityRecord,
             maxHumidityRecord,
@@ -186,24 +189,26 @@ public class DataRecordService {
             maxTemperatureRecord}) {
             if (currentRecord != null) {
                 resultList.add(currentRecord);
-                IncompleteKey key = keyFactory.setKind("DataRecordPeek").newKey();
-                final Float humidity = currentRecord.getHumidity();
-                final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
-                if (humidity != null) {
-                    builder.set("Humidity", humidity);
+                if (!isToday) {
+                    IncompleteKey key = keyFactory.setKind("DataRecordPeek").newKey();
+                    final Float humidity = currentRecord.getHumidity();
+                    final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
+                    if (humidity != null) {
+                        builder.set("Humidity", humidity);
+                    }
+                    final Float temperature = currentRecord.getTemperature();
+                    if (temperature != null) {
+                        builder.set("Temperature", temperature);
+                    }
+                    FullEntity entity = builder
+                            .set("Error", currentRecord.getError())
+                            .set("Location", location) //currentRecord.getLocation()) // insert the short location so that it can be directly used in the query
+                            .set("Voltage", currentRecord.getVoltage())
+                            .set("RecordDate", Timestamp.of(currentRecord.getRecordDate()))
+                            .set("RecordDay", dateKey)
+                            .build();
+                    datastore.put(entity);
                 }
-                final Float temperature = currentRecord.getTemperature();
-                if (temperature != null) {
-                    builder.set("Temperature", temperature);
-                }
-                FullEntity entity = builder
-                        .set("Error", currentRecord.getError())
-                        .set("Location", location) //currentRecord.getLocation()) // insert the short location so that it can be directly used in the query
-                        .set("Voltage", currentRecord.getVoltage())
-                        .set("RecordDate", Timestamp.of(currentRecord.getRecordDate()))
-                        .set("RecordDay", dateKey)
-                        .build();
-                datastore.put(entity);
             }
         }
     }
