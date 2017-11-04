@@ -16,10 +16,12 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.annotation.PostConstruct;
+import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -123,27 +125,147 @@ public class DataRecordService {
         return resultList;
     }
 
-    public List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate) {
-        List<DataRecord> resultList = new ArrayList<>();
+    public void insertDailyPeeks(String location, String dateKey, LocalDate date, List<DataRecord> resultList) {
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("DataRecord")
                 .setFilter(CompositeFilter.and(
-                        PropertyFilter.ge("RecordDate", Timestamp.of(startDate)),
-                        PropertyFilter.le("RecordDate", Timestamp.of(endDate))
-                ))
-                .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
-                .build();
+                        PropertyFilter.eq("Location", location),
+                        PropertyFilter.ge("RecordDate", Timestamp.of(date.toDate())),
+                        PropertyFilter.le("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
+                )).build();
         QueryResults<Entity> results = datastore.run(query);
+        DataRecord minHumidityRecord = null;
+        DataRecord maxHumidityRecord = null;
+        DataRecord minTemperatureRecord = null;
+        DataRecord maxTemperatureRecord = null;
         while (results.hasNext()) {
             Entity currentEntity = results.next();
-            final String meterLocation = currentEntity.getString("Location");
-            if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
-                resultList.add(new DataRecord(
-                        (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
-                        (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
-                        (float) currentEntity.getDouble("Voltage"), meterLocation,
-                        currentEntity.getString("Error"),
-                        new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
+            DataRecord currentRecord = new DataRecord(
+                    (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                    (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
+                    (float) currentEntity.getDouble("Voltage"),
+                    currentEntity.getString("Location"),
+                    currentEntity.getString("Error"),
+                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
+            if (currentRecord.getHumidity() != null) {
+                if (minHumidityRecord == null) {
+                    minHumidityRecord = currentRecord;
+                }
+                if (maxHumidityRecord == null) {
+                    maxHumidityRecord = currentRecord;
+                }
+                if (minHumidityRecord.getHumidity() > currentRecord.getHumidity()) {
+                    minHumidityRecord = currentRecord;
+                }
+                if (maxHumidityRecord.getHumidity() < currentRecord.getHumidity()) {
+                    maxHumidityRecord = currentRecord;
+                }
+            }
+            if (currentRecord.getTemperature() != null) {
+                if (minTemperatureRecord == null) {
+                    minTemperatureRecord = currentRecord;
+                }
+                if (maxTemperatureRecord == null) {
+                    maxTemperatureRecord = currentRecord;
+                }
+                if (minTemperatureRecord.getTemperature() > currentRecord.getTemperature()) {
+                    minTemperatureRecord = currentRecord;
+                }
+                if (maxTemperatureRecord.getTemperature() < currentRecord.getTemperature()) {
+                    maxTemperatureRecord = currentRecord;
+                }
+            }
+        }
+        for (DataRecord currentRecord : new DataRecord[]{
+            minHumidityRecord,
+            maxHumidityRecord,
+            minTemperatureRecord,
+            maxTemperatureRecord}) {
+            if (currentRecord != null) {
+                resultList.add(currentRecord);
+                IncompleteKey key = keyFactory.setKind("DataRecordPeek").newKey();
+                final Float humidity = currentRecord.getHumidity();
+                final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
+                if (humidity != null) {
+                    builder.set("Humidity", humidity);
+                }
+                final Float temperature = currentRecord.getTemperature();
+                if (temperature != null) {
+                    builder.set("Temperature", temperature);
+                }
+                FullEntity entity = builder
+                        .set("Error", currentRecord.getError())
+                        .set("Location", currentRecord.getLocation())
+                        .set("Voltage", currentRecord.getVoltage())
+                        .set("RecordDate", Timestamp.of(currentRecord.getRecordDate()))
+                        .set("RecordDay", dateKey)
+                        .build();
+                datastore.put(entity);
+            }
+        }
+    }
+
+    public boolean findDailyPeeks(String location, String dateKey, List<DataRecord> resultList) {
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("DataRecordPeek")
+                .setFilter(CompositeFilter.and(
+                        PropertyFilter.eq("Location", location),
+                        PropertyFilter.eq("RecordDay", dateKey)))
+                .build();
+        QueryResults<Entity> results = datastore.run(query);
+        if (!results.hasNext()) {
+            return false;
+        }
+        while (results.hasNext()) {
+            Entity currentEntity = results.next();
+            resultList.add(new DataRecord(
+                    (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                    (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
+                    (float) currentEntity.getDouble("Voltage"),
+                    currentEntity.getString("Location"),
+                    currentEntity.getString("Error"),
+                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
+        }
+        return true;
+    }
+
+    public List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate) {
+        // if the date range is greater than three days, then use min max records
+        int daysBetween = (int) ((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+        List<DataRecord> resultList = new ArrayList<>();
+        if (daysBetween < 7) {
+            Query<Entity> query = Query.newEntityQueryBuilder()
+                    .setKind("DataRecord")
+                    .setFilter(CompositeFilter.and(
+                            PropertyFilter.eq("Location", location),
+                            PropertyFilter.ge("RecordDate", Timestamp.of(startDate)),
+                            PropertyFilter.le("RecordDate", Timestamp.of(endDate))
+                    ))
+                    .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
+                    .build();
+            QueryResults<Entity> results = datastore.run(query);
+            while (results.hasNext()) {
+                Entity currentEntity = results.next();
+                final String meterLocation = currentEntity.getString("Location");
+                if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
+                    resultList.add(new DataRecord(
+                            (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                            (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
+                            (float) currentEntity.getDouble("Voltage"), meterLocation,
+                            currentEntity.getString("Error"),
+                            new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
+                }
+            }
+        } else {
+            LocalDate start = new LocalDate(startDate);
+            LocalDate end = new LocalDate(endDate);
+            for (LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                String dateKey = formatter.format(date);
+                if (!findDailyPeeks(location, dateKey, resultList)) {
+                    insertDailyPeeks(location, dateKey, date, resultList);
+                    break; // only insert one days data at a time
+                }
             }
         }
         return resultList;
