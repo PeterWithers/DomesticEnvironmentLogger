@@ -60,6 +60,7 @@ public class DataRecordController {
     ) {
         final EnergyRecord energyRecord = new EnergyRecord(meterLocation, meterValue, readingDate);
         energyRecordRepository.save(energyRecord);
+        energyRecordService.save(energyRecord);
         return energyRecordRepository.findAll();
     }
 
