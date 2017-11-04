@@ -18,7 +18,9 @@ import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.PostConstruct;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -211,19 +213,19 @@ public class DataRecordService {
         }
     }
 
-    public boolean findDailyPeeks(String location, String dateKey, List<DataRecord> resultList) {
+    public Set<String> findDailyPeeks(String location, Date startDate, Date endDate, List<DataRecord> resultList) {
+        Set<String> dateKeys = new HashSet<>();
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("DataRecordPeek")
                 .setFilter(CompositeFilter.and(
                         PropertyFilter.eq("Location", location),
-                        PropertyFilter.eq("RecordDay", dateKey)))
+                        PropertyFilter.ge("RecordDate", Timestamp.of(startDate)),
+                        PropertyFilter.le("RecordDate", Timestamp.of(endDate))))
                 .build();
         QueryResults<Entity> results = datastore.run(query);
-        if (!results.hasNext()) {
-            return false;
-        }
         while (results.hasNext()) {
             Entity currentEntity = results.next();
+            dateKeys.add(currentEntity.getString("RecordDay"));
             resultList.add(new DataRecord(
                     (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
                     (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
@@ -232,7 +234,7 @@ public class DataRecordService {
                     currentEntity.getString("Error"),
                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
         }
-        return true;
+        return dateKeys;
     }
 
     public List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate) {
@@ -265,9 +267,10 @@ public class DataRecordService {
             LocalDate start = new LocalDate(startDate);
             LocalDate end = new LocalDate(endDate);
             int insertedDays = 0;
+            final Set<String> dateKeys = findDailyPeeks(location, startDate, endDate, resultList);
             for (LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
                 String dateKey = date.toString("yyyy-MM-dd");
-                if (!findDailyPeeks(location, dateKey, resultList)) {
+                if (!dateKeys.contains(dateKey)) {
                     if (insertedDays < 1) { // only insert only one days data in one request
                         insertDailyPeeks(location, dateKey, date, resultList);
                         insertedDays++;
