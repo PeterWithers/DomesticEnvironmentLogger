@@ -183,15 +183,17 @@ public class DataRecordService {
         String dateToday = new LocalDate().toString("yyyy-MM-dd");
         boolean isToday = dateKey.equals(dateToday);
         if (minHumidityRecord == null && maxHumidityRecord == null && minTemperatureRecord == null && maxTemperatureRecord == null) {
-            IncompleteKey key = keyFactory.setKind("DataRecordPeek").newKey();
-            final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
-            FullEntity entity = builder
-                    .set("NoRecords", true)
-                    .set("Location", location) //currentRecord.getLocation()) // insert the short location so that it can be directly used in the query
-                    .set("RecordDate", Timestamp.of(date.toDate()))
-                    .set("RecordDay", dateKey)
-                    .build();
-            datastore.put(entity);
+            if (!isToday) {
+                IncompleteKey key = keyFactory.setKind("DataRecordPeek").newKey();
+                final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
+                FullEntity entity = builder
+                        .set("NoRecords", true)
+                        .set("Location", location) //currentRecord.getLocation()) // insert the short location so that it can be directly used in the query
+                        .set("RecordDate", Timestamp.of(date.toDate()))
+                        .set("RecordDay", dateKey)
+                        .build();
+                datastore.put(entity);
+            }
         } else {
             for (DataRecord currentRecord : new DataRecord[]{
                 minHumidityRecord,
