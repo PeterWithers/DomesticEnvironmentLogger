@@ -132,7 +132,7 @@ public class DataRecordService {
                 .setFilter(CompositeFilter.and(
                         //                        PropertyFilter.eq("Location", location),
                         PropertyFilter.ge("RecordDate", Timestamp.of(date.toDate())),
-                        PropertyFilter.le("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
+                        PropertyFilter.lt("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
                 )).build();
         QueryResults<Entity> results = datastore.run(query);
         DataRecord minHumidityRecord = null;
