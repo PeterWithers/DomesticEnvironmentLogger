@@ -218,21 +218,24 @@ public class DataRecordService {
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("DataRecordPeek")
                 .setFilter(CompositeFilter.and(
-                        PropertyFilter.eq("Location", location),
+                        //                        PropertyFilter.eq("Location", location),
                         PropertyFilter.ge("RecordDate", Timestamp.of(startDate)),
                         PropertyFilter.le("RecordDate", Timestamp.of(endDate))))
                 .build();
         QueryResults<Entity> results = datastore.run(query);
         while (results.hasNext()) {
             Entity currentEntity = results.next();
-            dateKeys.add(currentEntity.getString("RecordDay"));
-            resultList.add(new DataRecord(
-                    (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
-                    (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
-                    (float) currentEntity.getDouble("Voltage"),
-                    currentEntity.getString("Location"),
-                    currentEntity.getString("Error"),
-                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
+            final String meterLocation = currentEntity.getString("Location");
+            if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
+                dateKeys.add(currentEntity.getString("RecordDay"));
+                resultList.add(new DataRecord(
+                        (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                        (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
+                        (float) currentEntity.getDouble("Voltage"),
+                        currentEntity.getString("Location"),
+                        currentEntity.getString("Error"),
+                        new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
+            }
         }
         return dateKeys;
     }
