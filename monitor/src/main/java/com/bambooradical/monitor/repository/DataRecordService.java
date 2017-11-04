@@ -16,7 +16,6 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -179,8 +178,7 @@ public class DataRecordService {
                 }
             }
         }
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-        String dateToday = formatter.format(new Date());
+        String dateToday = new LocalDate().toString("yyyy-MM-dd");
         boolean isToday = dateKey.equals(dateToday);
         for (DataRecord currentRecord : new DataRecord[]{
             minHumidityRecord,
@@ -267,8 +265,7 @@ public class DataRecordService {
             LocalDate start = new LocalDate(startDate);
             LocalDate end = new LocalDate(endDate);
             for (LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
-                String dateKey = formatter.format(date);
+                String dateKey = date.toString("yyyy-MM-dd");
                 if (!findDailyPeeks(location, dateKey, resultList)) {
                     insertDailyPeeks(location, dateKey, date, resultList);
                     break; // only insert one days data at a time
