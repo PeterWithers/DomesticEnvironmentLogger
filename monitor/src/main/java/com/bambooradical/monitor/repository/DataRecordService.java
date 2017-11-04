@@ -272,6 +272,7 @@ public class DataRecordService {
                 }
             }
         }
+        resultList.sort((DataRecord o1, DataRecord o2) -> o1.getRecordDate().compareTo(o2.getRecordDate()));
         return resultList;
     }
 }
