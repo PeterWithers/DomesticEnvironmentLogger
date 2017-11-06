@@ -113,6 +113,39 @@ public class DataViewController {
         return returnList;
     }
 
+    private List<RecordPoint> getHumidityArray(final String sensorLocation, Date startDate, Date endDate) {
+        List<RecordPoint> returnList = new ArrayList<>();
+        DataRecord recordMin = null;
+        DataRecord recordMax = null;
+        long currentTime = startDate.getTime();
+        int maxPoints = 100;
+        long timePerPoints = (endDate.getTime() - startDate.getTime()) / maxPoints;
+        for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
+            recordMin = (recordMin == null) ? record : recordMin;
+            recordMax = (recordMax == null) ? record : recordMax;
+            if (record.getRecordDate().getTime() > currentTime + timePerPoints) {
+                currentTime = record.getRecordDate().getTime();
+                if (recordMin.getHumidity() != null) {
+                    returnList.add(new RecordPoint(recordMin.getRecordDate().getTime(), recordMin.getHumidity()));
+                }
+                if (recordMax.getHumidity() != null) {
+                    returnList.add(0, new RecordPoint(recordMax.getRecordDate().getTime(), recordMax.getHumidity()));
+                }
+                recordMin = record;
+                recordMax = record;
+            }
+            final Float humidity = record.getHumidity();
+            if (humidity != null) {
+                recordMin = (recordMin.getHumidity() == null || recordMin.getHumidity() > record.getHumidity()) ? record : recordMin;
+                recordMax = (recordMax.getHumidity() == null || recordMax.getHumidity() < record.getHumidity()) ? record : recordMax;
+            }
+        }
+        if (!returnList.isEmpty()) {
+            returnList.add(returnList.get(0)); // close the shape
+        }
+        return returnList;
+    }
+
     @RequestMapping("/monitor/energy")
     public String getEnergy(Model model, @RequestParam(value = "linear", required = false, defaultValue = "false") boolean linear,
             @RequestParam(value = "add", required = false, defaultValue = "false") boolean addEnergy,
@@ -133,6 +166,10 @@ public class DataViewController {
         model.addAttribute("temperatureData2", getTemperatureArray("te", startDate, endDate));
         model.addAttribute("temperatureData3", getTemperatureArray("th", startDate, endDate));
         model.addAttribute("temperatureData4", getTemperatureArray("aqu", startDate, endDate));
+        model.addAttribute("humidityData1", getHumidityArray("s", startDate, endDate));
+        model.addAttribute("humidityData2", getHumidityArray("te", startDate, endDate));
+        model.addAttribute("humidityData3", getHumidityArray("th", startDate, endDate));
+        model.addAttribute("humidityData4", getHumidityArray("aqu", startDate, endDate));
         model.addAttribute("energyDataG3a", getGraphPointList("G3a", pageRequest, linear, startDate, endDate));
         model.addAttribute("energyDataG4", getGraphPointList("G4", pageRequest, linear, startDate, endDate));
         model.addAttribute("energyDataW3", getGraphPointList("W3", pageRequest, linear, startDate, endDate));
@@ -142,7 +179,7 @@ public class DataViewController {
         model.addAttribute("energyDataE4", getGraphPointList("E4", pageRequest, linear, startDate, endDate));
         return "energyviewer";
     }
-/*
+    /*
     @RequestMapping("/monitor/energy/insertdata")
     public String insertData(Model model) {
         dataRecordRepository.save(new DataRecord(12.0f, 16.0f, 5.0f, "testdata", null, new Date(2017 - 1900, 0, 1)));
@@ -228,5 +265,5 @@ public class DataViewController {
         energyRecordRepository.save(new EnergyRecord("W3a", 659.390015, new Date(1488258000000l)));
         return "redirect:/monitor/energy";
     }
-*/
+     */
 }
