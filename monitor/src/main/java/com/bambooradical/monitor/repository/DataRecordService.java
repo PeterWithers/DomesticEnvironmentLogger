@@ -38,6 +38,7 @@ public class DataRecordService {
     private KeyFactory keyFactory;
 
     private static final HashMap<String, ArrayList<DataRecord>> DAILY_PEEKS = new HashMap<>();
+    private static final HashMap<String, DataRecord> LATEST_RECORDS = new HashMap<>();
 
     @PostConstruct
     public void initializeKeyFactories() {
@@ -94,6 +95,7 @@ public class DataRecordService {
                 .set("Voltage", dataRecord.getVoltage())
                 .set("RecordDate", Timestamp.of(dataRecord.getRecordDate()))
                 .build();
+        LATEST_RECORDS.put(dataRecord.getLocation(), dataRecord);
         return datastore.put(entity);
     }
 
@@ -278,6 +280,13 @@ public class DataRecordService {
                 }
             } else {
                 resultList.addAll(DAILY_PEEKS.get(dateKey + "_" + location));
+            }
+        }
+        if (endDate.isAfter(new LocalDate().minusDays(1))) {
+            for (String lastRecordLocation : LATEST_RECORDS.keySet()) {
+                if (lastRecordLocation.toLowerCase().startsWith(location.toLowerCase())) {
+                    resultList.add(LATEST_RECORDS.get(lastRecordLocation));
+                }
             }
         }
     }
