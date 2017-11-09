@@ -101,17 +101,16 @@ public class DataViewController {
                 }
                 recordMin = record;
                 recordMax = record;
-            } else if (record.getTemperature() != null) {
-                if (returnList.isEmpty()) {
-                    // make sure the first record is included
-                    returnList.add(new RecordPoint(record.getRecordDate().getTime(), record.getTemperature()));
-                }
-                recordLast = record;
             }
             final Float temperature = record.getTemperature();
             if (temperature != null) {
                 recordMin = (recordMin.getTemperature() == null || recordMin.getTemperature() > record.getTemperature()) ? record : recordMin;
                 recordMax = (recordMax.getTemperature() == null || recordMax.getTemperature() < record.getTemperature()) ? record : recordMax;
+                if (returnList.isEmpty()) {
+                    // make sure the first record is included
+                    returnList.add(new RecordPoint(record.getRecordDate().getTime(), record.getTemperature()));
+                }
+                recordLast = record;
             }
         }
         if (recordLast != null) {
@@ -145,17 +144,16 @@ public class DataViewController {
                 }
                 recordMin = record;
                 recordMax = record;
-            } else if (record.getHumidity() != null) {
-                if (returnList.isEmpty()) {
-                    // make sure the first record is included
-                    returnList.add(new RecordPoint(record.getRecordDate().getTime(), record.getHumidity()));
-                }
-                recordLast = record;
             }
             final Float humidity = record.getHumidity();
             if (humidity != null) {
                 recordMin = (recordMin.getHumidity() == null || recordMin.getHumidity() > record.getHumidity()) ? record : recordMin;
                 recordMax = (recordMax.getHumidity() == null || recordMax.getHumidity() < record.getHumidity()) ? record : recordMax;
+                if (returnList.isEmpty()) {
+                    // make sure the first record is included
+                    returnList.add(new RecordPoint(record.getRecordDate().getTime(), record.getHumidity()));
+                }
+                recordLast = record;
             }
         }
         if (recordLast != null) {
