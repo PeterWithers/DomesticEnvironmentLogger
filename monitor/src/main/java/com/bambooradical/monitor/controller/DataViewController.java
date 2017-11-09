@@ -87,6 +87,7 @@ public class DataViewController {
         long currentTime = startDate.getTime();
         int maxPoints = 100;
         long timePerPoints = (endDate.getTime() - startDate.getTime()) / maxPoints;
+        DataRecord recordLast = null;
         for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
             recordMin = (recordMin == null) ? record : recordMin;
             recordMax = (recordMax == null) ? record : recordMax;
@@ -100,12 +101,22 @@ public class DataViewController {
                 }
                 recordMin = record;
                 recordMax = record;
+            } else if (record.getTemperature() != null) {
+                if (returnList.isEmpty()) {
+                    // make sure the first record is included
+                    returnList.add(new RecordPoint(record.getRecordDate().getTime(), record.getTemperature()));
+                }
+                recordLast = record;
             }
             final Float temperature = record.getTemperature();
             if (temperature != null) {
                 recordMin = (recordMin.getTemperature() == null || recordMin.getTemperature() > record.getTemperature()) ? record : recordMin;
                 recordMax = (recordMax.getTemperature() == null || recordMax.getTemperature() < record.getTemperature()) ? record : recordMax;
             }
+        }
+        if (recordLast != null) {
+            // make sure the last record is included
+            returnList.add(new RecordPoint(recordLast.getRecordDate().getTime(), recordLast.getTemperature()));
         }
         if (!returnList.isEmpty()) {
             returnList.add(returnList.get(0)); // close the shape
@@ -120,6 +131,7 @@ public class DataViewController {
         long currentTime = startDate.getTime();
         int maxPoints = 100;
         long timePerPoints = (endDate.getTime() - startDate.getTime()) / maxPoints;
+        DataRecord recordLast = null;
         for (final DataRecord record : dataRecordRepository.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
             recordMin = (recordMin == null) ? record : recordMin;
             recordMax = (recordMax == null) ? record : recordMax;
@@ -133,12 +145,22 @@ public class DataViewController {
                 }
                 recordMin = record;
                 recordMax = record;
+            } else if (record.getHumidity() != null) {
+                if (returnList.isEmpty()) {
+                    // make sure the first record is included
+                    returnList.add(new RecordPoint(record.getRecordDate().getTime(), record.getHumidity()));
+                }
+                recordLast = record;
             }
             final Float humidity = record.getHumidity();
             if (humidity != null) {
                 recordMin = (recordMin.getHumidity() == null || recordMin.getHumidity() > record.getHumidity()) ? record : recordMin;
                 recordMax = (recordMax.getHumidity() == null || recordMax.getHumidity() < record.getHumidity()) ? record : recordMax;
             }
+        }
+        if (recordLast != null) {
+            // make sure the last record is included
+            returnList.add(new RecordPoint(recordLast.getRecordDate().getTime(), recordLast.getHumidity()));
         }
         if (!returnList.isEmpty()) {
             returnList.add(returnList.get(0)); // close the shape
