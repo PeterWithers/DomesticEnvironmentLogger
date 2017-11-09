@@ -18,9 +18,8 @@ import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import javax.annotation.PostConstruct;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +36,8 @@ public class DataRecordService {
     Datastore datastore;
 
     private KeyFactory keyFactory;
+
+    private static final HashMap<String, ArrayList<DataRecord>> DAILY_PEEKS = new HashMap<>();
 
     @PostConstruct
     public void initializeKeyFactories() {
@@ -193,8 +194,11 @@ public class DataRecordService {
                         .set("RecordDay", dateKey)
                         .build();
                 datastore.put(entity);
+                DAILY_PEEKS.put(dateKey + "_" + location, new ArrayList<>());
             }
         } else {
+            final ArrayList<DataRecord> arrayDataRecord = new ArrayList<>();
+            DAILY_PEEKS.put(dateKey + "_" + location, arrayDataRecord);
             for (DataRecord currentRecord : new DataRecord[]{
                 minHumidityRecord,
                 maxHumidityRecord,
@@ -221,40 +225,63 @@ public class DataRecordService {
                                 .set("RecordDay", dateKey)
                                 .build();
                         datastore.put(entity);
+                        arrayDataRecord.add(currentRecord);
                     }
                 }
             }
         }
     }
 
-    public Set<String> findDailyPeeks(String location, Date startDate, Date endDate, List<DataRecord> resultList) {
-        Set<String> dateKeys = new HashSet<>();
-        Query<Entity> query = Query.newEntityQueryBuilder()
-                .setKind("DataRecordPeek")
-                .setFilter(CompositeFilter.and(
-                        //                        PropertyFilter.eq("Location", location),
-                        PropertyFilter.ge("RecordDate", Timestamp.of(startDate)),
-                        PropertyFilter.le("RecordDate", Timestamp.of(endDate))))
-                .build();
-        QueryResults<Entity> results = datastore.run(query);
-        while (results.hasNext()) {
-            Entity currentEntity = results.next();
-            final String meterLocation = currentEntity.getString("Location");
-            if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
-                dateKeys.add(currentEntity.getString("RecordDay"));
+    public void findDailyPeeks(String location, LocalDate startDate, LocalDate endDate, List<DataRecord> resultList) {
+//    public Set<String> findDailyPeeks(String location, Date startDate, Date endDate, List<DataRecord> resultList) {
+//        Set<String> dateKeys = new HashSet<>();
+        if (DAILY_PEEKS.isEmpty()) {
+            Query<Entity> query = Query.newEntityQueryBuilder()
+                    .setKind("DataRecordPeek")
+                    //                .setFilter(CompositeFilter.and(
+                    //                        //                        PropertyFilter.eq("Location", location),
+                    //                        PropertyFilter.ge("RecordDate", Timestamp.of(startDate)),
+                    //                        PropertyFilter.le("RecordDate", Timestamp.of(endDate))))
+                    .build();
+            QueryResults<Entity> results = datastore.run(query);
+            while (results.hasNext()) {
+                Entity currentEntity = results.next();
+                final String meterLocation = currentEntity.getString("Location");
+//                if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
+//                    dateKeys.add(currentEntity.getString("RecordDay"));
+                ArrayList<DataRecord> arrayDataRecord = DAILY_PEEKS.get(currentEntity.getString("RecordDay") + "_" + meterLocation);
+                if (arrayDataRecord == null) {
+                    arrayDataRecord = new ArrayList<>();
+                    DAILY_PEEKS.put(currentEntity.getString("RecordDay") + "_" + meterLocation, arrayDataRecord);
+                }
                 if (!currentEntity.contains("NoRecords")) {
-                    resultList.add(new DataRecord(
+                    arrayDataRecord.add(new DataRecord(
                             (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
                             (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
                             (float) currentEntity.getDouble("Voltage"),
                             currentEntity.getString("Location"),
                             currentEntity.getString("Error"),
                             new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
+//                } else {
+//                    DAILY_PEEKS.put(currentEntity.getString("RecordDay") + "_" + meterLocation, null);
                 }
+//                }
             }
         }
-        return dateKeys;
+        int insertedDays = 0;
+        for (LocalDate date = startDate; date.isBefore(endDate); date = date.plusDays(1)) {
+            String dateKey = date.toString("yyyy-MM-dd");
+            if (!DAILY_PEEKS.containsKey(dateKey + "_" + location)) {
+                if (insertedDays < 3) { // only insert only 3 days data in one request
+                    insertDailyPeeks(location, dateKey, date, resultList);
+                    insertedDays++;
+                }
+            } else {
+                resultList.addAll(DAILY_PEEKS.get(dateKey + "_" + location));
+            }
+        }
     }
+    //    public HashMap<DataRecord> findByRecordDateBetweenOrderByRecordDateAsc(String[] locations, Date startDate, Date endDate) {
 
     public List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate) {
         // if the date range is greater than three days, then use min max records
@@ -285,17 +312,7 @@ public class DataRecordService {
         } else {
             LocalDate start = new LocalDate(startDate);
             LocalDate end = new LocalDate(endDate);
-            int insertedDays = 0;
-            final Set<String> dateKeys = findDailyPeeks(location, startDate, endDate, resultList);
-            for (LocalDate date = start; date.isBefore(end); date = date.plusDays(1)) {
-                String dateKey = date.toString("yyyy-MM-dd");
-                if (!dateKeys.contains(dateKey)) {
-                    if (insertedDays < 3) { // only insert only 3 days data in one request
-                        insertDailyPeeks(location, dateKey, date, resultList);
-                        insertedDays++;
-                    }
-                }
-            }
+            findDailyPeeks(location, start, end, resultList);
         }
         resultList.sort((DataRecord o1, DataRecord o2) -> o1.getRecordDate().compareTo(o2.getRecordDate()));
         return resultList;
