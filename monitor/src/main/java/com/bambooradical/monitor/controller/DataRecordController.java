@@ -549,6 +549,8 @@ public class DataRecordController {
                 + "<br/>"
                 + "<a href=\"energy?add=true\">add energy</a>"
                 + "<br/>"
+                + "<a href=\"import?startDate=20171116\">import weather</a>"
+                + "<br/>"
                 + "<a href=\"listEnergy\">energy JSON</a>"
                 + "<br/>"
                 + pagebleMenu

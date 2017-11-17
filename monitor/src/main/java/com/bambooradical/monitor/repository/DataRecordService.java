@@ -78,6 +78,24 @@ public class DataRecordService {
         return resultCount;
     }
 
+    public Entity save(final String location, final Timestamp timestamp, final Float temperature, final Float humidity, final String keyString) {
+        Key key = keyFactory.setKind("DataRecord").newKey(keyString);
+        final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
+        if (humidity != null) {
+            builder.set("Humidity", humidity);
+        }
+        if (temperature != null) {
+            builder.set("Temperature", temperature);
+        }
+        FullEntity entity = builder
+                .set("Location", location)
+                .set("RecordDate", timestamp)
+                .set("Voltage", 0.0f)
+                .set("Error", "")
+                .build();
+        return datastore.put(entity);
+    }
+
     public Entity save(DataRecord dataRecord) {
         IncompleteKey key = keyFactory.setKind("DataRecord").newKey();
         final Float humidity = dataRecord.getHumidity();

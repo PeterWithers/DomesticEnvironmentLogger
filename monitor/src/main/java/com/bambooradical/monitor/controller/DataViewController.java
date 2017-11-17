@@ -190,6 +190,8 @@ public class DataViewController {
         model.addAttribute("humidityData2", getHumidityArray("te", startDate, endDate));
         model.addAttribute("humidityData3", getHumidityArray("th", startDate, endDate));
         model.addAttribute("humidityData4", getHumidityArray("aqu", startDate, endDate));
+        model.addAttribute("temperatureDeelen", getTemperatureArray("Deele", startDate, endDate));
+        model.addAttribute("humidityDeelen", getHumidityArray("Deele", startDate, endDate));
         model.addAttribute("energyDataG3a", getGraphPointList("G3a", pageRequest, linear, startDate, endDate));
         model.addAttribute("energyDataG4", getGraphPointList("G4", pageRequest, linear, startDate, endDate));
         model.addAttribute("energyDataW3", getGraphPointList("W3", pageRequest, linear, startDate, endDate));

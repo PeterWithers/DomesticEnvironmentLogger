@@ -23,6 +23,8 @@
                 var humidityData2 = /*[[${humidityData2}]]*/ [];
                 var humidityData3 = /*[[${humidityData3}]]*/ [];
                 var humidityData4 = /*[[${humidityData4}]]*/ [];
+                var temperatureDeelen = /*[[${temperatureDeelen}]]*/ [];
+                var humidityDeelen = /*[[${humidityDeelen}]]*/ [];
                 var energyDataG3a = /*[[${energyDataG3a}]]*/ [];
                 var energyDataG4 = /*[[${energyDataG4}]]*/ [];
                 var energyDataW3 = /*[[${energyDataW3}]]*/ [];
@@ -154,7 +156,23 @@
                                 pointBorderColor: "#fff",
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(75, 92, 192, 1)",
-                                data: humidityData4}]
+                                data: humidityData4}, {
+                                label: 'Temperature Deelen',
+                                backgroundColor: "rgba(100, 92, 192, 0.0)",
+                                borderColor: "rgba(100, 92, 192, 1)",
+                                pointBackgroundColor: "rgba(100, 92, 192, 1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(100, 92, 192, 1)",
+                                data: temperatureDeelen}, {
+                                label: 'Humidity Deelen',
+                                backgroundColor: "rgba(100, 92, 192, 0.0)",
+                                borderColor: "rgba(100, 92, 192, 1)",
+                                pointBackgroundColor: "rgba(75, 92, 192, 1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(75, 92, 192, 1)",
+                                data: humidityDeelen}]
                     },
                     options: {
                         bezierCurve: false,
@@ -251,3 +269,4 @@
         <!--<canvas id="temperatureContainer" width="800" height="400"></canvas>-->
     </body>
 </html>
+
