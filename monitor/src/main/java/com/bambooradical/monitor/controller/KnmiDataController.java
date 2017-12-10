@@ -77,7 +77,9 @@ public class KnmiDataController {
             }
         }
         bufferedReader.close();
+//        response.append("<br/><a href=\"/monitor/clear\">clear cache</a><br/>");
+        response.append("<br/><a href=\"/monitor/energy\">energy viewer</a><br/>");
+        dataRecordService.clearCachedData();
         return response.toString();
     }
 }
-

@@ -78,6 +78,11 @@ public class DataRecordService {
         return resultCount;
     }
 
+    public void clearCachedData() {
+        DAILY_PEEKS.clear();
+        LATEST_RECORDS.clear();
+    }
+
     public Entity save(final String location, final Timestamp timestamp, final Float temperature, final Float humidity, final String keyString) {
         Key key = keyFactory.setKind("DataRecord").newKey(keyString);
         final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);

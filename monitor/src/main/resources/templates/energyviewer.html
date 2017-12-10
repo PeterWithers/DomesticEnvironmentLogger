@@ -37,6 +37,7 @@
                     type: 'line',
                     data: {
                         datasets: [{
+                                hidden: true,
                                 label: 'G3a',
                                 backgroundColor: "rgba(179,181,198,0.2)",
                                 borderColor: "rgba(179,181,198,1)",
@@ -53,6 +54,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(179,151,198,1)",
                                 data: energyDataG4}, {
+                                hidden: true,
                                 label: 'W3',
                                 backgroundColor: "rgba(75, 192, 192, 0.2)",
                                 borderColor: "rgba(75, 192, 192, 1)",
@@ -61,6 +63,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(75, 192, 192, 1)",
                                 data: energyDataW3}, {
+                                hidden: true,
                                 label: 'W3a',
                                 backgroundColor: "rgba(75, 152, 192, 0.2)",
                                 borderColor: "rgba(75, 192, 152, 1)",
@@ -69,6 +72,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(75, 152, 192, 1)",
                                 data: energyDataW3a}, {
+                                hidden: true,
                                 label: 'W4',
                                 backgroundColor: "rgba(75, 192, 152, 0.2)",
                                 borderColor: "rgba(75, 192, 152, 1)",
@@ -77,6 +81,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(75, 192, 152, 1)",
                                 data: energyDataW4}, {
+                                hidden: true,
                                 label: 'E3a',
                                 backgroundColor: "rgba(255,99,132,0.2)",
                                 borderColor: "rgba(255,99,132,1)",
@@ -85,6 +90,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(255,99,132,1)",
                                 data: energyDataE3a}, {
+                                hidden: true,
                                 label: 'E4',
                                 backgroundColor: "rgba(255,129,132,0.2)",
                                 borderColor: "rgba(255,129,132,1)",
@@ -101,6 +107,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(179,181,198,1)",
                                 data: temperatureData1}, {
+                                hidden: true,
                                 label: 'Temperature 1',
                                 backgroundColor: "rgba(255,99,132,0.2)",
                                 borderColor: "rgba(255,99,132,1)",
@@ -109,6 +116,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(255,99,132,1)",
                                 data: temperatureData2}, {
+                                hidden: true,
                                 label: 'Temperature 3',
                                 backgroundColor: "rgba(75, 192, 192, 0.2)",
                                 borderColor: "rgba(75, 192, 192, 1)",
@@ -117,6 +125,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(75, 192, 192, 1)",
                                 data: temperatureData3}, {
+                                hidden: true,
                                 label: 'Temperature 4',
                                 backgroundColor: "rgba(75, 92, 192, 0.2)",
                                 borderColor: "rgba(75, 92, 192, 1)",
@@ -133,6 +142,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(179,181,198,1)",
                                 data: humidityData1}, {
+                                hidden: true,
                                 label: 'Humidity 1',
                                 backgroundColor: "rgba(255,99,132,0.2)",
                                 borderColor: "rgba(255,99,132,1)",
@@ -141,6 +151,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(255,99,132,1)",
                                 data: humidityData2}, {
+                                hidden: true,
                                 label: 'Humidity 3',
                                 backgroundColor: "rgba(75, 192, 192, 0.2)",
                                 borderColor: "rgba(75, 192, 192, 1)",
@@ -149,6 +160,7 @@
                                 pointHoverBackgroundColor: "#fff",
                                 pointHoverBorderColor: "rgba(75, 192, 192, 1)",
                                 data: humidityData3}, {
+                                hidden: true,
                                 label: 'Humidity 4',
                                 backgroundColor: "rgba(75, 92, 192, 0.2)",
                                 borderColor: "rgba(75, 92, 192, 1)",
@@ -261,9 +273,9 @@
             <br/>
         </form>
         <a th:href="@{energy(start=${startDay},span=${spanDays * 2},linear=${linear})}">zoom-</a>&nbsp;
-        <a th:href="@{energy(start=${startDay},span=${spanDays / 2},linear=${linear})}">zoom+</a>&nbsp;
+        <a th:href="@{energy(start=${startDay},span=${spanDays / 2},linear=${linear})}">zoom+</a><br/><br/>
         <a th:href="@{energy(start=${startDay - spanDays},span=${spanDays},linear=${linear})}">prev</a>&nbsp;
-        <a th:href="@{energy(start=${startDay + spanDays},span=${spanDays},linear=${linear})}">next</a><br/>
+        <a th:href="@{energy(start=${startDay + spanDays},span=${spanDays},linear=${linear})}">next</a><br/><br/>
         <a th:href="@{energy(start=${startDay},span=${spanDays},linear=${!linear})}" th:text="${(linear)?'difference':'linear'}"></a><br/>
         <canvas id="energyContainer" width="800" height="400"></canvas>
         <!--<canvas id="temperatureContainer" width="800" height="400"></canvas>-->
