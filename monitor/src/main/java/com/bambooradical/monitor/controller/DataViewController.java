@@ -119,8 +119,6 @@ public class DataViewController {
             returnList.add(new RecordPoint(recordMax.getRecordDate().getTime(), recordMax.getTemperature()));
             returnList.add(new RecordPoint(recordLast.getRecordDate().getTime(), recordLast.getTemperature()));
         }
-        }
-        }
         if (!returnList.isEmpty()) {
             returnList.add(returnList.get(0)); // close the shape
         }
