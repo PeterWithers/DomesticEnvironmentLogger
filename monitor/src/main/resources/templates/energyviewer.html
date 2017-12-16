@@ -32,11 +32,21 @@
                 var energyDataW4 = /*[[${energyDataW4}]]*/ [];
                 var energyDataE3a = /*[[${energyDataE3a}]]*/ [];
                 var energyDataE4 = /*[[${energyDataE4}]]*/ [];
+                var energyEuros = /*[[${energyEuros}]]*/ [];
                 var energyContainer = $("#energyContainer");
                 var energyChart = new Chart(energyContainer, {
                     type: 'line',
                     data: {
                         datasets: [{
+                                hidden: false,
+                                label: 'Euros',
+                                backgroundColor: "rgba(255,181,198,0.2)",
+                                borderColor: "rgba(255,181,198,1)",
+                                pointBackgroundColor: "rgba(255,181,198,1)",
+                                pointBorderColor: "#fff",
+                                pointHoverBackgroundColor: "#fff",
+                                pointHoverBorderColor: "rgba(255,181,198,1)",
+                                data: energyEuros}, {
                                 hidden: true,
                                 label: 'G3a',
                                 backgroundColor: "rgba(179,181,198,0.2)",
