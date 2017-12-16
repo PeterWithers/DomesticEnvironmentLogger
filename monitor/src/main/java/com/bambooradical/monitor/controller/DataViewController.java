@@ -43,14 +43,14 @@ public class DataViewController {
         return "dataviewer";
     }
 
-    private List<GraphPoint> getGraphPointList(String meterLocation, final Pageable pageable, final boolean linear, Date startDate, Date endDate) {
+    private List<GraphPoint> getGraphPointList(String meterLocation, final Pageable pageable, final boolean linear, Date startDate, Date endDate, final float pricePerUnit) {
         List<GraphPoint> workingList = new ArrayList<>();
         final List<EnergyRecord> meterLocationsRecords = energyRecordRepository.findByMeterLocationOrderByRecordDateAsc(meterLocation, pageable);
         EnergyRecord previousEnergyRecord = null;
         double offset = 0;
         for (EnergyRecord energyRecord : meterLocationsRecords) {
             if (previousEnergyRecord != null) {
-                final GraphPoint graphPoint = new GraphPoint(previousEnergyRecord, energyRecord, linear, offset);
+                final GraphPoint graphPoint = new GraphPoint(previousEnergyRecord, energyRecord, linear, offset, pricePerUnit);
                 if (!linear) {
                     workingList.add(new GraphPoint(previousEnergyRecord, graphPoint));
                 }
@@ -173,7 +173,10 @@ public class DataViewController {
     @RequestMapping("/monitor/energy")
     public String getEnergy(Model model, @RequestParam(value = "linear", required = false, defaultValue = "false") boolean linear,
             @RequestParam(value = "add", required = false, defaultValue = "false") boolean addEnergy,
-            @RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "256") int spanDays) {
+            @RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "256") int spanDays,
+            @RequestParam(value = "gppu", required = false, defaultValue = "1") float gasPricePerUnit,
+            @RequestParam(value = "eppu", required = false, defaultValue = "1") float electPricePerUnit,
+            @RequestParam(value = "wppu", required = false, defaultValue = "1") float waterPricePerUnit) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, startDay);
         Date endDate = calendar.getTime();
@@ -196,13 +199,13 @@ public class DataViewController {
         model.addAttribute("humidityData4", getHumidityArray("aqu", startDate, endDate));
         model.addAttribute("temperatureDeelen", getTemperatureArray("Deele", startDate, endDate));
         model.addAttribute("humidityDeelen", getHumidityArray("Deele", startDate, endDate));
-        model.addAttribute("energyDataG3a", getGraphPointList("G3a", pageRequest, linear, startDate, endDate));
-        model.addAttribute("energyDataG4", getGraphPointList("G4", pageRequest, linear, startDate, endDate));
-        model.addAttribute("energyDataW3", getGraphPointList("W3", pageRequest, linear, startDate, endDate));
-        model.addAttribute("energyDataW3a", getGraphPointList("W3a", pageRequest, linear, startDate, endDate));
-        model.addAttribute("energyDataW4", getGraphPointList("W4", pageRequest, linear, startDate, endDate));
-        model.addAttribute("energyDataE3a", getGraphPointList("E3a", pageRequest, linear, startDate, endDate));
-        model.addAttribute("energyDataE4", getGraphPointList("E4", pageRequest, linear, startDate, endDate));
+        model.addAttribute("energyDataG3a", getGraphPointList("G3a", pageRequest, linear, startDate, endDate, gasPricePerUnit));
+        model.addAttribute("energyDataG4", getGraphPointList("G4", pageRequest, linear, startDate, endDate, gasPricePerUnit));
+        model.addAttribute("energyDataW3", getGraphPointList("W3", pageRequest, linear, startDate, endDate, waterPricePerUnit));
+        model.addAttribute("energyDataW3a", getGraphPointList("W3a", pageRequest, linear, startDate, endDate, waterPricePerUnit));
+        model.addAttribute("energyDataW4", getGraphPointList("W4", pageRequest, linear, startDate, endDate, waterPricePerUnit));
+        model.addAttribute("energyDataE3a", getGraphPointList("E3a", pageRequest, linear, startDate, endDate, electPricePerUnit));
+        model.addAttribute("energyDataE4", getGraphPointList("E4", pageRequest, linear, startDate, endDate, electPricePerUnit));
         return "energyviewer";
     }
     /*

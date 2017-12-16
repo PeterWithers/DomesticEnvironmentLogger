@@ -23,10 +23,10 @@ public class GraphPoint {
         this.y = graphPoint.getY();
     }
 
-    public GraphPoint(EnergyRecord previousEnergyRecord, EnergyRecord currentEnergyRecord, final boolean linear, final double offset) {
+    public GraphPoint(EnergyRecord previousEnergyRecord, EnergyRecord currentEnergyRecord, final boolean linear, final double offset, final float pricePerUnit) {
         int daysBetween = (int) ((currentEnergyRecord.getRecordDate().getTime() - previousEnergyRecord.getRecordDate().getTime()) / (1000 * 60 * 60 * 24));
         this.x = currentEnergyRecord.getRecordDate().getTime();
-        this.y = (linear) ? currentEnergyRecord.getMeterValue() - offset : (currentEnergyRecord.getMeterValue() - previousEnergyRecord.getMeterValue()) / daysBetween;
+        this.y = ((linear) ? currentEnergyRecord.getMeterValue() - offset : (currentEnergyRecord.getMeterValue() - previousEnergyRecord.getMeterValue()) / daysBetween) * pricePerUnit;
     }
 
     public GraphPoint(long date, double value) {

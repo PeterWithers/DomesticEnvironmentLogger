@@ -32,21 +32,21 @@
                 var energyDataW4 = /*[[${energyDataW4}]]*/ [];
                 var energyDataE3a = /*[[${energyDataE3a}]]*/ [];
                 var energyDataE4 = /*[[${energyDataE4}]]*/ [];
-                var energyEuros = /*[[${energyEuros}]]*/ [];
+//                var energyEuros = /*[[${energyEuros}]]*/ [];
                 var energyContainer = $("#energyContainer");
                 var energyChart = new Chart(energyContainer, {
                     type: 'line',
                     data: {
                         datasets: [{
-                                hidden: false,
-                                label: 'Euros',
-                                backgroundColor: "rgba(255,181,198,0.2)",
-                                borderColor: "rgba(255,181,198,1)",
-                                pointBackgroundColor: "rgba(255,181,198,1)",
-                                pointBorderColor: "#fff",
-                                pointHoverBackgroundColor: "#fff",
-                                pointHoverBorderColor: "rgba(255,181,198,1)",
-                                data: energyEuros}, {
+//                                hidden: false,
+//                                label: 'Euros',
+//                                backgroundColor: "rgba(255,181,198,0.2)",
+//                                borderColor: "rgba(255,181,198,1)",
+//                                pointBackgroundColor: "rgba(255,181,198,1)",
+//                                pointBorderColor: "#fff",
+//                                pointHoverBackgroundColor: "#fff",
+//                                pointHoverBorderColor: "rgba(255,181,198,1)",
+//                                data: energyEuros}, {
                                 hidden: true,
                                 label: 'G3a',
                                 backgroundColor: "rgba(179,181,198,0.2)",
@@ -287,6 +287,8 @@
         <a th:href="@{energy(start=${startDay - spanDays},span=${spanDays},linear=${linear})}">prev</a>&nbsp;
         <a th:href="@{energy(start=${startDay + spanDays},span=${spanDays},linear=${linear})}">next</a><br/><br/>
         <a th:href="@{energy(start=${startDay},span=${spanDays},linear=${!linear})}" th:text="${(linear)?'difference':'linear'}"></a><br/>
+        <br/><a href=\"energy?gppu=0.6272&eppu=0.1919&wppu=1">cost</a><br/>
+        <br/><a href=\"charts\">charts</a><br/>
         <canvas id="energyContainer" width="800" height="400"></canvas>
         <!--<canvas id="temperatureContainer" width="800" height="400"></canvas>-->
     </body>
