@@ -210,15 +210,16 @@ public class DataRecordService {
         boolean isToday = dateKey.equals(dateToday);
         if (minHumidityRecord == null && maxHumidityRecord == null && minTemperatureRecord == null && maxTemperatureRecord == null) {
             if (!isToday) {
-                IncompleteKey key = keyFactory.setKind("DataRecordPeek").newKey();
-                final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
-                FullEntity entity = builder
-                        .set("NoRecords", true)
-                        .set("Location", location) //currentRecord.getLocation()) // insert the short location so that it can be directly used in the query
-                        .set("RecordDate", Timestamp.of(date.toDate()))
-                        .set("RecordDay", dateKey)
-                        .build();
-                datastore.put(entity);
+//                IncompleteKey key = keyFactory.setKind("DataRecordPeek").newKey();
+//                final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
+//                FullEntity entity = builder
+//                        .set("NoRecords", true)
+//                        .set("Location", location) //currentRecord.getLocation()) // insert the short location so that it can be directly used in the query
+//                        .set("RecordDate", Timestamp.of(date.toDate()))
+//                        .set("RecordDay", dateKey)
+//                        .build();
+                // do not store NoRecords entities, it is enough to keep a record in the hashtable
+//                datastore.put(entity);
                 DAILY_PEEKS.put(dateKey + "_" + location, new ArrayList<>());
             }
         } else {
