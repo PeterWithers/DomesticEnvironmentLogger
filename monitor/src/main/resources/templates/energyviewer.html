@@ -286,7 +286,8 @@
         <a th:href="@{energy(start=${startDay},span=${spanDays / 2},linear=${linear},gppu=${gppu},eppu=${eppu},wppu=${wppu})}">zoom+</a><br/><br/>
         <a th:href="@{energy(start=${startDay - spanDays},span=${spanDays},linear=${linear},gppu=${gppu},eppu=${eppu},wppu=${wppu})}">prev</a>&nbsp;
         <a th:href="@{energy(start=${startDay + spanDays},span=${spanDays},linear=${linear},gppu=${gppu},eppu=${eppu},wppu=${wppu})}">next</a><br/><br/>
-        <a th:href="@{energy(start=${startDay},span=${spanDays},linear=true,gppu=0.6272,eppu=0.1919,wppu=1)}">total cost</a>&nbsp;<a th:href="@{energy(start=${startDay},span=${spanDays},linear=true,gppu=1,eppu=1,wppu=1)}" th:text="total units"></a><br/><br/>
+        <a th:href="@{energy(start=${startDay},span=${spanDays},linear=true,gppu=0.6272,eppu=0.1919,wppu=1)}">total cost</a>&nbsp;
+        <a th:href="@{energy(start=${startDay},span=${spanDays},linear=true,gppu=1,eppu=1,wppu=1)}">total units</a><br/><br/>
         <a th:href="@{energy(start=${startDay},span=${spanDays},linear=false,gppu=0.6272,eppu=0.1919,wppu=1)}">cost per day</a>&nbsp;
         <a th:href="@{energy(start=${startDay},span=${spanDays},linear=false,gppu=${0.6272 * 7},eppu=${0.1919 * 7},wppu=${1 * 7})}">cost per week</a>&nbsp;
         <a th:href="@{energy(start=${startDay},span=${spanDays},linear=false,gppu=${0.6272 * 30},eppu=${0.1919 * 30},wppu=${1 * 30})}">cost per month</a>&nbsp;
