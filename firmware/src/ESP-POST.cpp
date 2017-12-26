@@ -180,7 +180,7 @@ void requestRGB(String locationString) {
             int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
             int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
             long delayValue = strtol(delayString.c_str(), NULL, 32);
-            segmentRGB[segmentIndex].duration = delayValue * 1000;
+            segmentRGB[segmentIndex].duration = delayValue;
             segmentRGB[segmentIndex].redValue = redValue;
             segmentRGB[segmentIndex].greenValue = greenValue;
             segmentRGB[segmentIndex].blueValue = blueValue;
@@ -427,15 +427,17 @@ void loop() {
             segmentMillisOffset = millis();
             break;
         } else if (segmentRGB[segmentIndex].duration > segmentDuration) {
-            int durationDifference = segmentRGB[segmentIndex].duration - lastDuration;
-            int durationPortion = segmentDuration - lastDuration;
-            // this method is overly simplistic and does not consider colour space gradients, but it might be adequate
-            int tweenedRed = ((segmentRGB[segmentIndex].redValue - lastRed) / durationDifference * durationPortion) + lastRed;
-            int tweenedGreen = ((segmentRGB[segmentIndex].greenValue - lastGreen) / durationDifference * durationPortion) + lastGreen;
-            int tweenedBlue = ((segmentRGB[segmentIndex].blueValue - lastBlue) / durationDifference * durationPortion) + lastBlue;
-            analogWrite(RED_LED_PIN, tweenedRed);
-            analogWrite(GREEN_LED_PIN, tweenedGreen);
-            analogWrite(BLUE_LED_PIN, tweenedBlue);
+            float durationDifference = segmentRGB[segmentIndex].duration - lastDuration;
+            float durationPortion = segmentDuration - lastDuration;
+            if (durationDifference > 0) {
+                // this method is overly simplistic and does not consider colour space gradients, but it might be adequate
+                int tweenedRed = (int) ((segmentRGB[segmentIndex].redValue - lastRed) / durationDifference * durationPortion) + lastRed;
+                int tweenedGreen = (int) ((segmentRGB[segmentIndex].greenValue - lastGreen) / durationDifference * durationPortion) + lastGreen;
+                int tweenedBlue = (int) ((segmentRGB[segmentIndex].blueValue - lastBlue) / durationDifference * durationPortion) + lastBlue;
+                analogWrite(RED_LED_PIN, tweenedRed);
+                analogWrite(GREEN_LED_PIN, tweenedGreen);
+                analogWrite(BLUE_LED_PIN, tweenedBlue);
+            }
             break;
         } else {
             lastRed = segmentRGB[segmentIndex].redValue;
@@ -445,6 +447,6 @@ void loop() {
         }
     }
 #endif
-    delay(1000);
+    delay(100);
     //Serial.print(".");
 }
