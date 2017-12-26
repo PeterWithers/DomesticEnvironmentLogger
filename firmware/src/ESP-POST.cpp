@@ -130,7 +130,7 @@ void sendMessage(String messageString) {
 }
 
 void requestRGB(String locationString) {
-    WiFiClientSecure client;
+    WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
         sendMessage("connection failed: requestRGB");
         return;
