@@ -38,6 +38,7 @@ volatile unsigned long lastDataSentMs = -dataSendDelayMs; // set to a value that
 volatile unsigned long onBoardButtonDataSentMs = 0;
 volatile unsigned long externalButton1DataSentMs = 0;
 volatile unsigned long externalButton2DataSentMs = 0;
+volatile int requestRGB = 0;
 volatile int onBoardButtonChanged = 0;
 volatile int externalButton1Changed = 0;
 volatile int externalButton2Changed = 0;
@@ -72,8 +73,8 @@ String locationString = "aquarium";
 #define GREEN_LED_PIN       13
 #define RED_LED_PIN         12
 #define BLUE_LED_PIN        14
-#define DS18b20_PIN         0
- */
+#define DS18b20_PIN         0 
+*/
 
 /*
 String locationString = "second%20testing%20board";
@@ -254,6 +255,10 @@ void sendMonitoredData() {
     }
 }
 
+void requestRGBInterrupt() {
+    requestRGB++;
+}
+
 void onBoardButtonChangeInterrupt() {
     onBoardButtonChanged++;
 }
@@ -286,6 +291,17 @@ void setup() {
     pinMode(EXTERNAL_BUTTON2, INPUT_PULLUP);
     //digitalWrite(EXTERNAL_BUTTON2, 1);
     attachInterrupt(EXTERNAL_BUTTON2, externalButton2ChangeInterrupt, CHANGE);
+#endif
+#ifdef GREEN_LED_PIN
+    pinMode(RED_LED_PIN, OUTPUT);
+    digitalWrite(RED_LED_PIN, 0);
+    pinMode(GREEN_LED_PIN, OUTPUT);
+    digitalWrite(GREEN_LED_PIN, 0);
+    pinMode(BLUE_LED_PIN, OUTPUT);
+    digitalWrite(BLUE_LED_PIN, 0);
+
+    pinMode(ON_BOARD_BUTTON, INPUT_PULLUP);
+    attachInterrupt(ON_BOARD_BUTTON, requestRGBInterrupt, CHANGE);
 #endif
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
@@ -341,6 +357,10 @@ void loop() {
             //Serial.println("sending button2 message");
             sendMessage(buttonMessage2);
         }
+        if (requestRGB > 0) {
+            requestRGB(locationString);
+        }
+        requestRGB = 0;
         onBoardButtonChanged = 0;
         externalButton1Changed = 0;
         externalButton2Changed = 0;
