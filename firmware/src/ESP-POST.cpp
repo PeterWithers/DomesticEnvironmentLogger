@@ -74,7 +74,7 @@ String locationString = "aquarium";
 #define BLUE_LED_PIN        14
 #define DS18b20_PIN         0
 */
-        
+
 /*
 String locationString = "second%20testing%20board";
 #define POWER_DHT_VIA_GPIO
@@ -135,7 +135,7 @@ void requestRGB(String locationString) {
         return;
     }
     String connectionString = "GET ";
-    connectionString += = "/monitor/currentRGB?location=";
+    connectionString += "/monitor/currentRGB?location=";
     connectionString += locationString;
     connectionString += " HTTP/1.1\r\n";
     connectionString += "Host: ";
@@ -147,7 +147,7 @@ void requestRGB(String locationString) {
     unsigned long timeout = millis();
     while (client.available() == 0) {
         if (millis() - timeout > 5000) {
-            sendMessage("timeout: " + url);
+            sendMessage("timeout: requestRGB");
             client.stop();
 #ifdef GREEN_LED_PIN
             analogWrite(RED_LED_PIN, 100);
@@ -161,13 +161,13 @@ void requestRGB(String locationString) {
         String line = client.readStringUntil('\r');
         sendMessage("currentRGB: " + line);
 #ifdef GREEN_LED_PIN
-        int redValue = strtol(line.substring(0, 1).toInt());
-        int greenValue = strtol(line.substring(2, 3).toInt());
-        int blueValue = strtol(line.substring(3, 4).toInt());
+        int redValue = line.substring(0, 1).toInt();
+        int greenValue = line.substring(2, 3).toInt();
+        int blueValue = line.substring(3, 4).toInt();
         analogWrite(RED_LED_PIN, redValue);
         analogWrite(GREEN_LED_PIN, greenValue);
         analogWrite(BLUE_LED_PIN, blueValue);
-#elif
+#else
         sendMessage("LED pins not defined");
 #endif
     }
