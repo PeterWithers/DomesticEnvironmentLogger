@@ -180,7 +180,7 @@ void requestRGB(String locationString) {
             int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
             int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
             long delayValue = strtol(delayString.c_str(), NULL, 32);
-            segmentRGB[segmentIndex].duration = delayValue;
+            segmentRGB[segmentIndex].duration = delayValue * 1000;
             segmentRGB[segmentIndex].redValue = redValue;
             segmentRGB[segmentIndex].greenValue = greenValue;
             segmentRGB[segmentIndex].blueValue = blueValue;
@@ -417,16 +417,31 @@ void loop() {
         requestRGBButtonChanged = 0;
     }
 #ifdef GREEN_LED_PIN
+    int lastRed = 0;
+    int lastGreen = 0;
+    int lastBlue = 0;
+    int lastDuration = 0;
     long segmentDuration = millis() - segmentMillisOffset;
     for (int segmentIndex = 0; segmentIndex < SEGMENTSIZE; segmentIndex++) {
         if (segmentRGB[segmentIndex].duration == -1) {
             segmentMillisOffset = millis();
             break;
         } else if (segmentRGB[segmentIndex].duration > segmentDuration) {
-            analogWrite(RED_LED_PIN, segmentRGB[segmentIndex].redValue);
-            analogWrite(GREEN_LED_PIN, segmentRGB[segmentIndex].greenValue);
-            analogWrite(BLUE_LED_PIN, segmentRGB[segmentIndex].blueValue);
+            int durationDifference = segmentRGB[segmentIndex].duration - lastDuration;
+            int durationPortion = segmentDuration - lastDuration;
+            // this method is overly simplistic and does not consider colour space gradients, but it might be adequate
+            int tweenedRed = ((segmentRGB[segmentIndex].redValue - lastRed) / durationDifference * durationPortion) + lastRed;
+            int tweenedGreen = ((segmentRGB[segmentIndex].greenValue - lastGreen) / durationDifference * durationPortion) + lastGreen;
+            int tweenedBlue = ((segmentRGB[segmentIndex].blueValue - lastBlue) / durationDifference * durationPortion) + lastBlue;
+            analogWrite(RED_LED_PIN, tweenedRed);
+            analogWrite(GREEN_LED_PIN, tweenedGreen);
+            analogWrite(BLUE_LED_PIN, tweenedBlue);
             break;
+        } else {
+            lastRed = segmentRGB[segmentIndex].redValue;
+            lastGreen = segmentRGB[segmentIndex].greenValue;
+            lastBlue = segmentRGB[segmentIndex].blueValue;
+            lastDuration = segmentRGB[segmentIndex].duration;
         }
     }
 #endif
