@@ -6,7 +6,7 @@
  * ESP-POST.cpp
  *
  * Created: 19/11/2016 12:20:32
- * Author : Peter Withers <peter@gthb-bambooradical.com>
+ * Author : Peter Withers <peter-gthb@bambooradical.com>
  */
 
 #include <ESP8266WiFi.h>
@@ -132,7 +132,7 @@ void sendMessage(String messageString) {
 void requestRGB(String locationString) {
     WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
-        sendMessage("connection failed: requestRGB");
+        sendMessage("connection%20failed%20requestRGB");
         return;
     }
     String connectionString = "GET ";
@@ -148,28 +148,39 @@ void requestRGB(String locationString) {
     unsigned long timeout = millis();
     while (client.available() == 0) {
         if (millis() - timeout > 5000) {
-            sendMessage("timeout: " + connectionString);
             client.stop();
 #ifdef GREEN_LED_PIN
             analogWrite(RED_LED_PIN, 100);
-            analogWrite(GREEN_LED_PIN, 20);
-            analogWrite(BLUE_LED_PIN, 20);
+            analogWrite(GREEN_LED_PIN, 0);
+            analogWrite(BLUE_LED_PIN, 0);
 #endif
+            sendMessage("timeout%20currentRGB%20" + locationString);
             return;
         }
     }
+    String line;
     while (client.available()) {
-        String line = client.readStringUntil('\r');
-        sendMessage("currentRGB: " + line);
+        line = client.readStringUntil('\r');
+    }
+    if (line != NULL) {
 #ifdef GREEN_LED_PIN
-        int redValue = line.substring(0, 1).toInt();
-        int greenValue = line.substring(2, 3).toInt();
-        int blueValue = line.substring(3, 4).toInt();
+        String redString = line.substring(1, 3);
+//        sendMessage("redString%20" + redString);
+        String greenString = line.substring(3, 5);
+//        sendMessage("greenString%20" + greenString);
+        String blueString = line.substring(5, 7);
+//        sendMessage("blueString%20" + blueString);
+        String delayString = line.substring(8, 12);
+//        sendMessage("delayString%20" + delayString);
+        int redValue = (int) strtol(redString.c_str(), NULL, 16);
+        int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
+        int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
+        long delayValue = strtol(delayString.c_str(), NULL, 32);
         analogWrite(RED_LED_PIN, redValue);
         analogWrite(GREEN_LED_PIN, greenValue);
         analogWrite(BLUE_LED_PIN, blueValue);
 #else
-        sendMessage("LED pins not defined");
+        sendMessage("LED%20pins%20not%20defined");
 #endif
     }
 }
@@ -221,7 +232,7 @@ void sendMonitoredData() {
     WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
         //Serial.println("connection failed");
-        sendMessage("connection failed: " + url);
+        sendMessage("connection%20failed%20add%20" + locationString);
         return;
     }
     url += "&location=";
@@ -243,8 +254,8 @@ void sendMonitoredData() {
     while (client.available() == 0) {
         if (millis() - timeout > 5000) {
             //Serial.println("timeout");
-            sendMessage("timeout: " + url);
             client.stop();
+            sendMessage("timeout%20add%20" + locationString);
             return;
         }
     }
@@ -294,11 +305,11 @@ void setup() {
 #endif
 #ifdef GREEN_LED_PIN
     pinMode(RED_LED_PIN, OUTPUT);
-    digitalWrite(RED_LED_PIN, 0);
+    analogWrite(RED_LED_PIN, 0);
     pinMode(GREEN_LED_PIN, OUTPUT);
-    digitalWrite(GREEN_LED_PIN, 0);
+    analogWrite(GREEN_LED_PIN, 0);
     pinMode(BLUE_LED_PIN, OUTPUT);
-    digitalWrite(BLUE_LED_PIN, 0);
+    analogWrite(BLUE_LED_PIN, 0);
 
     pinMode(ON_BOARD_BUTTON, INPUT_PULLUP);
     attachInterrupt(ON_BOARD_BUTTON, requestRGBInterrupt, CHANGE);
@@ -357,13 +368,13 @@ void loop() {
             //Serial.println("sending button2 message");
             sendMessage(buttonMessage2);
         }
-        if (requestRGBButtonChanged > 0) {
-            requestRGB(locationString);
-        }
-        requestRGBButtonChanged = 0;
         onBoardButtonChanged = 0;
         externalButton1Changed = 0;
         externalButton2Changed = 0;
+    }
+    if (requestRGBButtonChanged > 0) {
+        requestRGB(locationString);
+        requestRGBButtonChanged = 0;
     }
     delay(1000);
     //Serial.print(".");
