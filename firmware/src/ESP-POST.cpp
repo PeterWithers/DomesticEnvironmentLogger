@@ -73,7 +73,7 @@ String locationString = "aquarium";
 #define RED_LED_PIN         12
 #define BLUE_LED_PIN        14
 #define DS18b20_PIN         0
-*/
+ */
 
 /*
 String locationString = "second%20testing%20board";
@@ -131,7 +131,7 @@ void sendMessage(String messageString) {
 void requestRGB(String locationString) {
     WiFiClientSecure client;
     if (!client.connect(reportingServer, httpPort)) {
-        //Serial.println("connection failed");
+        sendMessage("connection failed: requestRGB");
         return;
     }
     String connectionString = "GET ";
@@ -147,7 +147,7 @@ void requestRGB(String locationString) {
     unsigned long timeout = millis();
     while (client.available() == 0) {
         if (millis() - timeout > 5000) {
-            sendMessage("timeout: requestRGB");
+            sendMessage("timeout: " + connectionString);
             client.stop();
 #ifdef GREEN_LED_PIN
             analogWrite(RED_LED_PIN, 100);
