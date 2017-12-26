@@ -168,30 +168,28 @@ void requestRGB(String locationString) {
             return;
         }
     }
-    String line;
+    int segmentIndex = 0;
     while (client.available()) {
-        line = client.readStringUntil('\r');
+        String line = client.readStringUntil('\r');
+        for (int substringIndex = 0; substringIndex < line.length(); substringIndex += 12) {
+            String redString = line.substring(1, 3);
+            String greenString = line.substring(3, 5);
+            String blueString = line.substring(5, 7);
+            String delayString = line.substring(8, 12);
+            int redValue = (int) strtol(redString.c_str(), NULL, 16);
+            int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
+            int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
+            long delayValue = strtol(delayString.c_str(), NULL, 32);
+            segmentRGB[segmentIndex].duration = delayValue;
+            segmentRGB[segmentIndex].redValue = redValue;
+            segmentRGB[segmentIndex].greenValue = greenValue;
+            segmentRGB[segmentIndex].blueValue = blueValue;
+            segmentIndex++;
+        }
     }
-    if (line != NULL) {
-#ifdef GREEN_LED_PIN
-        String redString = line.substring(1, 3);
-        //        sendMessage("redString%20" + redString);
-        String greenString = line.substring(3, 5);
-        //        sendMessage("greenString%20" + greenString);
-        String blueString = line.substring(5, 7);
-        //        sendMessage("blueString%20" + blueString);
-        String delayString = line.substring(8, 12);
-        //        sendMessage("delayString%20" + delayString);
-        int redValue = (int) strtol(redString.c_str(), NULL, 16);
-        int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
-        int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
-        long delayValue = strtol(delayString.c_str(), NULL, 32);
-        analogWrite(RED_LED_PIN, redValue);
-        analogWrite(GREEN_LED_PIN, greenValue);
-        analogWrite(BLUE_LED_PIN, blueValue);
-#else
-        sendMessage("LED%20pins%20not%20defined");
-#endif
+    if (segmentIndex > 0) {
+        segmentRGB[segmentIndex].duration = -1;
+        segmentMillisOffset = millis();
     }
 }
 
