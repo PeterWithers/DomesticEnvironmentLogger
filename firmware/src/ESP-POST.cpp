@@ -96,6 +96,16 @@ ADC_MODE(ADC_VCC);
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
+struct SegmentRGB {
+    int redValue;
+    int greenValue;
+    int blueValue;
+    long duration;
+};
+#define SEGMENTSIZE 100
+SegmentRGB segmentRGB[SEGMENTSIZE];
+long segmentMillisOffset = 0;
+
 void sendMessage(String messageString) {
     WiFiClientSecure client;
     if (!client.connect(messageServer, httpsPort)) {
@@ -165,13 +175,13 @@ void requestRGB(String locationString) {
     if (line != NULL) {
 #ifdef GREEN_LED_PIN
         String redString = line.substring(1, 3);
-//        sendMessage("redString%20" + redString);
+        //        sendMessage("redString%20" + redString);
         String greenString = line.substring(3, 5);
-//        sendMessage("greenString%20" + greenString);
+        //        sendMessage("greenString%20" + greenString);
         String blueString = line.substring(5, 7);
-//        sendMessage("blueString%20" + blueString);
+        //        sendMessage("blueString%20" + blueString);
         String delayString = line.substring(8, 12);
-//        sendMessage("delayString%20" + delayString);
+        //        sendMessage("delayString%20" + delayString);
         int redValue = (int) strtol(redString.c_str(), NULL, 16);
         int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
         int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
@@ -324,6 +334,38 @@ void setup() {
     //Serial.println(ssid);
     dht.begin();
     sendMessage(startMessage);
+    segmentRGB[0].blueValue = 0;
+    segmentRGB[0].redValue = 0;
+    segmentRGB[0].greenValue = 0;
+    segmentRGB[0].duration = 1000;
+    segmentRGB[1].blueValue = 255;
+    segmentRGB[1].redValue = 0;
+    segmentRGB[1].greenValue = 0;
+    segmentRGB[1].duration = 2000;
+    segmentRGB[2].blueValue = 0;
+    segmentRGB[2].redValue = 255;
+    segmentRGB[2].greenValue = 0;
+    segmentRGB[2].duration = 3000;
+    segmentRGB[3].blueValue = 0;
+    segmentRGB[3].redValue = 0;
+    segmentRGB[3].greenValue = 255;
+    segmentRGB[3].duration = 4000;
+    segmentRGB[4].blueValue = 0;
+    segmentRGB[4].redValue = 255;
+    segmentRGB[4].greenValue = 255;
+    segmentRGB[4].duration = 5000;
+    segmentRGB[5].blueValue = 255;
+    segmentRGB[5].redValue = 255;
+    segmentRGB[5].greenValue = 0;
+    segmentRGB[5].duration = 6000;
+    segmentRGB[6].blueValue = 255;
+    segmentRGB[6].redValue = 255;
+    segmentRGB[6].greenValue = 255;
+    segmentRGB[6].duration = 7000;
+    segmentRGB[7].blueValue = 0;
+    segmentRGB[7].redValue = 0;
+    segmentRGB[7].greenValue = 0;
+    segmentRGB[7].duration = -1;
 }
 
 void loop() {
@@ -376,6 +418,20 @@ void loop() {
         requestRGB(locationString);
         requestRGBButtonChanged = 0;
     }
+#ifdef GREEN_LED_PIN
+    long segmentDuration = millis() - segmentMillisOffset;
+    for (int segmentIndex = 0; segmentIndex < SEGMENTSIZE; segmentIndex++) {
+        if (segmentRGB[segmentIndex].duration == -1) {
+            segmentMillisOffset = millis();
+            break;
+        } else if (segmentRGB[segmentIndex].duration > segmentDuration) {
+            analogWrite(RED_LED_PIN, segmentRGB[segmentIndex].redValue);
+            analogWrite(GREEN_LED_PIN, segmentRGB[segmentIndex].greenValue);
+            analogWrite(BLUE_LED_PIN, segmentRGB[segmentIndex].blueValue);
+            break;
+        }
+    }
+#endif
     delay(1000);
     //Serial.print(".");
 }
