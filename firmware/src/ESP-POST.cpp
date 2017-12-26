@@ -43,22 +43,44 @@ volatile int externalButton1Changed = 0;
 volatile int externalButton2Changed = 0;
 
 /*
-String locationString = "testing%20board";
+String locationString = "testing%20first%20floor";
+#define DHTPIN              4
+#define BUTTONPIN           14
 */
 
-String locationString = "third%20testing%20messaging";
-#define VCC_VOLTAGE_MONITOR 
-#define BUTTON_MESSAGE
+/*
+String locationString = "third%20ground%20floor";
+#define VCC_VOLTAGE_MONITOR
+//#define POWER_DHT_VIA_GPIO
+#define DHTPIN              4
+#define BUTTONPIN           14
+*/
+
+/*
+String locationString = "second%20top%20floor";
+#define VCC_VOLTAGE_MONITOR
+#define POWER_DHT_VIA_GPIO
+#define DHTPIN              4
+#define BUTTONPIN           14
+*/
+
+/*
+String locationString = "aquarium";
+#define VCC_VOLTAGE_MONITOR
+//#define BUTTON_MESSAGE
+#define DHTPIN              2
+#define BUTTONPIN           5
+*/
 
 /*
 String locationString = "second%20testing%20board";
 #define POWER_DHT_VIA_GPIO
 #define VCC_VOLTAGE_MONITOR
-*/
-
-#define DHTPIN              4
 #define DHTPOWERPIN         5
-#define BUTTONPIN           5
+ */
+
+//#define DHTPIN              4 // top floor = 4 // aquarium = 2
+//#define BUTTONPIN           5
 #define ON_BOARD_BUTTON     0
 #define EXTERNAL_BUTTON1    1
 #define EXTERNAL_BUTTON2    3
@@ -113,6 +135,7 @@ void sendMonitoredData() {
     if (isnan(event.temperature)) {
         telemetryString += "Error reading temperature<br/>";
         errorString += "Error%20reading%20temperature. ";
+        sendMessage(errorString);
     } else {
         telemetryString += "Temperature: ";
         telemetryString += event.temperature;
@@ -124,6 +147,7 @@ void sendMonitoredData() {
     if (isnan(event.relative_humidity)) {
         telemetryString += "Error reading humidity<br/>";
         errorString += "Error%20reading%20humidity. ";
+        sendMessage(errorString);
     } else {
         telemetryString += "Humidity: ";
         telemetryString += event.relative_humidity;
@@ -148,6 +172,7 @@ void sendMonitoredData() {
     WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
         //Serial.println("connection failed");
+        sendMessage("connection failed: " + url);
         return;
     }
     url+="&location=";
@@ -169,6 +194,7 @@ void sendMonitoredData() {
     while (client.available() == 0) {
         if (millis() - timeout > 5000) {
             //Serial.println("timeout");
+            sendMessage("timeout: " + url);
             client.stop();
             return;
         }
