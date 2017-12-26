@@ -38,11 +38,17 @@ public class DataRecordController {
     @Autowired
     EnergyRecordService energyRecordService;
 
+    static String valueRGB = "116699";
+
     @RequestMapping("/currentRGB")
     public String currentRGB(
-            @RequestParam(value = "location", required = true) String location
+            @RequestParam(value = "location", required = true) String location,
+            @RequestParam(value = "value", required = false, defaultValue = "") String value
     ) {
-        return "116699";
+        if (value != null && !value.isEmpty()) {
+            valueRGB = value;
+        }
+        return valueRGB;
     }
 
     @RequestMapping("/add")
