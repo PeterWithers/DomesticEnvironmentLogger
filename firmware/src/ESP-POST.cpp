@@ -38,7 +38,7 @@ volatile unsigned long lastDataSentMs = -dataSendDelayMs; // set to a value that
 volatile unsigned long onBoardButtonDataSentMs = 0;
 volatile unsigned long externalButton1DataSentMs = 0;
 volatile unsigned long externalButton2DataSentMs = 0;
-volatile int requestRGB = 0;
+volatile int requestRGBButtonChanged = 0;
 volatile int onBoardButtonChanged = 0;
 volatile int externalButton1Changed = 0;
 volatile int externalButton2Changed = 0;
@@ -256,7 +256,7 @@ void sendMonitoredData() {
 }
 
 void requestRGBInterrupt() {
-    requestRGB++;
+    requestRGBButtonChanged++;
 }
 
 void onBoardButtonChangeInterrupt() {
@@ -357,10 +357,10 @@ void loop() {
             //Serial.println("sending button2 message");
             sendMessage(buttonMessage2);
         }
-        if (requestRGB > 0) {
+        if (requestRGBButtonChanged > 0) {
             requestRGB(locationString);
         }
-        requestRGB = 0;
+        requestRGBButtonChanged = 0;
         onBoardButtonChanged = 0;
         externalButton1Changed = 0;
         externalButton2Changed = 0;
