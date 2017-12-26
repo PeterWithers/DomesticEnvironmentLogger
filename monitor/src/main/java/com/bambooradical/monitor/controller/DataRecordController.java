@@ -38,6 +38,13 @@ public class DataRecordController {
     @Autowired
     EnergyRecordService energyRecordService;
 
+    @RequestMapping("/currentRGB")
+    public String currentRGB(
+            @RequestParam(value = "location", required = true) String location
+    ) {
+        return "116699";
+    }
+
     @RequestMapping("/add")
     public DataRecord addRecord(
             @RequestParam(value = "temperature", required = true) Float temperature,
