@@ -168,14 +168,16 @@ void requestRGB(String locationString) {
             return;
         }
     }
+    String parsedValues = "";
     int segmentIndex = 0;
     while (client.available()) {
         String line = client.readStringUntil('\r');
         for (int substringIndex = 0; substringIndex < line.length(); substringIndex += 12) {
-            String redString = line.substring(1, 3);
-            String greenString = line.substring(3, 5);
-            String blueString = line.substring(5, 7);
-            String delayString = line.substring(8, 12);
+            String redString = line.substring(substringIndex + 1, substringIndex + 3);
+            String greenString = line.substring(substringIndex + 3, substringIndex + 5);
+            String blueString = line.substring(substringIndex + 5, substringIndex + 7);
+            String delayString = line.substring(substringIndex + 8, substringIndex + 12);
+            parsedValues += redString + "-" + greenString + "-" + blueString + "-" + delayString + "_";
             int redValue = (int) strtol(redString.c_str(), NULL, 16);
             int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
             int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
@@ -190,6 +192,7 @@ void requestRGB(String locationString) {
     if (segmentIndex > 0) {
         segmentRGB[segmentIndex].duration = -1;
         segmentMillisOffset = millis();
+        sendMessage(parsedValues);
     }
 }
 
