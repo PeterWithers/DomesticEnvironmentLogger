@@ -175,20 +175,20 @@ void requestRGB(String locationString) {
     while (client.connected()) {
         if (client.available()) {
             String line = client.readStringUntil('\r');
-            if (line[12] == ';') {
+            if (line[14] == ';') {
                 if (line[7] == ':' || line[7] == 'T') {
                     receivedValues += line;
                 }
             }
         }
     }
-    for (int substringIndex = 0; substringIndex < receivedValues.length() && segmentIndex < SEGMENTSIZE; substringIndex += 12) {
-        if (receivedValues[substringIndex + 12] == ';') {
+    for (int substringIndex = 0; substringIndex < receivedValues.length() && segmentIndex < SEGMENTSIZE; substringIndex += 14) {
+        if (receivedValues[substringIndex + 14] == ';') {
             if (receivedValues[substringIndex + 7] == ':' || receivedValues[substringIndex + 7] == 'T') {
                 String redString = receivedValues.substring(substringIndex + 1, substringIndex + 3);
                 String greenString = receivedValues.substring(substringIndex + 3, substringIndex + 5);
                 String blueString = receivedValues.substring(substringIndex + 5, substringIndex + 7);
-                String delayString = receivedValues.substring(substringIndex + 8, substringIndex + 12);
+                String delayString = receivedValues.substring(substringIndex + 8, substringIndex + 14);
                 sendMessage(redString + "-" + greenString + "-" + blueString + "-" + delayString);
                 parsedValues = parsedValues + redString + "-" + greenString + "-" + blueString + "-" + delayString + "_";
                 int redValue = (int) strtol(redString.c_str(), NULL, 16);
