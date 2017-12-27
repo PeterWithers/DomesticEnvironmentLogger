@@ -48,7 +48,7 @@ public class DataRecordController {
             @RequestParam(value = "value", required = false, defaultValue = "") String value
     ) {
         if (value != null && !value.isEmpty()) {
-            valueRGB = value;
+            valueRGB = (value.length() > 14) ? value : "";
         }
         if (valueRGB.isEmpty()) {
             DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
