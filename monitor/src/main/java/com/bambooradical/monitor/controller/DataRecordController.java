@@ -12,6 +12,8 @@ import com.bambooradical.monitor.repository.EnergyRecordService;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,7 +40,7 @@ public class DataRecordController {
     @Autowired
     EnergyRecordService energyRecordService;
 
-    static String valueRGB = "116699";
+    static String valueRGB = "";
 
     @RequestMapping("/currentRGB")
     public String currentRGB(
@@ -48,7 +50,21 @@ public class DataRecordController {
         if (value != null && !value.isEmpty()) {
             valueRGB = value;
         }
-        return valueRGB;
+        if (valueRGB.isEmpty()) {
+            DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
+            int hourOfDay = dateTime.getHourOfDay();
+            if (hourOfDay > 23) {
+                return "000000:000000;550000T000100;005500:000200;000055:000300;";
+            } else if (hourOfDay > 10) {
+                return "000000:000000;550000T000100;005500:000200;000055:000300;";
+            } else if (hourOfDay > 12) {
+                return "000000:000000;ff0000T000100;00ff00:000200;0000ff:000300;000000:000400;ffffffT000500;000000T000600;ffffffT000700;";
+            } else {
+                return "000000:000000;000000T000100;000000:000200;";
+            }
+        } else {
+            return valueRGB;
+        }
     }
 
     @RequestMapping("/add")
