@@ -54,7 +54,7 @@ public class DataRecordController {
             DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
             int hourOfDay = dateTime.getHourOfDay();
             if (hourOfDay > 23) {
-                return "000000:000000;550000T000100;005500:000200;000055:000300;";
+                return "550055:000000;550000T000100;555500T000200;005500T000300;005555T000400;000055T000500;550055T000600;";
             } else if (hourOfDay > 10) {
                 return "000000:000000;550000T000100;005500:000200;000055:000300;";
             } else if (hourOfDay > 12) {
