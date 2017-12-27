@@ -73,7 +73,7 @@ String locationString = "aquarium";
 #define GREEN_LED_PIN       13
 #define RED_LED_PIN         12
 #define BLUE_LED_PIN        14
-#define DS18b20_PIN         0 
+#define DS18b20_PIN         0
 */
 
 /*
@@ -101,6 +101,7 @@ struct SegmentRGB {
     int greenValue;
     int blueValue;
     long duration;
+    bool tween;
 };
 #define SEGMENTSIZE 100
 SegmentRGB segmentRGB[SEGMENTSIZE];
@@ -169,30 +170,48 @@ void requestRGB(String locationString) {
         }
     }
     String parsedValues = "";
+    String receivedValues = "";
     int segmentIndex = 0;
-    while (client.available()) {
-        String line = client.readStringUntil('\r');
-        for (int substringIndex = 0; substringIndex < line.length(); substringIndex += 12) {
-            String redString = line.substring(substringIndex + 1, substringIndex + 3);
-            String greenString = line.substring(substringIndex + 3, substringIndex + 5);
-            String blueString = line.substring(substringIndex + 5, substringIndex + 7);
-            String delayString = line.substring(substringIndex + 8, substringIndex + 12);
-            parsedValues += redString + "-" + greenString + "-" + blueString + "-" + delayString + "_";
-            int redValue = (int) strtol(redString.c_str(), NULL, 16);
-            int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
-            int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
-            long delayValue = strtol(delayString.c_str(), NULL, 32);
-            segmentRGB[segmentIndex].duration = delayValue;
-            segmentRGB[segmentIndex].redValue = redValue;
-            segmentRGB[segmentIndex].greenValue = greenValue;
-            segmentRGB[segmentIndex].blueValue = blueValue;
-            segmentIndex++;
+    while (client.connected()) {
+        if (client.available()) {
+            String line = client.readStringUntil('\r');
+            if (line[12] == ';') {
+                if (line[7] == ':' || line[7] == 'T') {
+                    receivedValues += line;
+                }
+            }
+        }
+    }
+    for (int substringIndex = 0; substringIndex < receivedValues.length() && segmentIndex < SEGMENTSIZE; substringIndex += 12) {
+        if (receivedValues[substringIndex + 12] == ';') {
+            if (receivedValues[substringIndex + 7] == ':' || receivedValues[substringIndex + 7] == 'T') {
+                String redString = receivedValues.substring(substringIndex + 1, substringIndex + 3);
+                String greenString = receivedValues.substring(substringIndex + 3, substringIndex + 5);
+                String blueString = receivedValues.substring(substringIndex + 5, substringIndex + 7);
+                String delayString = receivedValues.substring(substringIndex + 8, substringIndex + 12);
+                sendMessage(redString + "-" + greenString + "-" + blueString + "-" + delayString);
+                parsedValues = parsedValues + redString + "-" + greenString + "-" + blueString + "-" + delayString + "_";
+                int redValue = (int) strtol(redString.c_str(), NULL, 16);
+                int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
+                int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
+                long delayValue = strtol(delayString.c_str(), NULL, 32);
+                segmentRGB[segmentIndex].duration = delayValue;
+                segmentRGB[segmentIndex].redValue = redValue;
+                segmentRGB[segmentIndex].greenValue = greenValue;
+                segmentRGB[segmentIndex].blueValue = blueValue;
+                segmentRGB[segmentIndex].tween = receivedValues[substringIndex + 7] == 'T';
+                segmentIndex++;
+            }
         }
     }
     if (segmentIndex > 0) {
-        segmentRGB[segmentIndex].duration = -1;
+        if (segmentIndex < SEGMENTSIZE) {
+            segmentRGB[segmentIndex].duration = -1;
+        }
         segmentMillisOffset = millis();
         sendMessage(parsedValues);
+    } else {
+        sendMessage("no parsedValues");
     }
 }
 
@@ -339,34 +358,42 @@ void setup() {
     segmentRGB[0].redValue = 0;
     segmentRGB[0].greenValue = 0;
     segmentRGB[0].duration = 1000;
+    segmentRGB[0].tween = false;
     segmentRGB[1].blueValue = 255;
     segmentRGB[1].redValue = 0;
     segmentRGB[1].greenValue = 0;
     segmentRGB[1].duration = 2000;
+    segmentRGB[1].tween = false;
     segmentRGB[2].blueValue = 0;
     segmentRGB[2].redValue = 255;
     segmentRGB[2].greenValue = 0;
     segmentRGB[2].duration = 3000;
+    segmentRGB[2].tween = false;
     segmentRGB[3].blueValue = 0;
     segmentRGB[3].redValue = 0;
     segmentRGB[3].greenValue = 255;
     segmentRGB[3].duration = 4000;
+    segmentRGB[3].tween = false;
     segmentRGB[4].blueValue = 0;
     segmentRGB[4].redValue = 255;
     segmentRGB[4].greenValue = 255;
     segmentRGB[4].duration = 5000;
+    segmentRGB[4].tween = true;
     segmentRGB[5].blueValue = 255;
     segmentRGB[5].redValue = 255;
     segmentRGB[5].greenValue = 0;
     segmentRGB[5].duration = 6000;
+    segmentRGB[5].tween = false;
     segmentRGB[6].blueValue = 255;
     segmentRGB[6].redValue = 255;
     segmentRGB[6].greenValue = 255;
     segmentRGB[6].duration = 7000;
+    segmentRGB[6].tween = false;
     segmentRGB[7].blueValue = 0;
     segmentRGB[7].redValue = 0;
     segmentRGB[7].greenValue = 0;
     segmentRGB[7].duration = -1;
+    segmentRGB[7].tween = false;
 }
 
 void loop() {
@@ -416,6 +443,7 @@ void loop() {
         externalButton2Changed = 0;
     }
     if (requestRGBButtonChanged > 0) {
+        sendMessage("requestRGBButton");
         requestRGB(locationString);
         requestRGBButtonChanged = 0;
     }
@@ -430,16 +458,22 @@ void loop() {
             segmentMillisOffset = millis();
             break;
         } else if (segmentRGB[segmentIndex].duration > segmentDuration) {
-            float durationDifference = segmentRGB[segmentIndex].duration - lastDuration;
-            float durationPortion = segmentDuration - lastDuration;
-            if (durationDifference > 0) {
-                // this method is overly simplistic and does not consider colour space gradients, but it might be adequate
-                int tweenedRed = (int) ((segmentRGB[segmentIndex].redValue - lastRed) / durationDifference * durationPortion) + lastRed;
-                int tweenedGreen = (int) ((segmentRGB[segmentIndex].greenValue - lastGreen) / durationDifference * durationPortion) + lastGreen;
-                int tweenedBlue = (int) ((segmentRGB[segmentIndex].blueValue - lastBlue) / durationDifference * durationPortion) + lastBlue;
-                analogWrite(RED_LED_PIN, tweenedRed);
-                analogWrite(GREEN_LED_PIN, tweenedGreen);
-                analogWrite(BLUE_LED_PIN, tweenedBlue);
+            if (segmentRGB[segmentIndex].tween) {
+                float durationDifference = segmentRGB[segmentIndex].duration - lastDuration;
+                float durationPortion = segmentDuration - lastDuration;
+                if (durationDifference > 0) {
+                    // this method is overly simplistic and does not consider colour space gradients, but it might be adequate
+                    int tweenedRed = (int) ((segmentRGB[segmentIndex].redValue - lastRed) / durationDifference * durationPortion) + lastRed;
+                    int tweenedGreen = (int) ((segmentRGB[segmentIndex].greenValue - lastGreen) / durationDifference * durationPortion) + lastGreen;
+                    int tweenedBlue = (int) ((segmentRGB[segmentIndex].blueValue - lastBlue) / durationDifference * durationPortion) + lastBlue;
+                    analogWrite(RED_LED_PIN, tweenedRed);
+                    analogWrite(GREEN_LED_PIN, tweenedGreen);
+                    analogWrite(BLUE_LED_PIN, tweenedBlue);
+                }
+            } else {
+                analogWrite(RED_LED_PIN, segmentRGB[segmentIndex].redValue);
+                analogWrite(GREEN_LED_PIN, segmentRGB[segmentIndex].greenValue);
+                analogWrite(BLUE_LED_PIN, segmentRGB[segmentIndex].blueValue);
             }
             break;
         } else {
@@ -450,6 +484,6 @@ void loop() {
         }
     }
 #endif
-    delay(100);
+    delay(10);
     //Serial.print(".");
 }
