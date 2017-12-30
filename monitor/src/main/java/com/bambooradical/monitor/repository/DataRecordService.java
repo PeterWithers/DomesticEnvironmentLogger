@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * @since Oct 14, 2017 1:32:09 PM (creation date)
- * @author : Peter Withers <peter@gthb-bambooradical.com>
+ * @author : Peter Withers <peter-gthb@bambooradical.com>
  */
 @Service
 public class DataRecordService {
