@@ -25,7 +25,7 @@ public class LightingController {
     @RequestMapping("/showProgram")
     public String showProgram() {
         String resultValue = "";
-        for (int index = 0; index < 23; index++) {
+        for (int index = 0; index < 24; index++) {
             resultValue += "<a href=\"setProgram?location=&hour=" + index + "&value=" + lightingService.findProgram(index) + "\">" + index + ":" + lightingService.findProgram(index) + "</a><br/>";
         }
         resultValue += "<a href=\"currentRGB\">currentRGB</a><br/>";
@@ -40,7 +40,7 @@ public class LightingController {
     ) {
         lightingService.updateProgram(hour, value);
         String resultValue = "";
-        for (int index = 0; index < 23; index++) {
+        for (int index = 0; index < 24; index++) {
             resultValue += "<a href=\"setProgram?location=&hour=" + index + "&value=" + lightingService.findProgram(index) + "\">" + index + ":" + lightingService.findProgram(index) + "</a><br/>";
         }
         return resultValue;
