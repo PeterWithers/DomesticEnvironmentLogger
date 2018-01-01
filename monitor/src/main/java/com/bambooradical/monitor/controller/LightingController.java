@@ -22,30 +22,57 @@ public class LightingController {
     @Autowired
     LightingService lightingService;
 
-    static String valueRGB = "";
+    @RequestMapping("/")
+    public String showProgram() {
+        String resultValue = "";
+        for (int index = 0; index < 23; index++) {
+            resultValue += "<a href=\"setProgram?location=&hour=" + index + "&value=" + lightingService.findProgram(index) + "\">" + index + ":" + lightingService.findProgram(index) + "</a><br/>";
+        }
+        resultValue += "<a href=\"currentRGB\">currentRGB</a><br/>";
+        return resultValue;
+    }
+
+    @RequestMapping("/setProgram")
+    public String currentRGB(
+            @RequestParam(value = "location", required = true) String location,
+            @RequestParam(value = "hour", required = true) int hour,
+            @RequestParam(value = "value", required = false, defaultValue = "") String value
+    ) {
+        lightingService.updateProgram(hour, value);
+        String resultValue = "";
+        for (int index = 0; index < 23; index++) {
+            resultValue += "<a href=\"setProgram?location=&hour=" + index + "&value=" + lightingService.findProgram(index) + "\">" + index + ":" + lightingService.findProgram(index) + "</a><br/>";
+        }
+        return resultValue;
+    }
 
     @RequestMapping("/currentRGB")
     public String currentRGB(
-            @RequestParam(value = "location", required = true) String location,
-            @RequestParam(value = "value", required = false, defaultValue = "") String value
+            @RequestParam(value = "location", required = true) String location
     ) {
-        if (value != null && !value.isEmpty()) {
-            valueRGB = (value.length() > 14) ? value : "";
-        }
-        if (valueRGB.isEmpty()) {
-            DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
-            int hourOfDay = dateTime.getHourOfDay();
-            if (hourOfDay > 23) {
-                return "550055:000000;550000T000100;555500T000200;005500T000300;005555T000400;000055T000500;550055T000600;";
-            } else if (hourOfDay > 10) {
-                return "000000:000000;550000T000100;005500:000200;000055:000300;";
-            } else if (hourOfDay > 12) {
-                return "000000:000000;ff0000T000100;00ff00:000200;0000ff:000300;000000:000400;ffffffT000500;000000T000600;ffffffT000700;";
-            } else {
-                return "000000:000000;000000T000100;000000:000200;";
+        DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
+        int hourOfDay = dateTime.getHourOfDay();
+        int minuteOfHour = dateTime.getMinuteOfHour();
+        String currentProgram = lightingService.findProgram(hourOfDay);
+        if (currentProgram == null || currentProgram.isEmpty()) {
+            int redValue = 0;
+            int greenValue = 0;
+            int blueValue = 0;
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int minuteCounter = 0; minuteCounter < 60; minuteCounter++) {
+                redValue = ((minuteCounter + minuteOfHour) % 2 == 0) ? 0x00 : 0xff;
+                greenValue = 0xff / 5 * ((minuteCounter + minuteOfHour) % 5);
+                blueValue = 0xff / 15 * ((minuteCounter + minuteOfHour) % 15);
+                stringBuilder.append(String.format("%04x", minuteCounter * 60 * 1000));
+                stringBuilder.append("T");
+                stringBuilder.append(String.format("%02x", redValue));
+                stringBuilder.append(String.format("%02x", greenValue));
+                stringBuilder.append(String.format("%02x", blueValue));
+                stringBuilder.append(";");
             }
+            return stringBuilder.toString();
         } else {
-            return valueRGB;
+            return currentProgram;
         }
     }
 }
