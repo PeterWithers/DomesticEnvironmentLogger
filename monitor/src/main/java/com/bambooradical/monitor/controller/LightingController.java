@@ -63,11 +63,11 @@ public class LightingController {
                 redValue = ((minuteCounter + minuteOfHour) % 2 == 0) ? 0x00 : 0xff;
                 greenValue = 0xff / 5 * ((minuteCounter + minuteOfHour) % 5);
                 blueValue = 0xff / 15 * ((minuteCounter + minuteOfHour) % 15);
-                stringBuilder.append(String.format("%04x", minuteCounter * 60 * 1000));
-                stringBuilder.append("T");
                 stringBuilder.append(String.format("%02x", redValue));
                 stringBuilder.append(String.format("%02x", greenValue));
                 stringBuilder.append(String.format("%02x", blueValue));
+                stringBuilder.append("T");
+                stringBuilder.append(String.format("%06x", minuteCounter * 60 * 1000));
                 stringBuilder.append(";");
             }
             return stringBuilder.toString();
