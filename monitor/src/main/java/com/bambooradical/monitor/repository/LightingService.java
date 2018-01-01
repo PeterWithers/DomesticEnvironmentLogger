@@ -37,18 +37,20 @@ public class LightingService {
 
     public void updateProgram(int hour, String program) {
         Key lightSettingsKey = keyFactory.newKey("defaultSettings");
-        Entity lightSettings = Entity.newBuilder(datastore.get(lightSettingsKey)).set(encodeHour(hour), program).build();
-        if (lightSettings == null) {
-            lightSettings = datastore.add(Entity.newBuilder(lightSettingsKey).build());
+        Entity lightSettingsEntity = datastore.get(lightSettingsKey);
+        if (lightSettingsEntity == null) {
+            lightSettingsEntity = datastore.add(Entity.newBuilder(lightSettingsKey).set(encodeHour(hour), program).build());
+        } else {
+            Entity.newBuilder(lightSettingsEntity).set(encodeHour(hour), program).build();
         }
-        datastore.update(lightSettings);
+        datastore.update(lightSettingsEntity);
         HOURLY_PROGRAMS.clear();
     }
 
     public String findProgram(int hour) {
         if (HOURLY_PROGRAMS.isEmpty()) {
             Key lightSettingsKey = keyFactory.newKey("defaultSettings");
-            Entity lightSettings = Entity.newBuilder(datastore.get(lightSettingsKey)).build();
+            Entity lightSettings = datastore.get(lightSettingsKey);
             if (lightSettings != null) {
                 for (String propertyName : lightSettings.getNames()) {
                     HOURLY_PROGRAMS.put(propertyName, lightSettings.getString(propertyName));
