@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
  * @author : Peter Withers <peter-gthb@bambooradical.com>
  */
 @RestController
-@RequestMapping("/lighting")
+@RequestMapping("/monitor")
 public class LightingController {
 
     @Autowired
     LightingService lightingService;
 
-    @RequestMapping("/")
+    @RequestMapping("/showProgram")
     public String showProgram() {
         String resultValue = "";
         for (int index = 0; index < 23; index++) {
