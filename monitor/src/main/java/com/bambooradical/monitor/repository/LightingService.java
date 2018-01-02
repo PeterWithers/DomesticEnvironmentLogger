@@ -35,16 +35,16 @@ public class LightingService {
     public ProgramRecord[] getProgramRecords() {
         return new ProgramRecord[]{
             new ProgramRecord("location", 0, "00ff00", true),
-            new ProgramRecord("location", 10, "aaff00", true),
-            new ProgramRecord("location", 20, "aaff00", true),
-            new ProgramRecord("location", 30, "eeff00", true),
-            new ProgramRecord("location", 40, "00ffff", true),
-            new ProgramRecord("location", 50, "11ff00", true),
-            new ProgramRecord("location", 60, "ffff00", true),
-            new ProgramRecord("location", 70, "eeff00", true),
-            new ProgramRecord("location", 80, "00ff00", true),
-            new ProgramRecord("location", 90, "66ff00", true),
-            new ProgramRecord("location", 00, "11ff00", true),};
+            new ProgramRecord("location", 3 * 60 * 60 * 1000, "aaff00", true),
+            new ProgramRecord("location", 9 * 60 * 60 * 1000, "aaff00", true),
+            new ProgramRecord("location", 12 * 60 * 60 * 1000, "eeff00", true),
+            new ProgramRecord("location", 14 * 60 * 60 * 1000, "00ffff", true),
+            new ProgramRecord("location", 17 * 60 * 60 * 1000, "11ff00", true),
+            new ProgramRecord("location", 19 * 60 * 60 * 1000, "ffff00", true),
+            new ProgramRecord("location", 20 * 60 * 60 * 1000, "eeff00", true),
+            new ProgramRecord("location", 21 * 60 * 60 * 1000, "00ff00", true),
+            new ProgramRecord("location", 22 * 60 * 60 * 1000, "66ff00", true),
+            new ProgramRecord("location", 23 * 60 * 60 * 1000, "11ff00", true),};
     }
 
 //    private String encodeHour(int milliseconds) {
