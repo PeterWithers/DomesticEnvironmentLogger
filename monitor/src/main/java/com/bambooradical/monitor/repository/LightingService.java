@@ -3,6 +3,7 @@
  */
 package com.bambooradical.monitor.repository;
 
+import com.bambooradical.monitor.model.ProgramRecord;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
@@ -31,6 +32,23 @@ public class LightingService {
         keyFactory = datastore.newKeyFactory().setKind("LightSettings");
     }
 
+    public ProgramRecord[] getProgramRecords() {
+        return new ProgramRecord[]{
+            new ProgramRecord("location", 0, "00ff00", true),
+            new ProgramRecord("location", 10, "aaff00", true),
+            new ProgramRecord("location", 20, "aaff00", true),
+            new ProgramRecord("location", 30, "eeff00", true),
+            new ProgramRecord("location", 40, "00ffff", true),
+            new ProgramRecord("location", 50, "11ff00", true),
+            new ProgramRecord("location", 60, "ffff00", true),
+            new ProgramRecord("location", 70, "eeff00", true),
+            new ProgramRecord("location", 80, "00ff00", true),
+            new ProgramRecord("location", 90, "66ff00", true),
+            new ProgramRecord("location", 00, "11ff00", true),};
+    }
+
+//    private String encodeHour(int milliseconds) {
+//        return "ms_" + milliseconds;
     private String encodeHour(int hour) {
         return "hour_" + hour;
     }

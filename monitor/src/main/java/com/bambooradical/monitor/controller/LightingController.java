@@ -7,15 +7,19 @@ import com.bambooradical.monitor.repository.LightingService;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @since Dec 30, 2017 11:31:41 AM (creation date)
  * @author : Peter Withers <peter-gthb@bambooradical.com>
  */
-@RestController
+@Controller
 @RequestMapping("/monitor")
 public class LightingController {
 
@@ -23,17 +27,19 @@ public class LightingController {
     LightingService lightingService;
 
     @RequestMapping("/showProgram")
-    public String showProgram() {
-        String resultValue = "";
-        for (int index = 0; index < 24; index++) {
-            resultValue += "<a href=\"setProgram?location=&hour=" + index + "&value=" + lightingService.findProgram(index) + "\">" + index + ":" + lightingService.findProgram(index) + "</a><br/>";
-        }
-        resultValue += "<a href=\"currentRGB\">currentRGB</a><br/>";
-        return resultValue;
+    public String showProgram(Model model) {
+//        String resultValue = "";
+//        for (int index = 0; index < 24; index++) {
+//            resultValue += "<a href=\"setProgram?location=&hour=" + index + "&value=" + lightingService.findProgram(index) + "\">" + index + ":" + lightingService.findProgram(index) + "</a><br/>";
+//        }
+//        resultValue += "<a href=\"currentRGB\">currentRGB</a><br/>";
+        model.addAttribute("programData", lightingService.getProgramRecords());
+        return "programviewer";
     }
 
     @RequestMapping("/setProgram")
     public String currentRGB(
+            Model model,
             @RequestParam(value = "location", required = true) String location,
             @RequestParam(value = "hour", required = true) int hour,
             @RequestParam(value = "value", required = false, defaultValue = "") String value
@@ -46,7 +52,10 @@ public class LightingController {
         return resultValue;
     }
 
-    @RequestMapping("/currentRGB")
+    @RequestMapping(value = "/currentRGB",
+            method = RequestMethod.GET,
+            produces = {MediaType.TEXT_PLAIN_VALUE})
+    @ResponseBody
     public String currentRGB(
             @RequestParam(value = "location", required = true) String location
     ) {
@@ -76,3 +85,4 @@ public class LightingController {
         }
     }
 }
+
