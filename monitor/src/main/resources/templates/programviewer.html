@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--
+ Copyright (C) 2018 Peter Withers
+ 
+ @since Jan 02, 2018 21:42 PM (creation date)
+ @author : Peter Withers <petergthb-@bambooradical.com>
+-->
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Lighting Program Viewer</title>
+        <meta charset="UTF-8"/>
+        <script src="/js/jquery.min.js"></script>
+    </head>
+    <body>
+        <div th:each="programRecord : ${programData}">
+            <form action="setProgram">
+                <button type="submit" name="deleteProgram">Delete</button>
+                <select id="location" name="location">
+                    <option value="aquarium">aquarium</option>
+                </select>
+                <select id="tween" name="tween">
+                    <option value="liner">linear</option>
+                    <option value="step">step</option>
+                </select>
+                <input id="programTime" name="programTime" type="time" th:value="${programRecord.getTime()}" />
+                <input id="programColour" name="programColour" type="color" th:value="${programRecord.getColour()}"/>
+                <button type="submit" name="updateProgram">Add</button>
+                <br/>
+            </form>
+        </div> 
+    </body>
+</html>
+
+
