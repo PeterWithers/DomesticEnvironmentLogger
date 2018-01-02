@@ -23,7 +23,7 @@
                     <option value="step">step</option>
                 </select>
                 <input id="programTime" name="programTime" type="time" th:value="${programRecord.getTime()}" />
-                <input id="programColour" name="programColour" type="color" th:value="${programRecord.getColour()}"/>
+                <input id="programColour" name="programColour" type="color" th:value="${'#' + programRecord.getColour()}"/>
                 <button type="submit" name="updateProgram">Add</button>
                 <br/>
             </form>
