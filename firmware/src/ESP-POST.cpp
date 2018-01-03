@@ -61,6 +61,7 @@ String locationString = "third%20ground%20floor";
 String locationString = "second%20top%20floor";
 #define VCC_VOLTAGE_MONITOR
 #define POWER_DHT_VIA_GPIO
+#define DHTPOWERPIN         5
 #define DHTPIN              4
 #define BUTTONPIN           14
  */
@@ -170,40 +171,40 @@ void requestRGB(String locationString) {
         }
     }
     String parsedValues = "";
-    String receivedValues = "";
+    //String receivedValues = "";
     int segmentIndex = 0;
     while (client.connected()) {
         if (client.available()) {
             String line = client.readStringUntil('\r');
-            if (line[14] == ';') {
+            if (line[15] == ';') {
                 if (line[7] == ':' || line[7] == 'T') {
-                    receivedValues += line;
+                    for (int substringIndex = 0; substringIndex < line.length() && segmentIndex < SEGMENTSIZE; substringIndex += 15) {
+                        if (line[substringIndex + 15] == ';') {
+                            if (line[substringIndex + 7] == ':' || line[substringIndex + 7] == 'T') {
+                                String redString = line.substring(substringIndex + 1, substringIndex + 3);
+                                String greenString = line.substring(substringIndex + 3, substringIndex + 5);
+                                String blueString = line.substring(substringIndex + 5, substringIndex + 7);
+                                String delayString = line.substring(substringIndex + 8, substringIndex + 15);
+                                //sendMessage(redString + "-" + greenString + "-" + blueString + "-" + delayString);
+                                parsedValues = parsedValues + redString + "-" + greenString + "-" + blueString + "-" + delayString + "_";
+                                int redValue = (int) strtol(redString.c_str(), NULL, 16);
+                                int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
+                                int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
+                                long delayValue = strtol(delayString.c_str(), NULL, 32);
+                                segmentRGB[segmentIndex].duration = delayValue;
+                                segmentRGB[segmentIndex].redValue = redValue;
+                                segmentRGB[segmentIndex].greenValue = greenValue;
+                                segmentRGB[segmentIndex].blueValue = blueValue;
+                                segmentRGB[segmentIndex].tween = line[substringIndex + 7] == 'T';
+                                segmentIndex++;
+                            }
+                        }
+                    }
                 }
             }
         }
     }
-    for (int substringIndex = 0; substringIndex < receivedValues.length() && segmentIndex < SEGMENTSIZE; substringIndex += 14) {
-        if (receivedValues[substringIndex + 14] == ';') {
-            if (receivedValues[substringIndex + 7] == ':' || receivedValues[substringIndex + 7] == 'T') {
-                String redString = receivedValues.substring(substringIndex + 1, substringIndex + 3);
-                String greenString = receivedValues.substring(substringIndex + 3, substringIndex + 5);
-                String blueString = receivedValues.substring(substringIndex + 5, substringIndex + 7);
-                String delayString = receivedValues.substring(substringIndex + 8, substringIndex + 14);
-                sendMessage(redString + "-" + greenString + "-" + blueString + "-" + delayString);
-                parsedValues = parsedValues + redString + "-" + greenString + "-" + blueString + "-" + delayString + "_";
-                int redValue = (int) strtol(redString.c_str(), NULL, 16);
-                int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
-                int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
-                long delayValue = strtol(delayString.c_str(), NULL, 32);
-                segmentRGB[segmentIndex].duration = delayValue;
-                segmentRGB[segmentIndex].redValue = redValue;
-                segmentRGB[segmentIndex].greenValue = greenValue;
-                segmentRGB[segmentIndex].blueValue = blueValue;
-                segmentRGB[segmentIndex].tween = receivedValues[substringIndex + 7] == 'T';
-                segmentIndex++;
-            }
-        }
-    }
+
     if (segmentIndex > 0) {
         if (segmentIndex < SEGMENTSIZE) {
             segmentRGB[segmentIndex].duration = -1;
