@@ -38,7 +38,7 @@ public class LightingService {
 
     public List<ProgramRecord> getProgramRecords() throws ParseException {
         if (PROGRAM_RECORDS.isEmpty()) {
-            Key lightSettingsKey = keyFactory.newKey("defaultSettings");
+            Key lightSettingsKey = keyFactory.newKey("defaultProgram");
             Entity lightSettings = datastore.get(lightSettingsKey);
             if (lightSettings != null) {
                 for (String propertyName : lightSettings.getNames()) {
@@ -58,22 +58,23 @@ public class LightingService {
     }
 
     public void deleteProgram(final ProgramRecord programRecord) {
-        Key lightSettingsKey = keyFactory.newKey("defaultSettings");
+        Key lightSettingsKey = keyFactory.newKey("defaultProgram");
         Entity lightSettingsEntity = datastore.get(lightSettingsKey);
         datastore.update(Entity.newBuilder(lightSettingsEntity).setNull(programRecord.getKey()).build());
         HOURLY_PROGRAMS.clear();
     }
 
     public void updateProgram(final ProgramRecord programRecord) {
-        Key lightSettingsKey = keyFactory.newKey("defaultSettings");
+        Key lightSettingsKey = keyFactory.newKey("defaultProgram");
         Entity lightSettingsEntity = datastore.get(lightSettingsKey);
         datastore.update(Entity.newBuilder(lightSettingsEntity).set(programRecord.getKey(), programRecord.getProgramCode()).build());
+        HOURLY_PROGRAMS.clear();
     }
 
     public void addProgram(final ProgramRecord programRecord) {
-        Key lightSettingsKey = keyFactory.newKey("defaultSettings");
+        Key lightSettingsKey = keyFactory.newKey("defaultProgram");
         Entity lightSettingsEntity = datastore.get(lightSettingsKey);
-        if (lightSettingsEntity == null) {
+        if (!lightSettingsEntity.contains(programRecord.getKey())) {
             datastore.add(Entity.newBuilder(lightSettingsKey).set(programRecord.getKey(), programRecord.getProgramCode()).build());
             HOURLY_PROGRAMS.clear();
         }
@@ -92,4 +93,3 @@ public class LightingService {
         return HOURLY_PROGRAMS.get(encodeHour(hour));
     }
 }
-
