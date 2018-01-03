@@ -75,7 +75,7 @@ public class LightingService {
         if (lightSettingsEntity == null) {
             datastore.add(Entity.newBuilder(lightSettingsKey).set(programRecord.getKey(), programRecord.getProgramCode()).build());
         } else if (!lightSettingsEntity.contains(programRecord.getKey())) {
-            datastore.update(Entity.newBuilder(lightSettingsKey).set(programRecord.getKey(), programRecord.getProgramCode()).build());
+            datastore.update(Entity.newBuilder(lightSettingsEntity).set(programRecord.getKey(), programRecord.getProgramCode()).build());
         }
         HOURLY_PROGRAMS.clear();
     }
