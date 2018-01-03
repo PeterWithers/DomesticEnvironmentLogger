@@ -42,9 +42,7 @@ public class LightingService {
             Entity lightSettings = datastore.get(lightSettingsKey);
             if (lightSettings != null) {
                 for (String propertyName : lightSettings.getNames()) {
-                    if (!propertyName.startsWith("hour_")) {
-                        PROGRAM_RECORDS.add(new ProgramRecord(lightSettings.getString(propertyName)));
-                    }
+                    PROGRAM_RECORDS.add(new ProgramRecord(lightSettings.getString(propertyName)));
                 }
             }
         }
