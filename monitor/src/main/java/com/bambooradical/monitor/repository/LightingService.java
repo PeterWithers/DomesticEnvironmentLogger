@@ -74,10 +74,12 @@ public class LightingService {
     public void addProgram(final ProgramRecord programRecord) {
         Key lightSettingsKey = keyFactory.newKey("defaultProgram");
         Entity lightSettingsEntity = datastore.get(lightSettingsKey);
-        if (!lightSettingsEntity.contains(programRecord.getKey())) {
+        if (lightSettingsEntity == null) {
             datastore.add(Entity.newBuilder(lightSettingsKey).set(programRecord.getKey(), programRecord.getProgramCode()).build());
-            HOURLY_PROGRAMS.clear();
+        } else if (!lightSettingsEntity.contains(programRecord.getKey())) {
+            datastore.update(Entity.newBuilder(lightSettingsKey).set(programRecord.getKey(), programRecord.getProgramCode()).build());
         }
+        HOURLY_PROGRAMS.clear();
     }
 
     public String findProgram(int hour) {
