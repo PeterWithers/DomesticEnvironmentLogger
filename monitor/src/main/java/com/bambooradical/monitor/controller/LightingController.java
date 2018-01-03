@@ -43,7 +43,7 @@ public class LightingController {
             @RequestParam(value = "programTime", required = true) final String programTime,
             @RequestParam(value = "programColour", required = true) final String programColour
     ) throws ParseException {
-        final ProgramRecord programRecord = new ProgramRecord(location, programTime, programColour.substring(1), tween);
+        final ProgramRecord programRecord = new ProgramRecord(location, programTime + "00:00:00".substring(programTime.length()), programColour.substring(1), tween);
         switch (action) {
             case "deleteProgram":
                 lightingService.deleteProgram(programRecord);
@@ -92,4 +92,3 @@ public class LightingController {
         }
     }
 }
-
