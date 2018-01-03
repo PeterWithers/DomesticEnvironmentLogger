@@ -21,7 +21,7 @@ public class ProgramRecordTest {
         assertEquals(instance1.getTime(), instance2.getTime());
         assertEquals(instance1.isTween(), instance2.isTween());
         assertEquals(instance1.getProgramCode(), instance2.getProgramCode());
-        for (String exampleCode : new String[]{"ff0000T000000;", "00ff00T000100;", "0000ffT000200;", "ff0000T000300;", "000000:000000;", "000000T000100;", "000000:000200;"}) {
+        for (String exampleCode : new String[]{"ff0000T0000000;", "00ff00T0000100;", "0000ffT0000200;", "ff0000T0000300;", "000000:0000000;", "000000T0000100;", "000000:0000200;"}) {
             ProgramRecord instance3 = new ProgramRecord(exampleCode);
             ProgramRecord instance4 = new ProgramRecord(instance3.getProgramCode());
             assertEquals(instance3.getColour(), instance4.getColour());

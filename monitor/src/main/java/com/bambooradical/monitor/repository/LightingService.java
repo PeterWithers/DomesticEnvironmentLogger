@@ -10,6 +10,7 @@ import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.KeyFactory;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import javax.annotation.PostConstruct;
@@ -58,7 +59,7 @@ public class LightingService {
     public void deleteProgram(final ProgramRecord programRecord) {
         Key lightSettingsKey = keyFactory.newKey("defaultProgram");
         Entity lightSettingsEntity = datastore.get(lightSettingsKey);
-        datastore.update(Entity.newBuilder(lightSettingsEntity).setNull(programRecord.getKey()).build());
+        datastore.update(Entity.newBuilder(lightSettingsEntity).remove(programRecord.getKey()).build());
         PROGRAM_RECORDS.clear();
     }
 
@@ -80,7 +81,7 @@ public class LightingService {
         PROGRAM_RECORDS.clear();
     }
 
-    public String findProgram(int hour) {
+    public List<ProgramRecord> findProgram(final int millisOfDay) {
         if (HOURLY_PROGRAMS.isEmpty()) {
             Key lightSettingsKey = keyFactory.newKey("defaultSettings");
             Entity lightSettings = datastore.get(lightSettingsKey);
@@ -90,6 +91,10 @@ public class LightingService {
                 }
             }
         }
-        return HOURLY_PROGRAMS.get(encodeHour(hour));
+        for (ProgramRecord programRecord : PROGRAM_RECORDS) {
+            programRecord.setOffset(millisOfDay);
+        }
+        Collections.sort(PROGRAM_RECORDS);
+        return PROGRAM_RECORDS;
     }
 }

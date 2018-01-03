@@ -67,28 +67,11 @@ public class LightingController {
             @RequestParam(value = "location", required = true) String location
     ) {
         DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
-        int hourOfDay = dateTime.getHourOfDay();
-        int minuteOfHour = dateTime.getMinuteOfHour();
-        String currentProgram = lightingService.findProgram(hourOfDay);
-        if (currentProgram == null || currentProgram.isEmpty()) {
-            int redValue = 0;
-            int greenValue = 0;
-            int blueValue = 0;
-            StringBuilder stringBuilder = new StringBuilder();
-            for (int minuteCounter = 0; minuteCounter < 60; minuteCounter++) {
-                redValue = ((minuteCounter + minuteOfHour) % 2 == 0) ? 0x00 : 0xff;
-                greenValue = 0xff / 5 * ((minuteCounter + minuteOfHour) % 5);
-                blueValue = 0xff / 15 * ((minuteCounter + minuteOfHour) % 15);
-                stringBuilder.append(String.format("%02x", redValue));
-                stringBuilder.append(String.format("%02x", greenValue));
-                stringBuilder.append(String.format("%02x", blueValue));
-                stringBuilder.append("T");
-                stringBuilder.append(String.format("%06x", minuteCounter * 60 * 1000));
-                stringBuilder.append(";");
-            }
-            return stringBuilder.toString();
-        } else {
-            return currentProgram;
+        int millisOfDay = dateTime.getMillisOfDay();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (ProgramRecord currentProgram : lightingService.findProgram(millisOfDay)) {
+            stringBuilder.append(currentProgram.getProgramCode());
         }
+        return stringBuilder.toString();
     }
 }
