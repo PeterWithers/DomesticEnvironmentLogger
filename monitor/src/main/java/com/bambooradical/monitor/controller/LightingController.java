@@ -3,7 +3,9 @@
  */
 package com.bambooradical.monitor.controller;
 
+import com.bambooradical.monitor.model.ProgramRecord;
 import com.bambooradical.monitor.repository.LightingService;
+import java.text.ParseException;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +29,7 @@ public class LightingController {
     LightingService lightingService;
 
     @RequestMapping("/showProgram")
-    public String showProgram(Model model) {
-//        String resultValue = "";
-//        for (int index = 0; index < 24; index++) {
-//            resultValue += "<a href=\"setProgram?location=&hour=" + index + "&value=" + lightingService.findProgram(index) + "\">" + index + ":" + lightingService.findProgram(index) + "</a><br/>";
-//        }
-//        resultValue += "<a href=\"currentRGB\">currentRGB</a><br/>";
+    public String showProgram(Model model) throws ParseException {
         model.addAttribute("programData", lightingService.getProgramRecords());
         return "programviewer";
     }
@@ -40,16 +37,26 @@ public class LightingController {
     @RequestMapping("/setProgram")
     public String currentRGB(
             Model model,
-            @RequestParam(value = "location", required = true) String location,
-            @RequestParam(value = "hour", required = true) int hour,
-            @RequestParam(value = "value", required = false, defaultValue = "") String value
-    ) {
-        lightingService.updateProgram(hour, value);
-        String resultValue = "";
-        for (int index = 0; index < 24; index++) {
-            resultValue += "<a href=\"setProgram?location=&hour=" + index + "&value=" + lightingService.findProgram(index) + "\">" + index + ":" + lightingService.findProgram(index) + "</a><br/>";
+            @RequestParam(value = "action", required = true) final String action,
+            @RequestParam(value = "location", required = true) final String location,
+            @RequestParam(value = "tween", required = true) final boolean tween,
+            @RequestParam(value = "programTime", required = true) final String programTime,
+            @RequestParam(value = "programColour", required = true) final String programColour
+    ) throws ParseException {
+        final ProgramRecord programRecord = new ProgramRecord(location, programTime, programColour, tween);
+        switch (action) {
+            case "deleteProgram":
+                lightingService.deleteProgram(programRecord);
+                break;
+            case "updateProgram":
+                lightingService.updateProgram(programRecord);
+                break;
+            case "addProgram":
+                lightingService.addProgram(programRecord);
+                break;
         }
-        return resultValue;
+        model.addAttribute("programData", lightingService.getProgramRecords());
+        return "programviewer";
     }
 
     @RequestMapping(value = "/currentRGB",

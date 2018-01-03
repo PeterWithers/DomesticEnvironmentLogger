@@ -14,21 +14,36 @@
     <body>
         <div th:each="programRecord : ${programData}">
             <form action="setProgram">
-                <button type="submit" name="deleteProgram">Delete</button>
+                <button type="submit" name="action" value="deleteProgram">Delete</button>
                 <select id="location" name="location">
                     <option value="aquarium">aquarium</option>
                 </select>
                 <select id="tween" name="tween">
-                    <option value="liner">linear</option>
-                    <option value="step">step</option>
+                    <option value="true">linear</option>
+                    <option value="false">step</option>
                 </select>
-                <input id="programTime" name="programTime" type="time" th:value="${programRecord.getTime()}" />
+                <input id="programTime" name="programTime" type="hidden" th:value="${programRecord.getTime()}" />
+                <span th:value="${programRecord.getTime()}" />
                 <input id="programColour" name="programColour" type="color" th:value="${'#' + programRecord.getColour()}"/>
-                <button type="submit" name="updateProgram">Add</button>
+                <button type="submit" name="action" value="updateProgram">Update</button>
+                <br/>
+            </form>
+        </div> 
+        <div>
+            <form action="setProgram">
+                <select name="location">
+                    <option value="aquarium">aquarium</option>
+                </select>
+                <select name="tween">
+                    <option value="true">linear</option>
+                    <option value="false">step</option>
+                </select>
+                <input name="programTime" type="time" step="1"/>
+                <input name="programColour" type="color"/>
+                <button type="submit" name="action" value="addProgram">Add</button>
                 <br/>
             </form>
         </div> 
     </body>
 </html>
-
 
