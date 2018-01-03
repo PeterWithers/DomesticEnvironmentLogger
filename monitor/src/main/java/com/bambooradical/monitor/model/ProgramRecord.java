@@ -21,7 +21,7 @@ public class ProgramRecord {
 
     public ProgramRecord(String programCode) throws ParseException {
         this.location = "FromProgramCode";
-        this.milliseconds = Integer.parseInt(programCode.substring(7, 14), 16);
+        this.milliseconds = Integer.parseInt(programCode.substring(7, 13), 16);
         this.colour = programCode.substring(0, 6);
         this.tween = "T".equals(programCode.substring(6, 7));
     }
