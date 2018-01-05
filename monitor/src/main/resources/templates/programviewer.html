@@ -12,6 +12,7 @@
         <script src="/js/jquery.min.js"></script>
     </head>
     <body>
+      <div>
         <div th:each="programRecord : ${programData}">
             <form action="setProgram">
                 <button type="submit" name="action" value="deleteProgram">Delete</button>
@@ -44,6 +45,8 @@
                 <br/>
             </form>
         </div> 
+        <div th:style="${programStyle}"></div>
+      </div>
     </body>
 </html>
 

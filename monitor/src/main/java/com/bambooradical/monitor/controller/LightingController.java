@@ -31,6 +31,7 @@ public class LightingController {
     @RequestMapping("/showProgram")
     public String showProgram(Model model) throws ParseException {
         model.addAttribute("programData", lightingService.getProgramRecords());
+        model.addAttribute("programStyle", getCssGradient());
         return "programviewer";
     }
 
@@ -56,7 +57,28 @@ public class LightingController {
                 break;
         }
         model.addAttribute("programData", lightingService.getProgramRecords());
-        return "programviewer";
+        return "redirect:showProgram";
+    }
+
+    private String getCssGradient() {
+        DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
+        int millisOfDay = dateTime.getMillisOfDay();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("height: 864px; background: linear-gradient(");
+        boolean isFirst = true;
+        for (ProgramRecord currentProgram : lightingService.findProgram(millisOfDay)) {
+            if (!isFirst) {
+                stringBuilder.append(", ");
+            }
+            isFirst = false;
+            stringBuilder.append("#");
+            stringBuilder.append(currentProgram.getColour());
+            stringBuilder.append(" ");
+            stringBuilder.append(currentProgram.getOffsetMilliseconds() / 100000.0);
+            stringBuilder.append("px");
+        }
+        stringBuilder.append(");");
+        return stringBuilder.toString();
     }
 
     @RequestMapping(value = "/currentRGB",
