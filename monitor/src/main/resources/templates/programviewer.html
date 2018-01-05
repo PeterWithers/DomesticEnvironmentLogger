@@ -20,8 +20,8 @@
                     <option value="aquarium">aquarium</option>
                 </select>
                 <select id="tween" name="tween">
-                    <option value="true">linear</option>
-                    <option value="false">step</option>
+                    <option value="true" th:selected="${(programRecord.isTween())?'true':'false';}">tween</option>
+                    <option value="false" th:selected="${(programRecord.isTween())?'false':'true';}">step</option>
                 </select>
                 <input id="programTime" name="programTime" type="hidden" th:value="${programRecord.getTime()}" />
                 <span th:text="${programRecord.getTime()}" />
