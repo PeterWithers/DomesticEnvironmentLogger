@@ -66,16 +66,28 @@ public class LightingController {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("height: 864px; background: linear-gradient(");
         boolean isFirst = true;
+        double previousY = 0;
+        String previousColour = "";
         for (ProgramRecord currentProgram : lightingService.findProgram(millisOfDay)) {
+            final double currentY = currentProgram.getOffsetMilliseconds() / 100000.0;
             if (!isFirst) {
                 stringBuilder.append(", ");
+                if (!currentProgram.isTween() && currentY - previousY > 1) {
+                    stringBuilder.append("#");
+                    stringBuilder.append(previousColour);
+                    stringBuilder.append(" ");
+                    stringBuilder.append(previousY + 1);
+                    stringBuilder.append("px, ");
+                }
             }
             isFirst = false;
             stringBuilder.append("#");
             stringBuilder.append(currentProgram.getColour());
             stringBuilder.append(" ");
-            stringBuilder.append(currentProgram.getOffsetMilliseconds() / 100000.0);
+            stringBuilder.append(currentY);
             stringBuilder.append("px");
+            previousY = currentY;
+            previousColour = currentProgram.getColour();
         }
         stringBuilder.append(");");
         return stringBuilder.toString();
