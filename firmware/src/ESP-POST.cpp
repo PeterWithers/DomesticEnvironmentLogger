@@ -480,12 +480,12 @@ void loop() {
                     analogWrite(BLUE_LED_PIN, tweenedBlue);
                 }
             } else {
-                analogWrite(RED_LED_PIN, segmentRGB[segmentIndex].redValue);
-                analogWrite(GREEN_LED_PIN, segmentRGB[segmentIndex].greenValue);
-                analogWrite(BLUE_LED_PIN, segmentRGB[segmentIndex].blueValue);
-                if (segmentIndex != segmentMessageIndex) {
-                    sendMessage(String("I") + segmentIndex + "%20R" + String(segmentRGB[segmentIndex].redValue, HEX) + "%20G" + String(segmentRGB[segmentIndex].greenValue, HEX) + "%20B" + String(segmentRGB[segmentIndex].blueValue, HEX));
-                    segmentMessageIndex = segmentIndex;
+                analogWrite(RED_LED_PIN, segmentRGB[segmentPreviousIndex].redValue);
+                analogWrite(GREEN_LED_PIN, segmentRGB[segmentPreviousIndex].greenValue);
+                analogWrite(BLUE_LED_PIN, segmentRGB[segmentPreviousIndex].blueValue);
+                if (segmentPreviousIndex != segmentMessageIndex) {
+                    sendMessage(String("I") + segmentPreviousIndex + "%20R" + String(segmentRGB[segmentPreviousIndex].redValue, HEX) + "%20G" + String(segmentRGB[segmentPreviousIndex].greenValue, HEX) + "%20B" + String(segmentRGB[segmentPreviousIndex].blueValue, HEX));
+                    segmentMessageIndex = segmentPreviousIndex;
                 }
             }
             break;
