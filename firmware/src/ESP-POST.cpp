@@ -108,7 +108,7 @@ struct SegmentRGB {
 SegmentRGB segmentRGB[SEGMENTSIZE];
 long segmentMillisOffset = 0;
 int segmentPreviousIndex = 0;
-int segmentMessageIndex = 0;
+int segmentMessageIndex = -1;
 
 void sendMessage(String messageString) {
     WiFiClientSecure client;
@@ -189,7 +189,7 @@ void requestRGB(String locationString) {
                                 String blueString = line.substring(substringIndex + 5, substringIndex + 7);
                                 String delayString = line.substring(substringIndex + 8, substringIndex + 15);
                                 //sendMessage(redString + "-" + greenString + "-" + blueString + "-" + delayString);
-                                parsedValues = parsedValues + redString + "-" + greenString + "-" + blueString + "-" + delayString + "_";
+                                parsedValues = parsedValues + segmentIndex + "_" + redString + "-" + greenString + "-" + blueString + "_" + delayString + "%0A";
                                 int redValue = (int) strtol(redString.c_str(), NULL, 16);
                                 int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
                                 int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
@@ -484,7 +484,7 @@ void loop() {
                 analogWrite(GREEN_LED_PIN, segmentRGB[segmentIndex].greenValue);
                 analogWrite(BLUE_LED_PIN, segmentRGB[segmentIndex].blueValue);
                 if (segmentIndex != segmentMessageIndex) {
-                    sendMessage(segmentIndex + "%20R" + segmentRGB[segmentIndex].redValue + "%20G" + segmentRGB[segmentIndex].greenValue + "%20B" + segmentRGB[segmentIndex].blueValue);
+                    sendMessage("I" + segmentIndex + "%20R" + segmentRGB[segmentIndex].redValue + "%20G" + segmentRGB[segmentIndex].greenValue + "%20B" + segmentRGB[segmentIndex].blueValue);
                     segmentMessageIndex = segmentIndex;
                 }
             }
