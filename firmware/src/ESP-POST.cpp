@@ -484,7 +484,7 @@ void loop() {
                 analogWrite(GREEN_LED_PIN, segmentRGB[segmentIndex].greenValue);
                 analogWrite(BLUE_LED_PIN, segmentRGB[segmentIndex].blueValue);
                 if (segmentIndex != segmentMessageIndex) {
-                    sendMessage("I" + segmentIndex + "%20R" + segmentRGB[segmentIndex].redValue + "%20G" + segmentRGB[segmentIndex].greenValue + "%20B" + segmentRGB[segmentIndex].blueValue);
+                    sendMessage(String("I") + segmentIndex + "%20R" + String(segmentRGB[segmentIndex].redValue, HEX) + "%20G" + String(segmentRGB[segmentIndex].greenValue, HEX) + "%20B" + String(segmentRGB[segmentIndex].blueValue, HEX));
                     segmentMessageIndex = segmentIndex;
                 }
             }
