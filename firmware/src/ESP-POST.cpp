@@ -193,7 +193,7 @@ void requestRGB(String locationString) {
                                 int redValue = (int) strtol(redString.c_str(), NULL, 16);
                                 int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
                                 int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
-                                long delayValue = strtol(delayString.c_str(), NULL, 32);
+                                long delayValue = strtol(delayString.c_str(), NULL, 16);
                                 segmentRGB[segmentIndex].duration = delayValue;
                                 segmentRGB[segmentIndex].redValue = redValue;
                                 segmentRGB[segmentIndex].greenValue = greenValue;
