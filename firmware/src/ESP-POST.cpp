@@ -107,6 +107,7 @@ struct SegmentRGB {
 #define SEGMENTSIZE 100
 SegmentRGB segmentRGB[SEGMENTSIZE];
 long segmentMillisOffset = 0;
+int segmentPreviousIndex = 0;
 
 void sendMessage(String messageString) {
     WiFiClientSecure client;
@@ -170,6 +171,7 @@ void requestRGB(String locationString) {
             return;
         }
     }
+    long requestMillisOffset = millis();
     String parsedValues = "";
     //String receivedValues = "";
     int segmentIndex = 0;
@@ -204,12 +206,12 @@ void requestRGB(String locationString) {
             }
         }
     }
-
     if (segmentIndex > 0) {
         if (segmentIndex < SEGMENTSIZE) {
             segmentRGB[segmentIndex].duration = -1;
         }
-        segmentMillisOffset = millis();
+        segmentPreviousIndex = segmentIndex - 1;
+        segmentMillisOffset = requestMillisOffset;
         sendMessage(parsedValues);
     } else {
         sendMessage("no parsedValues");
@@ -449,21 +451,26 @@ void loop() {
         requestRGBButtonChanged = 0;
     }
 #ifdef GREEN_LED_PIN
-    int lastRed = 0;
-    int lastGreen = 0;
-    int lastBlue = 0;
-    int lastDuration = 0;
     long segmentDuration = millis() - segmentMillisOffset;
     for (int segmentIndex = 0; segmentIndex < SEGMENTSIZE; segmentIndex++) {
         if (segmentRGB[segmentIndex].duration == -1) {
+            segmentPreviousIndex = segmentIndex - 1;
             segmentMillisOffset = millis();
             break;
         } else if (segmentRGB[segmentIndex].duration > segmentDuration) {
             if (segmentRGB[segmentIndex].tween) {
+                int lastRed = segmentRGB[segmentPreviousIndex].redValue;
+                int lastGreen = segmentRGB[segmentPreviousIndex].greenValue;
+                int lastBlue = segmentRGB[segmentPreviousIndex].blueValue;
+                int lastDuration = segmentRGB[segmentPreviousIndex].duration;
                 float durationDifference = segmentRGB[segmentIndex].duration - lastDuration;
+                if (durationDifference < 0) {
+                    durationDifference = segmentRGB[segmentIndex].duration;
+                    lastDuration = 0;
+                }
                 float durationPortion = segmentDuration - lastDuration;
                 if (durationDifference > 0) {
-                    // this method is overly simplistic and does not consider colour space gradients, but it might be adequate
+                    // this method of gradients is overly simplistic and does not consider colour space rotation, but it might be adequate
                     int tweenedRed = (int) ((segmentRGB[segmentIndex].redValue - lastRed) / durationDifference * durationPortion) + lastRed;
                     int tweenedGreen = (int) ((segmentRGB[segmentIndex].greenValue - lastGreen) / durationDifference * durationPortion) + lastGreen;
                     int tweenedBlue = (int) ((segmentRGB[segmentIndex].blueValue - lastBlue) / durationDifference * durationPortion) + lastBlue;
@@ -478,10 +485,7 @@ void loop() {
             }
             break;
         } else {
-            lastRed = segmentRGB[segmentIndex].redValue;
-            lastGreen = segmentRGB[segmentIndex].greenValue;
-            lastBlue = segmentRGB[segmentIndex].blueValue;
-            lastDuration = segmentRGB[segmentIndex].duration;
+            segmentPreviousIndex = segmentIndex;
         }
     }
 #endif
