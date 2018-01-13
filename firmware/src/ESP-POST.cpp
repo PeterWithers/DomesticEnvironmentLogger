@@ -143,7 +143,7 @@ void sendMessage(String messageString) {
     }
 }
 
-void requestRGB(String locationString) {
+void requestRGB(String locationString, bool refresh) {
     WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
         sendMessage("connection%20failed%20requestRGB");
@@ -152,6 +152,7 @@ void requestRGB(String locationString) {
     String connectionString = "GET ";
     connectionString += "/monitor/currentRGB?location=";
     connectionString += locationString;
+    connectionString += (refresh) ? "&refresh=true" : "";
     connectionString += " HTTP/1.1\r\n";
     connectionString += "Host: ";
     connectionString += reportingServer;
@@ -406,7 +407,7 @@ void loop() {
         //Serial.println(WiFi.localIP());
         sendMonitoredData();
 #ifdef GREEN_LED_PIN
-        requestRGB(locationString);
+        requestRGB(locationString, false);
 #endif
         lastDataSentMs = millis();
     }
@@ -448,7 +449,7 @@ void loop() {
     }
     if (requestRGBButtonChanged > 0) {
         sendMessage("requestRGBButton");
-        requestRGB(locationString);
+        requestRGB(locationString, true);
         requestRGBButtonChanged = 0;
     }
 #ifdef GREEN_LED_PIN
