@@ -98,14 +98,26 @@ public class LightingController {
             produces = {MediaType.TEXT_PLAIN_VALUE})
     @ResponseBody
     public String currentRGB(
-            @RequestParam(value = "location", required = true) String location
+            @RequestParam(value = "location", required = true) String location,
+            @RequestParam(value = "refresh", required = false, defaultValue = "false") boolean refresh
     ) {
-        if (needsUpdate) {
+        if (needsUpdate || refresh) {
             DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
             int millisOfDay = dateTime.getMillisOfDay();
             StringBuilder stringBuilder = new StringBuilder();
+            ProgramRecord firstRecord = null;
+            ProgramRecord lastRecord = null;
             for (ProgramRecord currentProgram : lightingService.findProgram(millisOfDay)) {
+                if (firstRecord == null) {
+                    firstRecord = currentProgram;
+                }
+                lastRecord = currentProgram;
                 stringBuilder.append(currentProgram.getProgramCode());
+            }
+            if (lastRecord != null) {
+                int millisecondsPerDay = 0x5265C00; //86400000;
+                // todo: this colour should be tweened with firstRecord if the tween is active
+                stringBuilder.append(new ProgramRecord(lastRecord.getLocation(), millisecondsPerDay, lastRecord.getColour(), lastRecord.isTween()).getProgramCode());
             }
             needsUpdate = false;
             return stringBuilder.toString();
