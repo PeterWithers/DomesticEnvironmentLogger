@@ -28,6 +28,8 @@ public class LightingController {
     @Autowired
     LightingService lightingService;
 
+    static private boolean needsUpdate = true;
+
     @RequestMapping("/showProgram")
     public String showProgram(Model model) throws ParseException {
         model.addAttribute("programData", lightingService.getProgramRecords());
@@ -56,7 +58,7 @@ public class LightingController {
                 lightingService.addProgram(programRecord);
                 break;
         }
-        model.addAttribute("programData", lightingService.getProgramRecords());
+        needsUpdate = true;
         return "redirect:showProgram";
     }
 
@@ -98,12 +100,17 @@ public class LightingController {
     public String currentRGB(
             @RequestParam(value = "location", required = true) String location
     ) {
-        DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
-        int millisOfDay = dateTime.getMillisOfDay();
-        StringBuilder stringBuilder = new StringBuilder();
-        for (ProgramRecord currentProgram : lightingService.findProgram(millisOfDay)) {
-            stringBuilder.append(currentProgram.getProgramCode());
+        if (needsUpdate) {
+            DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
+            int millisOfDay = dateTime.getMillisOfDay();
+            StringBuilder stringBuilder = new StringBuilder();
+            for (ProgramRecord currentProgram : lightingService.findProgram(millisOfDay)) {
+                stringBuilder.append(currentProgram.getProgramCode());
+            }
+            needsUpdate = false;
+            return stringBuilder.toString();
+        } else {
+            return "";
         }
-        return stringBuilder.toString();
     }
 }
