@@ -399,6 +399,7 @@ void setup() {
     segmentRGB[7].greenValue = 0;
     segmentRGB[7].duration = -1;
     segmentRGB[7].tween = false;
+    requestRGB(locationString, true);
 }
 
 void loop() {
