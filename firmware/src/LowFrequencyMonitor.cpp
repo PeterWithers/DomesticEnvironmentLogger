@@ -16,6 +16,9 @@
 Sodaq_BMP085 pressureSensor;
 arduinoFFT FFT = arduinoFFT();
 
+#define SdaPin           12
+#define SclPin           14
+
 double baselinePressure;
 
 const uint16_t samples = 64;
