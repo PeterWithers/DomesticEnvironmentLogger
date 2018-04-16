@@ -1,0 +1,62 @@
+/*
+ * Copyright (C) 2018 Peter Withers
+ */
+
+/*
+ * LowFrequencyMonitor.cpp
+ *
+ * Created: 16/04/2018 20:44
+ * Author : Peter Withers <peter-gthb@bambooradical.com>
+ */
+
+#include <Sodaq_BMP085.h>
+#include <Wire.h>
+#include <arduinoFFT.h>
+
+Sodaq_BMP085 pressureSensor;
+arduinoFFT FFT = arduinoFFT();
+
+double baselinePressure;
+
+const uint16_t samples = 64;
+const double signalFrequency = 50;
+const double samplingFrequency = 120;
+const uint8_t amplitude = 100;
+
+double arrayReal[samples];
+double arrayImag[samples];
+
+int sampleIndex = 0;
+
+void setup() {
+    Serial.begin(115200);
+    Serial.println("LowFrequencyMonitor");
+
+    Wire.pins(SdaPin, SclPin);
+    pressureSensor.begin();
+    baselinePressure = pressureSensor.readPressure();
+    Serial.print("baseline pressure: ");
+    Serial.print(baselinePressure);
+    Serial.println(" mb");
+}
+
+void loop() {
+    unsigned long lastMs = millis();
+    double temperature = pressureSensor.readTemperature();
+    double pressure = pressureSensor.readPressure();
+    double altitude = pressureSensor.readAltitude(baselinePressure);
+    sampleIndex++;
+    if (sampleIndex >= samples) {
+        sampleIndex = 0;
+        Serial.print("baseline pressure: ");
+        Serial.print(temperature);
+        Serial.println(" c");
+        Serial.print(pressure);
+        Serial.println(" mb");
+        Serial.print(altitude);
+        Serial.println(" m");
+        Serial.print(millis());
+        Serial.println(" ms");
+    }
+    while (lastMs + 10 > millis()); /* attempt to sample at 100hz */
+}
