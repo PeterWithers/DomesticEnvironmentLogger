@@ -46,6 +46,7 @@ void loop() {
     double temperature = pressureSensor.readTemperature();
     double pressure = pressureSensor.readPressure();
     double altitude = pressureSensor.readAltitude(baselinePressure);
+    double cycles = (((samples - 1) * signalFrequency) / samplingFrequency);
     for (int sampleIndex = 0; sampleIndex < samples; sampleIndex++) {
         arrayReal[sampleIndex] = pressureSensor.readPressure();
         arrayImag[sampleIndex] = 0.0;
@@ -60,4 +61,11 @@ void loop() {
     Serial.println(" m");
     Serial.print(millis());
     Serial.println(" ms");
+
+    FFT.Windowing(arrayReal, samples, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+    FFT.Compute(arrayReal, arrayImag, samples, FFT_FORWARD);
+    FFT.ComplexToMagnitude(arrayReal, arrayImag, samples);
+    double x = FFT.MajorPeak(arrayReal, samples, samplingFrequency);
+    Serial.println(x, 6);
+    delay(2000);
 }
