@@ -15,6 +15,7 @@
 #include <Adafruit_Sensor.h>
 #include <DHT.h>
 #include <DHT_U.h>
+#include "LowFrequencyMonitor.h"
 
 const char* ssid = "";
 const char* password = "";
@@ -77,6 +78,12 @@ String locationString = "aquarium";
 #define DS18b20_PIN         0
  */
 
+String locationString = "pressure%20monitor";
+#define PRESSURE_MONITOR
+#define SdaPin              12
+#define SclPin              14
+#define BUTTONPIN           5
+
 /*
 String locationString = "second%20testing%20board";
 #define POWER_DHT_VIA_GPIO
@@ -95,7 +102,9 @@ String locationString = "second%20testing%20board";
 ADC_MODE(ADC_VCC);
 #endif
 
+#ifdef DHTPIN
 DHT_Unified dht(DHTPIN, DHTTYPE);
+#endif
 
 struct SegmentRGB {
     int redValue;
@@ -224,9 +233,10 @@ void sendMonitoredData() {
     String errorString = "";
     //Serial.println(reportingServer);
     String url = "/monitor/add?temperature=";
+    String telemetryString = "";
+#ifdef DHTPIN
     sensors_event_t event;
     dht.temperature().getEvent(&event);
-    String telemetryString = "";
     if (isnan(event.temperature)) {
         telemetryString += "Error reading temperature<br/>";
         errorString += "Error%20reading%20temperature. ";
@@ -249,6 +259,7 @@ void sendMonitoredData() {
         telemetryString += "%<br/>";
         url += event.relative_humidity;
     }
+#endif
     telemetryString += "ADC: ";
     telemetryString += analogRead(A0);
     telemetryString += "<br/>";
@@ -318,6 +329,10 @@ void externalButton2ChangeInterrupt() {
 }
 
 void setup() {
+#ifdef PRESSURE_MONITOR
+    Serial.begin(115200);
+    startPressureMonitor(SdaPin, SclPin);
+#endif
 #ifndef BUTTON_MESSAGE
     //Serial.begin(115200);
 #endif
@@ -353,12 +368,15 @@ void setup() {
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        //Serial.println(".");
+        Serial.println(".");
     }
     //Serial.println("Connected: ");
     //Serial.println(ssid);
+#ifdef DHTPIN
     dht.begin();
+#endif
     sendMessage(startMessage);
+#ifdef GREEN_LED_PIN
     segmentRGB[0].blueValue = 0;
     segmentRGB[0].redValue = 0;
     segmentRGB[0].greenValue = 0;
@@ -400,6 +418,7 @@ void setup() {
     segmentRGB[7].duration = -1;
     segmentRGB[7].tween = false;
     requestRGB(locationString, true);
+#endif
 }
 
 void loop() {
@@ -494,6 +513,12 @@ void loop() {
         } else {
             segmentPreviousIndex = segmentIndex;
         }
+    }
+#endif
+#ifdef PRESSURE_MONITOR
+    acquirePressureData();
+    if (interestingPressureData()) {
+        sendMessage(serialisePressureData());
     }
 #endif
     delay(10);
