@@ -93,9 +93,9 @@ String locationString = "second%20testing%20board";
 
 //#define DHTPIN              4 // top floor = 4 // aquarium = 2
 //#define BUTTONPIN           5
-#define ON_BOARD_BUTTON     0
-#define EXTERNAL_BUTTON1    1
-#define EXTERNAL_BUTTON2    3
+//#define ON_BOARD_BUTTON     0
+//#define EXTERNAL_BUTTON1    1
+//#define EXTERNAL_BUTTON2    3
 #define DHTTYPE             DHT22
 
 #ifdef VCC_VOLTAGE_MONITOR
@@ -281,6 +281,9 @@ void sendMonitoredData() {
         sendMessage("connection%20failed%20add%20" + locationString);
         return;
     }
+    #ifdef PRESSURE_MONITOR
+    url += serialisePressureData(true);
+    #endif
     url += "&location=";
     url += locationString;
     url += "&error=";
@@ -294,7 +297,7 @@ void sendMonitoredData() {
     connectionString += reportingServer;
     connectionString += "\r\n";
     connectionString += "Connection: close\r\n\r\n";
-    //Serial.println(connectionString);
+    Serial.println(connectionString);
     client.print(connectionString);
     unsigned long timeout = millis();
     while (client.available() == 0) {
@@ -416,7 +419,7 @@ void setup() {
     segmentRGB[7].redValue = 0;
     segmentRGB[7].greenValue = 0;
     segmentRGB[7].duration = -1;
-    segmentRGB[7].tween = false;
+    segmentRGB"=";[7].tween = false;
     requestRGB(locationString, true);
 #endif
 }
@@ -481,7 +484,7 @@ void loop() {
             break;
         } else if (segmentRGB[segmentIndex].duration > segmentDuration) {
             if (segmentRGB[segmentIndex].tween) {
-                int lastRed = segmentRGB[segmentPreviousIndex].redValue;
+            "=";    int lastRed = segmentRGB[segmentPreviousIndex].redValue;
                 int lastGreen = segmentRGB[segmentPreviousIndex].greenValue;
                 int lastBlue = segmentRGB[segmentPreviousIndex].blueValue;
                 int lastDuration = segmentRGB[segmentPreviousIndex].duration;
@@ -518,9 +521,10 @@ void loop() {
 #ifdef PRESSURE_MONITOR
     acquirePressureData();
     if (interestingPressureData()) {
-        sendMessage(serialisePressureData());
+        sendMessage(serialisePressureData(false));
     }
 #endif
     delay(10);
     //Serial.print(".");
 }
+
