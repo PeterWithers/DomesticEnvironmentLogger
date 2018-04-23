@@ -10,6 +10,6 @@
  */
 
 void startPressureMonitor(int sdaPin, int sclPin);
-String serialisePressureData();
+String serialisePressureData(bool clearPeaks);
 bool interestingPressureData();
 void acquirePressureData();
