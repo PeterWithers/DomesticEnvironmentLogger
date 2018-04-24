@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--
+ * Copyright (C) 2018 Peter Withers
+ * @since Apr 24, 2018 22:12 PM (creation date)
+ * @author Peter Withers <peter-gthb@bambooradical.com>
+-->
+<html>
+    <head>
+        <title>Spectragram</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="/js/jquery.min.js"></script>
+        <script src="./js/jquery.min.js"></script>
+        <script>
+            var sampleData = {"12:19":"0.00Hz 1139.17\n2.22Hz 504.44\n4.44Hz 294.64\n6.66Hz 253.61\n8.88Hz 205.20\n11.09Hz 164.04\n13.31Hz 135.18\n15.53Hz 107.5\n17.75Hz 98.60\n19.97Hz 88.96\n22.19Hz 83.52\n24.41Hz 80.91\n26.62Hz 78.57\n28.84Hz 64.71\n31.06Hz 54.07\n33.28Hz 77.96\n35.50Hz 104.6\n37.72Hz 102.7\n39.94Hz 97.12\n42.16Hz 84.50\n44.38Hz 88.25\n46.59Hz 82.41\n48.81Hz 82.24\n51.03Hz 80.47\n53.25Hz 75.99\n55.47Hz 72.93\n57.69Hz 79.43\n59.91Hz 86.99\n62.13Hz 96.35\n64.34Hz 88.90\n66.56Hz 82.80\n68.78Hz 114.48\n",
+                    "12:19_maxMsError":"2",
+                    "12:39":"0.00Hz 1257.62\n2.22Hz 561.51\n4.44Hz 251.79\n6.66Hz 212.71\n8.88Hz 170.65\n11.09Hz 118.89\n13.31Hz 106.60\n15.53Hz 132.50\n17.75Hz 130.47\n19.97Hz 108.57\n22.19Hz 72.96\n24.41Hz 75.63\n26.62Hz 67.41\n28.84Hz 76.74\n31.06Hz 84.01\n33.28Hz 65.38\n35.50Hz 56.10\n37.72Hz 52.79\n39.94Hz 67.39\n42.16Hz 79.19\n44.38Hz 70.40\n46.59Hz 61.94\n48.81Hz 62.19\n51.03Hz 58.52\n53.25Hz 67.64\n55.47Hz 82.93\n57.69Hz 85.74\n59.91Hz 81.93\n62.13Hz 77.43\n64.34Hz 76.02\n66.56Hz 88.22\n68.78Hz 101.18\n",
+                    "12:39_maxMsError":"2",
+                    "12:59":"0.00Hz 366.09\n2.22Hz 343.86\n4.44Hz 299.00\n6.66Hz 249.35\n8.88Hz 187.01\n11.09Hz 127.39\n13.31Hz 69.37\n15.53Hz 60.57\n17.75Hz 42.08\n19.97Hz 56.33\n22.19Hz 64.03\n24.41Hz 52.19\n26.62Hz 46.57\n28.84Hz 59.45\n31.06Hz 69.52\n33.28Hz 57.41\n35.50Hz 72.15\n37.72Hz 71.72\n39.94Hz 72.64\n42.16Hz 71.20\n44.38Hz 69.56\n46.59Hz 74.89\n48.81Hz 80.53\n51.03Hz 85.13\n53.25Hz 75.14\n55.47Hz 81.65\n57.69Hz 86.49\n59.91Hz 132.07\n62.13Hz 153.15\n64.34Hz 154.24\n66.56Hz 138.66\n68.78Hz 120.81\n",
+                    "12:59_maxMsError":"2",
+                    "13:19":"0.00Hz 511.87\n2.22Hz 447.8\n4.44Hz 349.4\n6.66Hz 238.2\n8.88Hz 97.94\n11.09Hz 72.52\n13.31Hz 67.73\n15.53Hz 85.86\n17.75Hz 58.99\n19.97Hz 52.73\n22.19Hz 50.22\n24.41Hz 100.2\n26.62Hz 110.4\n28.84Hz 92.21\n31.06Hz 67.49\n33.28Hz 49.04\n35.50Hz 50.40\n37.72Hz 66.41\n39.94Hz 61.61\n42.16Hz 54.06\n44.38Hz 44.36\n46.59Hz 54.89\n48.81Hz 48.56\n51.03Hz 49.46\n53.25Hz 49.03\n55.47Hz 45.64\n57.69Hz 53.74\n59.91Hz 62.31\n62.13Hz 66.10\n64.34Hz 75.59\n66.56Hz 76.54\n68.78Hz 73.86\n",
+                    "13:19_maxMsError":"2",
+                    "13:39":"0.00Hz 853.25\n2.22Hz 370.97\n4.44Hz 234.48\n6.66Hz 215.05\n8.88Hz 197.56\n11.09Hz 168.05\n13.31Hz 132.0\n15.53Hz 100.1\n17.75Hz 61.48\n19.97Hz 59.44\n22.19Hz 50.39\n24.41Hz 46.78\n26.62Hz 57.22\n28.84Hz 58.52\n31.06Hz 60.01\n33.28Hz 65.34\n35.50Hz 53.44\n37.72Hz 41.87\n39.94Hz 42.00\n42.16Hz 40.23\n44.38Hz 38.76\n46.59Hz 42.68\n48.81Hz 53.24\n51.03Hz 61.13\n53.25Hz 57.81\n55.47Hz 59.98\n57.69Hz 64.38\n59.91Hz 54.71\n62.13Hz 44.88\n64.34Hz 46.40\n66.56Hz 33.08\n68.78Hz 20.13\n",
+                    "13:39_maxMsError":"2",
+                    "13:59":"0.00Hz 496.21\n2.22Hz 475.69\n4.44Hz 406.22\n6.66Hz 293.96\n8.88Hz 164.13\n11.09Hz 70.52\n13.31Hz 59.54\n15.53Hz 103.9\n17.75Hz 110.0\n19.97Hz 91.54\n22.19Hz 57.11\n24.41Hz 28.18\n26.62Hz 40.32\n28.84Hz 60.63\n31.06Hz 57.14\n33.28Hz 33.06\n35.50Hz 37.15\n37.72Hz 49.56\n39.94Hz 50.99\n42.16Hz 39.97\n44.38Hz 49.78\n46.59Hz 32.73\n48.81Hz 35.97\n51.03Hz 43.89\n53.25Hz 49.94\n55.47Hz 39.04\n57.69Hz 28.71\n59.91Hz 29.17\n62.13Hz 37.26\n64.34Hz 41.94\n66.56Hz 42.97\n68.78Hz 37.17\n",
+                    "13:59_maxMsError":"2",
+                    "14:19":"0.00Hz 344.05\n2.22Hz 239.78\n4.44Hz 228.21\n6.66Hz 194.27\n8.88Hz 158.16\n11.09Hz 127.7\n13.31Hz 95.25\n15.53Hz 59.68\n17.75Hz 41.23\n19.97Hz 40.34\n22.19Hz 33.75\n24.41Hz 37.12\n26.62Hz 49.78\n28.84Hz 51.69\n31.06Hz 37.76\n33.28Hz 28.24\n35.50Hz 20.04\n37.72Hz 25.36\n39.94Hz 23.76\n42.16Hz 24.91\n44.38Hz 24.76\n46.59Hz 27.32\n48.81Hz 31.80\n51.03Hz 33.41\n53.25Hz 31.73\n55.47Hz 30.36\n57.69Hz 28.42\n59.91Hz 29.80\n62.13Hz 25.50\n64.34Hz 26.72\n66.56Hz 29.17\n68.78Hz 28.79\n",
+                    "14:19_maxMsError":"2",
+                    "14:39":"0.00Hz 1606.37\n2.22Hz 751.57\n4.44Hz 294.66\n6.66Hz 261.34\n8.88Hz 200.94\n11.09Hz 143.33\n13.31Hz 86.09\n15.53Hz 68.24\n17.75Hz 72.85\n19.97Hz 91.43\n22.19Hz 102.11\n24.41Hz 94.26\n26.62Hz 82.25\n28.84Hz 74.99\n31.06Hz 63.48\n33.28Hz 47.04\n35.50Hz 45.85\n37.72Hz 49.85\n39.94Hz 55.15\n42.16Hz 63.62\n44.38Hz 76.90\n46.59Hz 83.81\n48.81Hz 80.16\n51.03Hz 74.16\n53.25Hz 68.92\n55.47Hz 87.44\n57.69Hz 96.63\n59.91Hz 96.74\n62.13Hz 93.88\n64.34Hz 84.92\n66.56Hz 60.40\n68.78Hz 45.80\n", "14:39_maxMsError":"2",
+            };
+            $(document).ready(function (){
+            $.getJSON('/monitor/magnitudes?location=pressure%20monitor', 
+			    function(data){
+				    $.each(data, 
+						    function(key1,value1){ 
+            //$.each(sampleData, function(key1, value1) {
+            if (!key1.endsWith('maxMsError')){
+            $('#targetTableTitles').append('<td>' + key1 + '</td>');
+            $.each(value1.split(';'), function(key2, value2) {
+            var splitValue2 = value2.split(' ');
+            if (splitValue2.length > 1){
+            var idKey = 'k' + splitValue2[0].replace('.', '-');
+            if ($('#' + idKey).length === 0) {
+            $('#targetTable tr:first').after('<tr id="' + idKey + '">');
+            $('#' + idKey).append('<td>' + splitValue2[0] + '</td>');
+            }
+            $('#' + idKey + ' td:last').after('<td style="background:rgb('+Math.round(splitValue2[1]/8)+', 0, '+(255-Math.round(splitValue2[1]/2))+');">' + splitValue2[1] + '</td>');
+            //$('#targetTable').append('<tr>').append('<td>').attr('style', 'background:green;').text(key);
+            }   });
+            }
+            });
+	    }).fail(function( jqxhr, textStatus, error ) {
+    var err = textStatus + ", " + error;
+    console.log( "Request Failed: " + err );
+				    });
+            })
+        </script>
+    </head>
+    <body>
+        <table id="targetTable" style="border-spacing: 0px;"><tr id="targetTableTitles"><td></td></tr></table>
+    </body>
+</html>
+

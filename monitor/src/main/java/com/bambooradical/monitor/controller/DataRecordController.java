@@ -9,6 +9,7 @@ import com.bambooradical.monitor.repository.DataRecordRepository;
 import com.bambooradical.monitor.repository.DataRecordService;
 import com.bambooradical.monitor.repository.EnergyRecordRepository;
 import com.bambooradical.monitor.repository.EnergyRecordService;
+import com.bambooradical.monitor.repository.MagnitudeRecordService;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -37,18 +38,24 @@ public class DataRecordController {
     DataRecordService dataRecordService;
     @Autowired
     EnergyRecordService energyRecordService;
+    @Autowired
+    MagnitudeRecordService magnitudeRecordService;
 
     @RequestMapping("/add")
     public DataRecord addRecord(
             @RequestParam(value = "temperature", required = true) Float temperature,
-            @RequestParam(value = "humidity", required = true) Float humidity,
+            @RequestParam(value = "humidity", required = false) Float humidity,
             @RequestParam(value = "voltage", required = true) Float voltage,
             @RequestParam(value = "location", required = true) String location,
+            @RequestParam(value = "magnitudes", required = false, defaultValue = "") String magnitudes,
+            @RequestParam(value = "maxMsError", required = false, defaultValue = "") String maxMsError,
             @RequestParam(value = "error", required = false) String error
     ) {
         final DataRecord dataRecord = new DataRecord(temperature, humidity, voltage, location, error, new Date());
         dataRecordRepository.save(dataRecord);
         dataRecordService.save(dataRecord);
+if(magnitudes != null && !magnitudes.isEmpty())
+        magnitudeRecordService.save(magnitudes, maxMsError, location, new Date());
         return dataRecord;
     }
 
@@ -140,6 +147,12 @@ public class DataRecordController {
     @RequestMapping("/list")
     public List<DataRecord> listRecords() {
         return dataRecordRepository.findAll();
+    }
+
+    @RequestMapping(value = "/magnitudes", produces = {"application/JSON"})
+    //@RequestMapping("/magnitudes")
+    public String getMagnitudes(@RequestParam(value = "location", required = true) String location, @RequestParam(value = "date", required = false, defaultValue = "") String dateString) {
+        return magnitudeRecordService.getDay(location, dateString);
     }
 
     @RequestMapping("/listEnergy")
@@ -544,6 +557,7 @@ public class DataRecordController {
                 + "<br/>"
                 + "<a href=\"list\">list</a>"
                 + "<br/>"
+		+ "<br/><a href=\"/spectrogram.html\">spectrogram</a>"
                 + "<br/>"
                 + "<a href=\"energy\">energy graph</a>"
                 + "<br/>"
