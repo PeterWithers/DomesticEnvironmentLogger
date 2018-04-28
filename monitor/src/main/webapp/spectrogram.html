@@ -83,6 +83,11 @@
                             function(key1, value1){
 //            $.each(sampleData, function(key1, value1) {
                             if (!key1.endsWith('maxMsError')){
+                            var columnCount = $('#targetTableTitles' + dateString).children('td').length;
+                            var requiredColumns = parseInt(key1.substring(0, 2)) * 3;
+                            for (index = columnCount; index < requiredColumns; index++) {
+                            $('#targetTableTitles' + dateString).append('<td>__:__</td>');
+                            }
                             $('#targetTableTitles' + dateString).append('<td>' + key1 + '</td>');
                             $.each(value1.split(';'), function(key2, value2) {
                             var splitValue2 = value2.split(' ');
@@ -92,7 +97,10 @@
                             $('#targetTable' + dateString + ' tr:first').after('<tr id="' + idKey + dateString + '">');
                             $('#' + idKey + dateString).append('<td>' + splitValue2[0] + '</td>');
                             }
-                            $('#' + idKey + dateString + ' td:last').after('<td style="background:rgb(' + Math.round(splitValue2[1] / 8) + ', 0, ' + (255 - Math.round(splitValue2[1] / 2)) + ');">' + splitValue2[1] + '</td>');
+                            for (index = columnCount; index < requiredColumns; index++) {
+                            $('#' + idKey + dateString + ' td:last').after('<td></td>');
+                            }
+                            $('#' + idKey + dateString + ' td:last').after('<td style="font-size: 10px; background:rgb(' + Math.round(splitValue2[1] / 8) + ', 0, ' + (255 - Math.round(splitValue2[1] / 2)) + ');">' + splitValue2[1] + '</td>');
                             //$('#targetTable' + dateString + '').append('<tr>').append('<td>').attr('style', 'background:green;').text(key);
                             }   });
                             }
