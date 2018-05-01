@@ -38,8 +38,10 @@ const double samplingFrequency = 1000 / msPerSample;
 double arrayReal[samples];
 double arrayImag[samples];
 double arrayPeaks[(samples >> 1)];
+double arrayPeaksMax[(samples >> 1)];
 
 bool hasChanged = false;
+bool hasPeakMax = false;
 int maxMsError = 0;
 
 //bool hasSensor = false;
@@ -64,6 +66,7 @@ void startPressureMonitor(int sdaPin, int sclPin) {
     //    }
     for (uint16_t index = 0; index < (samples >> 1); index++) {
         arrayPeaks[index] = 0.0;
+        arrayPeaksMax[index] = 0.0;
     }
 }
 
@@ -78,12 +81,17 @@ void updatePeaks(double *valueData, uint16_t bufferSize) {
             arrayPeaks[index] = valueData[index];
             hasChanged = true;
         }
+        if (arrayPeaksMax[index] <= valueData[index]) {
+            arrayPeaksMax[index] = valueData[index];
+            hasPeakMax = true;
+        }
         //Serial.println();
     }
 }
 
 String serialisePressureData(bool clearPeaks) {
     hasChanged = false;
+    hasPeakMax = false;
     String pressureDataString = "";
     if (clearPeaks) pressureDataString += "&magnitudes=";
     for (uint16_t index = 0; index < (samples >> 1); index++) {
@@ -102,7 +110,7 @@ String serialisePressureData(bool clearPeaks) {
 }
 
 bool interestingPressureData() {
-    return hasChanged;
+    return hasPeakMax;
 }
 
 void acquirePressureData() {

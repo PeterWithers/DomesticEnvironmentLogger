@@ -333,7 +333,7 @@ void externalButton2ChangeInterrupt() {
 
 void setup() {
 #ifdef PRESSURE_MONITOR
-    Serial.begin(115200);
+    //Serial.begin(115200);
     startPressureMonitor(SdaPin, SclPin);
 #endif
 #ifndef BUTTON_MESSAGE
@@ -527,4 +527,3 @@ void loop() {
     delay(10);
     //Serial.print(".");
 }
-
