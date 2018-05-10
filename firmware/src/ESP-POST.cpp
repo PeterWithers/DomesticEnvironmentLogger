@@ -312,7 +312,29 @@ void serialiseTemperatureData(int sensorIndex, String &url, String &telemetryStr
       telemetryString += " *C<br/>";
       url += event.temperature;
   }
-  dht.humidity().getEvent(&event);
+  switch (sensorIndex){
+    #ifdef DHTPIN
+      case 0:
+        dht.humidity().getEvent(&event);
+        break;
+    #endif
+    #ifdef DHTPIN1
+      case 1:
+        dht1.humidity().getEvent(&event);
+        break;
+    #endif
+    #ifdef DHTPIN2
+      case 2:
+        dht2.humidity().getEvent(&event);
+        break;
+    #endif
+      default:
+        errorString += "no%20sensor%20";
+        errorString += sensorIndex;
+        errorString += "%20";
+        sendMessage(errorString);
+        return;
+  }
   url += "&humidity=";
   if (isnan(event.relative_humidity)) {
       telemetryString += "Error reading humidity<br/>";
