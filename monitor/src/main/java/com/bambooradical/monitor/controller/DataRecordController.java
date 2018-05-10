@@ -10,6 +10,7 @@ import com.bambooradical.monitor.repository.DataRecordService;
 import com.bambooradical.monitor.repository.EnergyRecordRepository;
 import com.bambooradical.monitor.repository.EnergyRecordService;
 import com.bambooradical.monitor.repository.MagnitudeRecordService;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -42,21 +43,36 @@ public class DataRecordController {
     MagnitudeRecordService magnitudeRecordService;
 
     @RequestMapping("/add")
-    public DataRecord addRecord(
-            @RequestParam(value = "temperature", required = true) Float temperature,
-            @RequestParam(value = "humidity", required = false) Float humidity,
+    public List<DataRecord> addRecord(
+            @RequestParam(value = "temperature", required = true) Float[] temperature,
+            @RequestParam(value = "humidity", required = false) Float[] humidity,
             @RequestParam(value = "voltage", required = true) Float voltage,
             @RequestParam(value = "location", required = true) String location,
             @RequestParam(value = "magnitudes", required = false, defaultValue = "") String magnitudes,
             @RequestParam(value = "maxMsError", required = false, defaultValue = "") String maxMsError,
             @RequestParam(value = "error", required = false) String error
     ) {
-        final DataRecord dataRecord = new DataRecord(temperature, humidity, voltage, location, error, new Date());
-        dataRecordRepository.save(dataRecord);
-        dataRecordService.save(dataRecord);
-if(magnitudes != null && !magnitudes.isEmpty())
-        magnitudeRecordService.save(magnitudes, maxMsError, location, new Date());
-        return dataRecord;
+        List<DataRecord> returnRecords = new ArrayList<>();
+        if (temperature != null) {
+            for (int index = 0; index < temperature.length; index++) {
+                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, voltage, location, error, new Date());
+                dataRecordRepository.save(dataRecord);
+                dataRecordService.save(dataRecord);
+                returnRecords.add(dataRecord);
+            }
+        }
+        if (humidity != null) {
+            for (int index = returnRecords.size(); index < humidity.length; index++) {
+                final DataRecord dataRecord = new DataRecord(null, humidity[index], voltage, location, error, new Date());
+                dataRecordRepository.save(dataRecord);
+                dataRecordService.save(dataRecord);
+                returnRecords.add(dataRecord);
+            }
+        }
+        if (magnitudes != null && !magnitudes.isEmpty()) {
+            magnitudeRecordService.save(magnitudes, maxMsError, location, new Date());
+        }
+        return returnRecords;
     }
 
     @RequestMapping("/addEnergy")
@@ -557,7 +573,7 @@ if(magnitudes != null && !magnitudes.isEmpty())
                 + "<br/>"
                 + "<a href=\"list\">list</a>"
                 + "<br/>"
-		+ "<br/><a href=\"/spectrogram.html\">spectrogram</a>"
+                + "<br/><a href=\"/spectrogram.html\">spectrogram</a>"
                 + "<br/>"
                 + "<a href=\"energy\">energy graph</a>"
                 + "<br/>"
