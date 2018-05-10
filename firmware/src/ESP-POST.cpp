@@ -47,7 +47,7 @@ volatile int externalButton2Changed = 0;
 /*
 String locationString = "testing%20first%20floor";
 #define DHTPIN              4
-#define BUTTONPIN           14
+#define ON_BOARD_BUTTON    14
  */
 
 /*
@@ -55,7 +55,7 @@ String locationString = "third%20ground%20floor";
 #define VCC_VOLTAGE_MONITOR
 //#define POWER_DHT_VIA_GPIO
 #define DHTPIN              4
-#define BUTTONPIN           14
+#define ON_BOARD_BUTTON    14
  */
 
 /*
@@ -64,8 +64,34 @@ String locationString = "second%20top%20floor";
 #define POWER_DHT_VIA_GPIO
 #define DHTPOWERPIN         5
 #define DHTPIN              4
-#define BUTTONPIN           14
+#define ON_BOARD_BUTTON    14
  */
+
+
+ String locationString = "rearwall%20top%20floor";
+ #define VCC_VOLTAGE_MONITOR
+ //#define POWER_DHT_VIA_GPIO
+ // D6
+#define DHTPOWERPIN         12
+ // D5
+#define DHTPIN              14
+// D3 program button
+#define ON_BOARD_BUTTON     0
+// known pins
+// D1 - 5
+// D3 - 0 --- also reset button
+// D5 - 14
+// D6 - 12
+// D7 - 13
+// D9 and D10 are busy when serial has begun
+// D8 and D4 would have pull up and pull down resistors
+// D0 would be connected to reset for sleep mode
+
+ // D2
+ #define EXTERNAL_BUTTON1    4
+ // D6
+// #define EXTERNAL_BUTTON2    12
+
 
 /*
 String locationString = "aquarium";
@@ -78,11 +104,14 @@ String locationString = "aquarium";
 #define DS18b20_PIN         0
  */
 
+/*
 String locationString = "pressure%20monitor";
+#define VCC_VOLTAGE_MONITOR
 #define PRESSURE_MONITOR
 #define SdaPin              12
 #define SclPin              14
-#define BUTTONPIN           5
+#define ON_BOARD_BUTTON      5
+*/
 
 /*
 String locationString = "second%20testing%20board";
@@ -122,7 +151,7 @@ int segmentMessageIndex = -1;
 void sendMessage(String messageString) {
     WiFiClientSecure client;
     if (!client.connect(messageServer, httpsPort)) {
-        //Serial.println("connection failed");
+        Serial.println("message failed");
         return;
     }
     String connectionString = "GET ";
@@ -141,14 +170,14 @@ void sendMessage(String messageString) {
     unsigned long timeout = millis();
     while (client.available() == 0) {
         if (millis() - timeout > 5000) {
-            //Serial.println("timeout");
+            Serial.println("timeout");
             client.stop();
             return;
         }
     }
     while (client.available()) {
         String line = client.readStringUntil('\r');
-        //Serial.print(line);
+        Serial.print(line);
     }
 }
 
@@ -167,7 +196,7 @@ void requestRGB(String locationString, bool refresh) {
     connectionString += reportingServer;
     connectionString += "\r\n";
     connectionString += "Connection: close\r\n\r\n";
-    //Serial.println(connectionString);
+    Serial.println(connectionString);
     client.print(connectionString);
     unsigned long timeout = millis();
     while (client.available() == 0) {
@@ -231,15 +260,19 @@ void requestRGB(String locationString, bool refresh) {
 
 void sendMonitoredData() {
     String errorString = "";
-    //Serial.println(reportingServer);
+    Serial.println(reportingServer);
     String url = "/monitor/add?temperature=";
     String telemetryString = "";
 #ifdef DHTPIN
+#ifdef DHTPOWERPIN
+    pinMode(DHTPOWERPIN, OUTPUT);
+    digitalWrite(DHTPOWERPIN, 1);
+#endif
     sensors_event_t event;
     dht.temperature().getEvent(&event);
     if (isnan(event.temperature)) {
         telemetryString += "Error reading temperature<br/>";
-        errorString += "Error%20reading%20temperature. ";
+        errorString += "Error%20reading%20temperature%20";
         sendMessage(errorString);
     } else {
         telemetryString += "Temperature: ";
@@ -251,7 +284,7 @@ void sendMonitoredData() {
     url += "&humidity=";
     if (isnan(event.relative_humidity)) {
         telemetryString += "Error reading humidity<br/>";
-        errorString += "Error%20reading%20humidity. ";
+        errorString += "Error%20reading%20humidity%20";
         sendMessage(errorString);
     } else {
         telemetryString += "Humidity: ";
@@ -259,25 +292,30 @@ void sendMonitoredData() {
         telemetryString += "%<br/>";
         url += event.relative_humidity;
     }
+    #ifdef DHTPOWERPIN
+        // power down the DHT
+        pinMode(DHTPOWERPIN, INPUT);
+    #endif
 #endif
     telemetryString += "ADC: ";
     telemetryString += analogRead(A0);
     telemetryString += "<br/>";
     telemetryString += "voltage: ";
-    telemetryString += (analogRead(A0) / 69.0);
-    telemetryString += "v";
     url += "&voltage=";
 #ifdef VCC_VOLTAGE_MONITOR
     // battery 3.83v = "voltage":2.61
     url += (ESP.getVcc() / 1000.0);
+    telemetryString += (analogRead(A0) / 1000.0);
 #else
     url += (analogRead(A0) / 69.0);
+    telemetryString += (analogRead(A0) / 69.0);
 #endif
+    telemetryString += "v";
 
-    //Serial.println(telemetryString);
+    Serial.println(telemetryString);
     WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
-        //Serial.println("connection failed");
+        Serial.println("connection failed");
         sendMessage("connection%20failed%20add%20" + locationString);
         return;
     }
@@ -288,7 +326,7 @@ void sendMonitoredData() {
     url += locationString;
     url += "&error=";
     url += errorString;
-    //Serial.println(url);
+    Serial.println(url);
 
     String connectionString = "GET ";
     connectionString += url;
@@ -302,7 +340,7 @@ void sendMonitoredData() {
     unsigned long timeout = millis();
     while (client.available() == 0) {
         if (millis() - timeout > 5000) {
-            //Serial.println("timeout");
+            Serial.println("timeout");
             client.stop();
             sendMessage("timeout%20add%20" + locationString);
             return;
@@ -311,7 +349,7 @@ void sendMonitoredData() {
 
     while (client.available()) {
         String line = client.readStringUntil('\r');
-        //Serial.print(line);
+        Serial.print(line);
     }
 }
 
@@ -324,7 +362,7 @@ void onBoardButtonChangeInterrupt() {
 }
 
 void externalButton1ChangeInterrupt() {
-    externalButton2Changed++;
+    externalButton1Changed++;
 }
 
 void externalButton2ChangeInterrupt() {
@@ -332,26 +370,30 @@ void externalButton2ChangeInterrupt() {
 }
 
 void setup() {
+Serial.begin(115200);
 #ifdef PRESSURE_MONITOR
-    //Serial.begin(115200);
+    Serial.begin(115200);
     startPressureMonitor(SdaPin, SclPin);
 #endif
 #ifndef BUTTON_MESSAGE
     //Serial.begin(115200);
 #endif
     delay(10);
-#ifdef POWER_DHT_VIA_GPIO
+#ifdef DHTPOWERPIN
     pinMode(DHTPOWERPIN, OUTPUT);
     digitalWrite(DHTPOWERPIN, 1);
 #endif
-    pinMode(BUTTONPIN, INPUT); // todo: should this use a pull up also
-#ifdef BUTTON_MESSAGE
+#ifdef ON_BOARD_BUTTON
     pinMode(ON_BOARD_BUTTON, INPUT_PULLUP);
     //digitalWrite(ON_BOARD_BUTTON, 1);
     attachInterrupt(ON_BOARD_BUTTON, onBoardButtonChangeInterrupt, CHANGE);
+#endif
+#ifdef EXTERNAL_BUTTON1
     pinMode(EXTERNAL_BUTTON1, INPUT_PULLUP);
     //digitalWrite(EXTERNAL_BUTTON1, 1);
     attachInterrupt(EXTERNAL_BUTTON1, externalButton1ChangeInterrupt, CHANGE);
+#endif
+#ifdef EXTERNAL_BUTTON2
     pinMode(EXTERNAL_BUTTON2, INPUT_PULLUP);
     //digitalWrite(EXTERNAL_BUTTON2, 1);
     attachInterrupt(EXTERNAL_BUTTON2, externalButton2ChangeInterrupt, CHANGE);
@@ -364,8 +406,8 @@ void setup() {
     pinMode(BLUE_LED_PIN, OUTPUT);
     analogWrite(BLUE_LED_PIN, 0);
 
-    pinMode(ON_BOARD_BUTTON, INPUT_PULLUP);
-    attachInterrupt(ON_BOARD_BUTTON, requestRGBInterrupt, CHANGE);
+    pinMode(BUTTONPIN, INPUT_PULLUP);
+    attachInterrupt(BUTTONPIN, requestRGBInterrupt, CHANGE);
 #endif
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
@@ -373,8 +415,8 @@ void setup() {
         delay(500);
         Serial.println(".");
     }
-    //Serial.println("Connected: ");
-    //Serial.println(ssid);
+    Serial.println("Connected: ");
+    Serial.println(ssid);
 #ifdef DHTPIN
     dht.begin();
 #endif
@@ -426,8 +468,8 @@ void setup() {
 
 void loop() {
     if (lastDataSentMs + dataSendDelayMs < millis()) {
-        //Serial.println("IP Address");
-        //Serial.println(WiFi.localIP());
+        Serial.println("IP Address");
+        Serial.println(WiFi.localIP());
         sendMonitoredData();
 #ifdef GREEN_LED_PIN
         requestRGB(locationString, false);
@@ -445,25 +487,25 @@ void loop() {
         udp.endPacket();
         udp.flush();
         udp.stop(); // flush and stop added to address issues of the ESP hanging after send
-        //Serial.print("onBoardButtonChanged: ");
-        //Serial.println(onBoardButtonChanged);
-        //Serial.print(" externalButton1Changed: ");
-        //Serial.println(externalButton1Changed);
-        //Serial.print(" externalButton2Changed: ");
-        //Serial.println(externalButton2Changed);
+        Serial.print("onBoardButtonChanged: ");
+        Serial.println(onBoardButtonChanged);
+        Serial.print(" externalButton1Changed: ");
+        Serial.println(externalButton1Changed);
+        Serial.print(" externalButton2Changed: ");
+        Serial.println(externalButton2Changed);
         if (onBoardButtonChanged && onBoardButtonDataSentMs + buttonDataSendDelayMs < millis()) {
             onBoardButtonDataSentMs = millis();
-            //Serial.println("sending button0 message");
+            Serial.println("sending button0 message");
             sendMessage(buttonMessage0);
         }
         if (externalButton1Changed && externalButton1DataSentMs + buttonDataSendDelayMs < millis()) {
             externalButton1DataSentMs = millis();
-            //Serial.println("sending button1 message");
+            Serial.println("sending button1 message");
             sendMessage(buttonMessage1);
         }
         if (externalButton2Changed && externalButton2DataSentMs + buttonDataSendDelayMs < millis()) {
             externalButton2DataSentMs = millis();
-            //Serial.println("sending button2 message");
+            Serial.println("sending button2 message");
             sendMessage(buttonMessage2);
         }
         onBoardButtonChanged = 0;
@@ -525,5 +567,5 @@ void loop() {
     }
 #endif
     delay(10);
-    //Serial.print(".");
+    Serial.print(".");
 }
