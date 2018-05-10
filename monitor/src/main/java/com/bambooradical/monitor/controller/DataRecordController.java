@@ -55,7 +55,7 @@ public class DataRecordController {
         List<DataRecord> returnRecords = new ArrayList<>();
         if (temperature != null) {
             for (int index = 0; index < temperature.length; index++) {
-                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, voltage, location, error, new Date());
+                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, voltage, location + ((returnRecords.isEmpty()) ? "" : returnRecords.size()), error, new Date());
                 dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
@@ -63,7 +63,7 @@ public class DataRecordController {
         }
         if (humidity != null) {
             for (int index = returnRecords.size(); index < humidity.length; index++) {
-                final DataRecord dataRecord = new DataRecord(null, humidity[index], voltage, location, error, new Date());
+                final DataRecord dataRecord = new DataRecord(null, humidity[index], voltage, location + ((returnRecords.isEmpty()) ? "" : returnRecords.size()), error, new Date());
                 dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
