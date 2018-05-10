@@ -73,12 +73,22 @@ String locationString = "second%20top%20floor";
  //#define POWER_DHT_VIA_GPIO
  // D6
 #define DHTPOWERPIN         12
+// D7
+#define DHTPOWERPIN1        13
+// D1
+#define DHTPOWERPIN2         5
  // D5
 #define DHTPIN              14
+// D2
+#define DHTPIN1              4
+// D3
+#define DHTPIN2              0
+
 // D3 program button
-#define ON_BOARD_BUTTON     0
+//#define ON_BOARD_BUTTON     0
 // known pins
 // D1 - 5
+// D2 - 4
 // D3 - 0 --- also reset button
 // D5 - 14
 // D6 - 12
@@ -88,7 +98,7 @@ String locationString = "second%20top%20floor";
 // D0 would be connected to reset for sleep mode
 
  // D2
- #define EXTERNAL_BUTTON1    4
+ //#define EXTERNAL_BUTTON1    4
  // D6
 // #define EXTERNAL_BUTTON2    12
 
@@ -133,6 +143,12 @@ ADC_MODE(ADC_VCC);
 
 #ifdef DHTPIN
 DHT_Unified dht(DHTPIN, DHTTYPE);
+#endif
+#ifdef DHTPIN1
+DHT_Unified dht1(DHTPIN1, DHTTYPE);
+#endif
+#ifdef DHTPIN2
+DHT_Unified dht2(DHTPIN2, DHTTYPE);
 #endif
 
 struct SegmentRGB {
@@ -258,43 +274,98 @@ void requestRGB(String locationString, bool refresh) {
     }
 }
 
+void serialiseTemperatureData(int sensorIndex, String &url, String &telemetryString, String &errorString) {
+  sensors_event_t event;
+  switch (sensorIndex){
+    #ifdef DHTPIN
+      case 0:
+        dht.temperature().getEvent(&event);
+        break;
+    #endif
+    #ifdef DHTPIN1
+      case 1:
+        dht1.temperature().getEvent(&event);
+        break;
+    #endif
+    #ifdef DHTPIN2
+      case 2:
+        dht2.temperature().getEvent(&event);
+        break;
+    #endif
+      default:
+        errorString += "no%20sensor%20";
+        errorString += sensorIndex;
+        errorString += "%20";
+        sendMessage(errorString);
+        return;
+  }
+  url += "&temperature=";
+  if (isnan(event.temperature)) {
+      telemetryString += "Error reading temperature<br/>";
+      errorString += "Error%20reading%20temperature%20";
+      errorString += sensorIndex;
+      errorString += "%20";
+      sendMessage(errorString);
+  } else {
+      telemetryString += "Temperature: ";
+      telemetryString += event.temperature;
+      telemetryString += " *C<br/>";
+      url += event.temperature;
+  }
+  dht.humidity().getEvent(&event);
+  url += "&humidity=";
+  if (isnan(event.relative_humidity)) {
+      telemetryString += "Error reading humidity<br/>";
+      errorString += "Error%20reading%20humidity%20";
+      errorString += sensorIndex;
+      errorString += "%20";
+      sendMessage(errorString);
+  } else {
+      telemetryString += "Humidity: ";
+      telemetryString += event.relative_humidity;
+      telemetryString += "%<br/>";
+      url += event.relative_humidity;
+  }
+}
+
 void sendMonitoredData() {
     String errorString = "";
     Serial.println(reportingServer);
-    String url = "/monitor/add?temperature=";
+    String url = "/monitor/add?location=";
+    url += locationString;
     String telemetryString = "";
 #ifdef DHTPIN
-#ifdef DHTPOWERPIN
-    pinMode(DHTPOWERPIN, OUTPUT);
-    digitalWrite(DHTPOWERPIN, 1);
-#endif
-    sensors_event_t event;
-    dht.temperature().getEvent(&event);
-    if (isnan(event.temperature)) {
-        telemetryString += "Error reading temperature<br/>";
-        errorString += "Error%20reading%20temperature%20";
-        sendMessage(errorString);
-    } else {
-        telemetryString += "Temperature: ";
-        telemetryString += event.temperature;
-        telemetryString += " *C<br/>";
-        url += event.temperature;
-    }
-    dht.humidity().getEvent(&event);
-    url += "&humidity=";
-    if (isnan(event.relative_humidity)) {
-        telemetryString += "Error reading humidity<br/>";
-        errorString += "Error%20reading%20humidity%20";
-        sendMessage(errorString);
-    } else {
-        telemetryString += "Humidity: ";
-        telemetryString += event.relative_humidity;
-        telemetryString += "%<br/>";
-        url += event.relative_humidity;
-    }
+    #ifdef DHTPOWERPIN
+        pinMode(DHTPOWERPIN, OUTPUT);
+        digitalWrite(DHTPOWERPIN, 1);
+    #endif
+    #ifdef DHTPOWERPIN1
+        pinMode(DHTPOWERPIN1, OUTPUT);
+        digitalWrite(DHTPOWERPIN1, 1);
+    #endif
+    #ifdef DHTPOWERPIN2
+        pinMode(DHTPOWERPIN2, OUTPUT);
+        digitalWrite(DHTPOWERPIN2, 1);
+    #endif
+    delay(500);
+    serialiseTemperatureData(0, url, telemetryString, errorString);
+    #ifdef DHTPIN1
+      serialiseTemperatureData(1, url, telemetryString, errorString);
+    #endif
+    #ifdef DHTPIN2
+      serialiseTemperatureData(2, url, telemetryString, errorString);
+    #endif
     #ifdef DHTPOWERPIN
         // power down the DHT
         pinMode(DHTPOWERPIN, INPUT);
+    #endif
+    #ifdef DHTPOWERPIN1
+        // power down the DHT
+        pinMode(DHTPOWERPIN1, INPUT);
+    #endif
+    #ifdef DHTPOWERPIN2
+        // power down the DHT
+        pinMode(DHTPOWERPIN2, INPUT);
     #endif
 #endif
     telemetryString += "ADC: ";
@@ -322,8 +393,6 @@ void sendMonitoredData() {
     #ifdef PRESSURE_MONITOR
     url += serialisePressureData(true);
     #endif
-    url += "&location=";
-    url += locationString;
     url += "&error=";
     url += errorString;
     Serial.println(url);
@@ -370,7 +439,7 @@ void externalButton2ChangeInterrupt() {
 }
 
 void setup() {
-Serial.begin(115200);
+//Serial.begin(115200);
 #ifdef PRESSURE_MONITOR
     Serial.begin(115200);
     startPressureMonitor(SdaPin, SclPin);
@@ -379,10 +448,6 @@ Serial.begin(115200);
     //Serial.begin(115200);
 #endif
     delay(10);
-#ifdef DHTPOWERPIN
-    pinMode(DHTPOWERPIN, OUTPUT);
-    digitalWrite(DHTPOWERPIN, 1);
-#endif
 #ifdef ON_BOARD_BUTTON
     pinMode(ON_BOARD_BUTTON, INPUT_PULLUP);
     //digitalWrite(ON_BOARD_BUTTON, 1);
@@ -419,6 +484,12 @@ Serial.begin(115200);
     Serial.println(ssid);
 #ifdef DHTPIN
     dht.begin();
+#endif
+#ifdef DHTPIN1
+    dht1.begin();
+#endif
+#ifdef DHTPIN2
+    dht2.begin();
 #endif
     sendMessage(startMessage);
 #ifdef GREEN_LED_PIN
@@ -567,5 +638,5 @@ void loop() {
     }
 #endif
     delay(10);
-    Serial.print(".");
+    //Serial.print(".");
 }
