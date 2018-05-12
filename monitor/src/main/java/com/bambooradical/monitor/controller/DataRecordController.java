@@ -55,7 +55,7 @@ public class DataRecordController {
         List<DataRecord> returnRecords = new ArrayList<>();
         if (temperature != null) {
             for (int index = 0; index < temperature.length; index++) {
-                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, voltage, location + ((returnRecords.isEmpty()) ? "" : returnRecords.size()), error, new Date());
+                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, voltage, location + returnRecords.size(), error, new Date());
                 dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
@@ -63,7 +63,7 @@ public class DataRecordController {
         }
         if (humidity != null) {
             for (int index = returnRecords.size(); index < humidity.length; index++) {
-                final DataRecord dataRecord = new DataRecord(null, humidity[index], voltage, location + ((returnRecords.isEmpty()) ? "" : returnRecords.size()), error, new Date());
+                final DataRecord dataRecord = new DataRecord(null, humidity[index], voltage, location + returnRecords.size(), error, new Date());
                 dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
@@ -418,7 +418,7 @@ public class DataRecordController {
                 + "        },"
                 + "{\n"
                 //                + "        lineTension: 0\n"
-                + "            label: 'rearwall',\n"
+                + "            label: 'rearwall0',\n"
                 + "            backgroundColor: \"rgba(200,100,200, 0.2)\",\n"
                 + "            borderColor: \"rgba(200,100,200, 1)\",\n"
                 + "            pointBackgroundColor: \"rgba(200,100,200, 1)\",\n"
@@ -426,11 +426,11 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(200,100,200, 1)\","
                 + "            data: "
-                + getTemperatureArray("rearwall top floor", startDate, endDate)
+                + getTemperatureArray("rearwall top floor0", startDate, endDate)
                 + "        },"
                 + "{\n"
                 //                + "        lineTension: 0\n"
-                + "            label: 'rearwall 1',\n"
+                + "            label: 'rearwall1',\n"
                 + "            backgroundColor: \"rgba(180,100,200, 0.2)\",\n"
                 + "            borderColor: \"rgba(180,100,200, 1)\",\n"
                 + "            pointBackgroundColor: \"rgba(180,100,200, 1)\",\n"
@@ -438,7 +438,7 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(180,100,200, 1)\","
                 + "            data: "
-                + getTemperatureArray("rearwall top floor1 ", startDate, endDate)
+                + getTemperatureArray("rearwall top floor1", startDate, endDate)
                 + "        },"
                 + "{\n"
                 //                + "        lineTension: 0\n"
@@ -521,7 +521,7 @@ public class DataRecordController {
                 + getHumidityArray("aqu", startDate, endDate)
                 + "        },"
                 + "{\n"
-                + "            label: 'rearwall',\n"
+                + "            label: 'rearwall0',\n"
                 + "            backgroundColor: \"rgba(200,100,200, 0.2)\",\n"
                 + "            borderColor: \"rgba(200,100,200, 1)\",\n"
                 + "            pointBackgroundColor: \"rgba(200,100,200, 1)\",\n"
@@ -529,10 +529,10 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(200,100,200, 1)\","
                 + "            data: "
-                + getHumidityArray("rearwall top floor", startDate, endDate)
+                + getHumidityArray("rearwall top floor0", startDate, endDate)
                 + "        },"
                 + "{\n"
-                + "            label: 'rearwall 1',\n"
+                + "            label: 'rearwall1',\n"
                 + "            backgroundColor: \"rgba(180,100,200, 0.2)\",\n"
                 + "            borderColor: \"rgba(180,100,200, 1)\",\n"
                 + "            pointBackgroundColor: \"rgba(180,100,200, 1)\",\n"
