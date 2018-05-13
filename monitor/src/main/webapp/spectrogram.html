@@ -79,7 +79,7 @@
             $('#tableTarget').append('<table id="targetTable' + dateString + '" style="border-spacing: 0px;"><tr id="targetTableTitles' + dateString + '"><td>' + dateString + '</td></tr></table>');
             var locationParam = window.location.search.split('?')[1].split('&')[0];
             var typeParam = window.location.search.split('?')[1].split('&')[1];
-            var dataIndex = (typeParam == "rms")?1:0;
+            var dataIndex = (typeParam == "rms")?2:1;
             $.getJSON('/monitor/magnitudes?location=' + locationParam + '&date=' + dateString,
                     function(data){
                     $.each(data,
