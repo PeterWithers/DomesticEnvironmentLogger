@@ -95,10 +95,10 @@
                             $.each(value1.split(';'), function(key2, value2) {
                             var splitValue2 = value2.split(' ');
                             if (splitValue2.length > 1){
-                            var idKey = 'k' + splitValue2[dataIndex].replace('.', '-');
+                            var idKey = 'k' + splitValue2[0].replace('.', '-');
                             if ($('#' + idKey + dateString).length === 0) {
                             $('#targetTable' + dateString + ' tr:first').after('<tr id="' + idKey + dateString + '">');
-                            $('#' + idKey + dateString).append('<td>' + splitValue2[dataIndex] + '</td>');
+                            $('#' + idKey + dateString).append('<td>' + splitValue2[0] + '</td>');
                             }
                             for (index = columnCount; index <= requiredColumns; index++) {
                             $('#' + idKey + dateString + ' td:last').after('<td></td>');
