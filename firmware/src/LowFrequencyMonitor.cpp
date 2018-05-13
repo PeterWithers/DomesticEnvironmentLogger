@@ -29,9 +29,9 @@ Sodaq_BMP085 pressureSensor;
 //Adafruit_BMP280 pressureSensor76();
 arduinoFFT FFT = arduinoFFT();
 
-const int msPerSample = 7;
+int msPerSample = 7;
 const uint16_t samples = 64;
-const double samplingFrequency = 1000 / msPerSample;
+double samplingFrequency = 1000 / msPerSample;
 
 double arrayReal[samples];
 double arrayImag[samples];
@@ -45,11 +45,11 @@ bool hasPeakMax = false;
 int maxMsError = 0;
 
 bool hasSensor = false;
-bool hasMic = false;
 
 void startAudioMonitor() {
     Serial.println("AudioFrequencyMonitor");
-    hasMic = true;
+    msPerSample = 3;
+    samplingFrequency = 1000 / msPerSample;
     zeroData();
 }
 
@@ -131,13 +131,25 @@ void acquirePressureData() {
     //    if (!hasSensor) {
     //        Serial.println("pressure sensor failed");
     //    } else {
-    double temperature = pressureSensor.readTemperature();
-    double pressure = pressureSensor.readPressure();
+    if (hasSensor) {
+        double temperature = pressureSensor.readTemperature();
+        double pressure = pressureSensor.readPressure();
+        Serial.print("baseline pressure: ");
+        Serial.print(temperature);
+        Serial.println(" c");
+        Serial.print(pressure);
+        Serial.println(" ");
+    }
     double pressureSum = 0;
     unsigned long startMs = millis();
     for (int sampleIndex = 0; sampleIndex < samples; sampleIndex++) {
         unsigned long lastMs = millis();
-        double pressureCurrent = pressureSensor.readRawPressure();
+        double pressureCurrent;
+        if (hasSensor) {
+            pressureCurrent = pressureSensor.readRawPressure();
+        } else {
+            pressureCurrent = analogRead(A0);
+        }
         pressureSum += pressureCurrent;
         arrayReal[sampleIndex] = pressureCurrent - pressureAverage;
         arrayImag[sampleIndex] = 0.0;
@@ -146,11 +158,6 @@ void acquirePressureData() {
     pressureAverage = pressureSum / samples;
     unsigned long endMs = millis();
     int msError = endMs - startMs - (samples * msPerSample);
-    Serial.print("baseline pressure: ");
-    Serial.print(temperature);
-    Serial.println(" c");
-    Serial.print(pressure);
-    Serial.println(" ");
     Serial.print(msError);
     Serial.println(" ms");
 
