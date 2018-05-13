@@ -29,8 +29,6 @@ Sodaq_BMP085 pressureSensor;
 //Adafruit_BMP280 pressureSensor76();
 arduinoFFT FFT = arduinoFFT();
 
-double baselinePressure;
-
 const int msPerSample = 7;
 const uint16_t samples = 64;
 const double samplingFrequency = 1000 / msPerSample;
@@ -39,15 +37,25 @@ double arrayReal[samples];
 double arrayImag[samples];
 double arrayPeaks[(samples >> 1)];
 double arrayPeaksMax[(samples >> 1)];
+double arrayRMS[(samples >> 1)];
 
+double pressureAverage = 0;
 bool hasChanged = false;
 bool hasPeakMax = false;
 int maxMsError = 0;
 
-//bool hasSensor = false;
+bool hasSensor = false;
+bool hasMic = false;
+
+void startAudioMonitor() {
+    Serial.println("AudioFrequencyMonitor");
+    hasMic = true;
+    zeroData();
+}
 
 void startPressureMonitor(int sdaPin, int sclPin) {
     Serial.println("LowFrequencyMonitor");
+    hasSensor = true;
     Wire.pins(sdaPin, sclPin);
     //    hasSensor =
     pressureSensor.begin(BMP085_ULTRALOWPOWER);
@@ -59,20 +67,20 @@ void startPressureMonitor(int sdaPin, int sclPin) {
     //        //Serial.println("pressure sensor at 0x76 failed");
     //        //}
     //    } else {
-    baselinePressure = pressureSensor.readPressure();
-    Serial.print("baseline pressure: ");
-    Serial.print(baselinePressure);
-    Serial.println(" mb");
-    //    }
+    zeroData();
+}
+
+void zeroData() {
     for (uint16_t index = 0; index < (samples >> 1); index++) {
         arrayPeaks[index] = 0.0;
         arrayPeaksMax[index] = 0.0;
+        arrayRMS[index] = 0.0;
     }
 }
 
 void updatePeaks(double *valueData, uint16_t bufferSize) {
     for (uint16_t index = 0; index < bufferSize; index++) {
-        double hertz = ((index * 1.0 * samplingFrequency) / samples);
+        //double hertz = ((index * 1.0 * samplingFrequency) / samples);
         //Serial.print(hertz, 6);
         //Serial.print("Hz");
         //Serial.print(" ");
@@ -85,6 +93,7 @@ void updatePeaks(double *valueData, uint16_t bufferSize) {
             arrayPeaksMax[index] = valueData[index];
             hasPeakMax = true;
         }
+        arrayRMS[index] = sqrt(((arrayRMS[index] * arrayRMS[index]) + (valueData[index] * valueData[index])));
         //Serial.println();
     }
 }
@@ -98,8 +107,13 @@ String serialisePressureData(bool clearPeaks) {
         pressureDataString += ((index * 1.0 * samplingFrequency) / samples);
         pressureDataString += "Hz%20";
         pressureDataString += arrayPeaks[index];
+        pressureDataString += "%20";
+        pressureDataString += arrayRMS[index];
         pressureDataString += "%0A";
-        if (clearPeaks) arrayPeaks[index] = 0.0;
+        if (clearPeaks) {
+            arrayPeaks[index] = 0.0;
+            arrayRMS[index] = 0.0;
+        }
     }
     if (clearPeaks) pressureDataString += "&";
     pressureDataString += "maxMsError";
@@ -119,24 +133,24 @@ void acquirePressureData() {
     //    } else {
     double temperature = pressureSensor.readTemperature();
     double pressure = pressureSensor.readPressure();
-    double altitude = pressureSensor.readAltitude(baselinePressure);
-    double pressureInitial = pressureSensor.readRawPressure();
+    double pressureSum = 0;
     unsigned long startMs = millis();
     for (int sampleIndex = 0; sampleIndex < samples; sampleIndex++) {
         unsigned long lastMs = millis();
-        arrayReal[sampleIndex] = pressureSensor.readRawPressure() - pressureInitial;
+        double pressureCurrent = pressureSensor.readRawPressure();
+        pressureSum += pressureCurrent;
+        arrayReal[sampleIndex] = pressureCurrent - pressureAverage;
         arrayImag[sampleIndex] = 0.0;
         while (lastMs + msPerSample > millis()); /* attempt to sample at msPerSample */
     }
+    pressureAverage = pressureSum / samples;
     unsigned long endMs = millis();
     int msError = endMs - startMs - (samples * msPerSample);
     Serial.print("baseline pressure: ");
     Serial.print(temperature);
     Serial.println(" c");
     Serial.print(pressure);
-    Serial.println(" mb");
-    Serial.print(altitude);
-    Serial.println(" m");
+    Serial.println(" ");
     Serial.print(msError);
     Serial.println(" ms");
 
