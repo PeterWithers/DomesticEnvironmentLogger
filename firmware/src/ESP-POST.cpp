@@ -478,8 +478,8 @@ void setup() {
     Serial.begin(115200);
 #ifdef SdaPin
     startPressureMonitor(SdaPin, SclPin);
-#elif
-    startPressureMonitor();
+#else
+    startAudioMonitor();
 #endif
 #endif
 #ifndef BUTTON_MESSAGE

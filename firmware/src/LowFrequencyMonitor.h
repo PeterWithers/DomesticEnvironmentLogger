@@ -9,6 +9,7 @@
  * Author : Peter Withers <peter-gthb@bambooradical.com>
  */
 
+void startAudioMonitor();
 void startPressureMonitor(int sdaPin, int sclPin);
 String serialisePressureData(bool clearPeaks);
 bool interestingPressureData();

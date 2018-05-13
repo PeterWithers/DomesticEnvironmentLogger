@@ -46,6 +46,14 @@ int maxMsError = 0;
 
 bool hasSensor = false;
 
+void zeroData() {
+    for (uint16_t index = 0; index < (samples >> 1); index++) {
+        arrayPeaks[index] = 0.0;
+        arrayPeaksMax[index] = 0.0;
+        arrayRMS[index] = 0.0;
+    }
+}
+
 void startAudioMonitor() {
     Serial.println("AudioFrequencyMonitor");
     msPerSample = 3;
@@ -68,14 +76,6 @@ void startPressureMonitor(int sdaPin, int sclPin) {
     //        //}
     //    } else {
     zeroData();
-}
-
-void zeroData() {
-    for (uint16_t index = 0; index < (samples >> 1); index++) {
-        arrayPeaks[index] = 0.0;
-        arrayPeaksMax[index] = 0.0;
-        arrayRMS[index] = 0.0;
-    }
 }
 
 void updatePeaks(double *valueData, uint16_t bufferSize) {
