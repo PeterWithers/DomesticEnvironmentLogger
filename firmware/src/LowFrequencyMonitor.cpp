@@ -93,7 +93,7 @@ void updatePeaks(double *valueData, uint16_t bufferSize) {
             arrayPeaksMax[index] = valueData[index];
             hasPeakMax = true;
         }
-        arrayRMS[index] = sqrt(((arrayRMS[index] * arrayRMS[index]) + (valueData[index] * valueData[index])));
+        arrayRMS[index] = sqrt(((arrayRMS[index] * arrayRMS[index]) + (valueData[index] * valueData[index])) / 2);
         //Serial.println();
     }
 }
