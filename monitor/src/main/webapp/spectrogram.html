@@ -77,7 +77,10 @@
             }
             function getData(dateString){
             $('#tableTarget').append('<table id="targetTable' + dateString + '" style="border-spacing: 0px;"><tr id="targetTableTitles' + dateString + '"><td>' + dateString + '</td></tr></table>');
-            $.getJSON('/monitor/magnitudes?location=pressure%20monitor&date=' + dateString,
+            var locationParam = window.location.search.split('?')[1].split('&')[0];
+            var typeParam = window.location.search.split('?')[1].split('&')[1];
+            var dataIndex = (typeParam == "rms")?1:0;
+            $.getJSON('/monitor/magnitudes?location=' + locationParam + '&date=' + dateString,
                     function(data){
                     $.each(data,
                             function(key1, value1){
@@ -92,15 +95,15 @@
                             $.each(value1.split(';'), function(key2, value2) {
                             var splitValue2 = value2.split(' ');
                             if (splitValue2.length > 1){
-                            var idKey = 'k' + splitValue2[0].replace('.', '-');
+                            var idKey = 'k' + splitValue2[dataIndex].replace('.', '-');
                             if ($('#' + idKey + dateString).length === 0) {
                             $('#targetTable' + dateString + ' tr:first').after('<tr id="' + idKey + dateString + '">');
-                            $('#' + idKey + dateString).append('<td>' + splitValue2[0] + '</td>');
+                            $('#' + idKey + dateString).append('<td>' + splitValue2[dataIndex] + '</td>');
                             }
                             for (index = columnCount; index <= requiredColumns; index++) {
                             $('#' + idKey + dateString + ' td:last').after('<td></td>');
                             }
-                            $('#' + idKey + dateString + ' td:last').after('<td style="max-width:20px; font-size: 3px; background:rgb(' + Math.round(splitValue2[1] / 8) + ', 0, ' + (255 - Math.round(splitValue2[1] / 2)) + ');">' + splitValue2[1] + '</td>');
+                            $('#' + idKey + dateString + ' td:last').after('<td style="max-width:20px; font-size: 3px; background:rgb(' + Math.round(splitValue2[dataIndex] / 8) + ', 0, ' + (255 - Math.round(splitValue2[dataIndex] / 2)) + ');">' + splitValue2[dataIndex] + '</td>');
                             //$('#targetTable' + dateString + '').append('<tr>').append('<td>').attr('style', 'background:green;').text(key);
                             }   });
                             }
@@ -112,6 +115,10 @@
         </script>
     </head>
     <body>
+        <a href="?pressure%20monitor&peeks">pressure peeks</a><br/>
+        <a href="?pressure%20monitor&rms">pressure RMS</a><br/>
+        <a href="?audio%20monitor&peeks">audio peeks</a><br/>
+        <a href="?audio%20monitor&rms">audio RMS</a><br/>
         <div id="tableTarget"></div>
         <button style="width: 100%" id="nextButton" onclick="loadMore()">Load More</button>
     </body>
