@@ -67,7 +67,7 @@ String locationString = "second%20top%20floor";
 #define ON_BOARD_BUTTON    14
  */
 
-
+/*
 String locationString = "rearwall%20top%20floor";
 #define VCC_VOLTAGE_MONITOR
 //#define POWER_DHT_VIA_GPIO
@@ -101,7 +101,7 @@ String locationString = "rearwall%20top%20floor";
 //#define EXTERNAL_BUTTON1    4
 // D6
 // #define EXTERNAL_BUTTON2    12
-
+ */
 
 /*
 String locationString = "aquarium";
@@ -122,6 +122,10 @@ String locationString = "pressure%20monitor";
 #define SclPin              14
 #define ON_BOARD_BUTTON      5
  */
+
+String locationString = "audio%20monitor";
+#define PRESSURE_MONITOR
+#define ON_BOARD_BUTTON      5
 
 /*
 String locationString = "second%20testing%20board";
@@ -369,7 +373,15 @@ void sendMonitoredData() {
     pinMode(DHTPOWERPIN2, OUTPUT);
     digitalWrite(DHTPOWERPIN2, 1);
 #endif
-    delay(1500);
+#ifdef DHTPIN
+    dht.begin();
+#endif
+#ifdef DHTPIN1
+    dht1.begin();
+#endif
+#ifdef DHTPIN2
+    dht2.begin();
+#endif
     serialiseTemperatureData(0, url, telemetryString, errorString);
 #ifdef DHTPIN1
     serialiseTemperatureData(1, url, telemetryString, errorString);
@@ -464,7 +476,11 @@ void setup() {
     //Serial.begin(115200);
 #ifdef PRESSURE_MONITOR
     Serial.begin(115200);
+#ifdef SdaPin
     startPressureMonitor(SdaPin, SclPin);
+#elif
+    startPressureMonitor();
+#endif
 #endif
 #ifndef BUTTON_MESSAGE
     //Serial.begin(115200);
@@ -504,15 +520,6 @@ void setup() {
     }
     Serial.println("Connected: ");
     Serial.println(ssid);
-#ifdef DHTPIN
-    dht.begin();
-#endif
-#ifdef DHTPIN1
-    dht1.begin();
-#endif
-#ifdef DHTPIN2
-    dht2.begin();
-#endif
     sendMessage(startMessage);
 #ifdef GREEN_LED_PIN
     segmentRGB[0].blueValue = 0;
