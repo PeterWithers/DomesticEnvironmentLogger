@@ -44,7 +44,7 @@ public class DataRecordController {
 
     @RequestMapping("/add")
     public List<DataRecord> addRecord(
-            @RequestParam(value = "temperature", required = true) Float[] temperature,
+            @RequestParam(value = "temperature", required = false) Float[] temperature,
             @RequestParam(value = "humidity", required = false) Float[] humidity,
             @RequestParam(value = "voltage", required = true) Float voltage,
             @RequestParam(value = "location", required = true) String location,
