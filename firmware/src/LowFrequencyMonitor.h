@@ -14,3 +14,5 @@ void startPressureMonitor(int sdaPin, int sclPin);
 String serialisePressureData(bool clearPeaks);
 bool interestingPressureData();
 void acquirePressureData();
+void startLedPanel(int dataPin, int clockPin, int csdPin);
+void updateLedPanel();

@@ -121,11 +121,14 @@ String locationString = "pressure%20monitor";
 #define SdaPin              12
 #define SclPin              14
 #define ON_BOARD_BUTTON      5
- */
+*/
 
 String locationString = "audio%20monitor";
 #define PRESSURE_MONITOR
 #define ON_BOARD_BUTTON      5
+#define LedDataPin          14
+#define LedClockPin         13
+#define LedCsPin            12
 
 /*
 String locationString = "second%20testing%20board";
@@ -481,6 +484,9 @@ void setup() {
 #else
     startAudioMonitor();
 #endif
+#ifdef LedDataPin
+    startLedPanel(LedDataPin, LedClockPin, LedCsPin);
+#endif
 #endif
 #ifndef BUTTON_MESSAGE
     //Serial.begin(115200);
@@ -662,6 +668,10 @@ void loop() {
 #endif
 #ifdef PRESSURE_MONITOR
     acquirePressureData();
+    #ifdef LedDataPin
+    updateLedPanel();
+    #endif
+
     if (interestingPressureData()) {
         sendMessage(serialisePressureData(false));
     }
