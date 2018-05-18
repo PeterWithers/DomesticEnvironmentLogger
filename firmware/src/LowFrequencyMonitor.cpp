@@ -39,7 +39,9 @@ double arrayReal[samples];
 double arrayImag[samples];
 double arrayPeaks[(samples >> 1)];
 double arrayPeaksMax[(samples >> 1)];
+double arraySum[(samples >> 1)];
 double arrayRMS[(samples >> 1)];
+int countOfSum = 0;
 
 double pressureAverage = 0;
 bool hasChanged = false;
@@ -53,6 +55,7 @@ void zeroData() {
         arrayPeaks[index] = 0.0;
         arrayPeaksMax[index] = 0.0;
         arrayRMS[index] = 0.0;
+        arraySum[index] = 0.0;
     }
 }
 
@@ -115,6 +118,8 @@ void updatePeaks(double *valueData, uint16_t bufferSize) {
             hasPeakMax = true;
         }
         arrayRMS[index] = sqrt(((arrayRMS[index] * arrayRMS[index]) + (valueData[index] * valueData[index])) / 2);
+        arraySum[index] += valueData[index];
+        countOfSum++;
         //Serial.println();
     }
 }
@@ -130,10 +135,13 @@ String serialisePressureData(bool clearPeaks) {
         pressureDataString += arrayPeaks[index];
         pressureDataString += "%20";
         pressureDataString += arrayRMS[index];
+        pressureDataString += "%20";
+        pressureDataString += arraySum[index] / countOfSum;
         pressureDataString += "%0A";
         if (clearPeaks) {
             arrayPeaks[index] = 0.0;
             arrayRMS[index] = 0.0;
+            arraySum[index] = 0.0;
         }
     }
     if (clearPeaks) pressureDataString += "&";
@@ -141,6 +149,13 @@ String serialisePressureData(bool clearPeaks) {
     if (clearPeaks) pressureDataString += "=";
     pressureDataString += maxMsError;
     if (clearPeaks) maxMsError = 0;
+
+    if (clearPeaks) pressureDataString += "&";
+    pressureDataString += "sampleCount";
+    if (clearPeaks) pressureDataString += "=";
+    pressureDataString += countOfSum;
+    if (clearPeaks) countOfSum = 0;
+
     return pressureDataString;
 }
 

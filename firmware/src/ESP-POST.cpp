@@ -576,6 +576,13 @@ void loop() {
     if (lastDataSentMs + dataSendDelayMs < millis()) {
         Serial.println("IP Address");
         Serial.println(WiFi.localIP());
+
+        #ifdef PRESSURE_MONITOR
+        if (interestingPressureData()) {
+            sendMessage(serialisePressureData(false));
+        }
+        #endif
+
         sendMonitoredData();
 #ifdef GREEN_LED_PIN
         requestRGB(locationString, false);
@@ -671,10 +678,6 @@ void loop() {
     #ifdef LedDataPin
     updateLedPanel();
     #endif
-
-    if (interestingPressureData()) {
-        sendMessage(serialisePressureData(false));
-    }
 #endif
     delay(10);
     //Serial.print(".");
