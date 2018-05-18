@@ -92,14 +92,27 @@ void startLedPanel(int dataPin, int clockPin, int csPin){
   }
 }
 
+//int columnIndex = 0;
+//int rowIndex = 0;
+
 void updateLedPanel(){
 for(int row = 0; row < 8; row++) {
   for(int column = 0; column < 8; column++) {
     for(int address = 0; address < 4; address++) {
-      ledControl->setLed(address, row, column, arrayReal[column + (7 - address) << 1] > row);
+      int frequencyIndex = (8 - column) + (address * 8);
+      ledControl->setLed(address, row, column, arrayReal[frequencyIndex] > row);
+      //ledControl->setLed(address, row, column, frequencyIndex == columnIndex && rowIndex > row);
     }
   }
 }
+/*
+columnIndex++;
+if(columnIndex>50){
+  columnIndex=0;
+  rowIndex++;
+  if(rowIndex>10)rowIndex=0;
+}
+*/
 }
 
 void updatePeaks(double *valueData, uint16_t bufferSize) {
@@ -194,15 +207,15 @@ void acquirePressureData() {
     pressureAverage = pressureSum / samples;
     unsigned long endMs = millis();
     int msError = endMs - startMs - (samples * msPerSample);
-    Serial.print(msError);
-    Serial.println(" ms");
+    //Serial.print(msError);
+    //Serial.println(" ms");
 
     if (maxMsError < msError) maxMsError = msError;
     FFT.Windowing(arrayReal, samples, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
     FFT.Compute(arrayReal, arrayImag, samples, FFT_FORWARD);
     FFT.ComplexToMagnitude(arrayReal, arrayImag, samples);
     updatePeaks(arrayReal, (samples >> 1));
-    double majorPeakHz = FFT.MajorPeak(arrayReal, samples, samplingFrequency);
-    Serial.println(majorPeakHz, 6);
+    //double majorPeakHz = FFT.MajorPeak(arrayReal, samples, samplingFrequency);
+    //Serial.println(majorPeakHz, 6);
     //    }
 }
