@@ -126,7 +126,7 @@
             var locationParam = window.location.search.split('?')[1].split('&')[0];
             var typeParam = window.location.search.split('?')[1].split('&')[1];
             var colourValue = parseInt(window.location.search.split('?')[1].split('&')[2]);
-            var dataIndex = (typeParam == "rms")?2:1;
+            var dataIndex = (typeParam == "rms")?2:(typeParam == "avg")?3:1;
             $.getJSON('/monitor/magnitudes?location=' + locationParam + '&date=' + dateString,
                     function(data){
                     $.each(data,
@@ -165,8 +165,10 @@
     <body>
         <a href="?pressure%20monitor&peeks&400">pressure peeks</a><br/>
         <a href="?pressure%20monitor&rms&400">pressure RMS</a><br/>
-        <a href="?audio%20monitor&peeks&400">audio peeks</a><br/>
-        <a href="?audio%20monitor&rms&400">audio RMS</a><br/>
+        <a href="?pressure%20monitor&avg&400">pressure average</a><br/>
+        <a href="?audio%20monitor&peeks&50">audio peeks</a><br/>
+        <a href="?audio%20monitor&rms&50">audio RMS</a><br/>
+        <a href="?audio%20monitor&avg&50">audio average</a><br/>
         <div id="tableTarget"></div>
         <button style="width: 100%" id="nextButton" onclick="loadMore()">Load More</button>
     </body>
