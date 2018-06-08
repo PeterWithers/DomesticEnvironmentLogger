@@ -77,12 +77,16 @@ String locationString = "rearwall%20top%20floor";
 #define DHTPOWERPIN1        13
 // D1
 #define DHTPOWERPIN2         5
+
+#define DHTPOWERPIN3         ?
 // D5
 #define DHTPIN              14
 // D2
 #define DHTPIN1              4
 // D3
 #define DHTPIN2              0
+// D?
+#define DHTPIN3              ?
 
 // D3 program button
 //#define ON_BOARD_BUTTON     0
@@ -121,7 +125,7 @@ String locationString = "pressure%20monitor";
 #define SdaPin              12
 #define SclPin              14
 #define ON_BOARD_BUTTON      5
-*/
+ */
 
 String locationString = "audio%20monitor";
 #define PRESSURE_MONITOR
@@ -156,6 +160,9 @@ DHT_Unified dht1(DHTPIN1, DHTTYPE);
 #endif
 #ifdef DHTPIN2
 DHT_Unified dht2(DHTPIN2, DHTTYPE);
+#endif
+#ifdef DHTPIN3
+DHT_Unified dht3(DHTPIN3, DHTTYPE);
 #endif
 
 struct SegmentRGB {
@@ -283,28 +290,42 @@ void requestRGB(String locationString, bool refresh) {
 
 void serialiseTemperatureData(int sensorIndex, String &url, String &telemetryString, String &errorString) {
     sensors_event_t event;
-    switch (sensorIndex) {
+    int sensorRetries = 3;
+    while (sensorRetries > 0) {
+        switch (sensorIndex) {
 #ifdef DHTPIN
-        case 0:
-            dht.temperature().getEvent(&event);
-            break;
+            case 0:
+                dht.temperature().getEvent(&event);
+                break;
 #endif
 #ifdef DHTPIN1
-        case 1:
-            dht1.temperature().getEvent(&event);
-            break;
+            case 1:
+                dht1.temperature().getEvent(&event);
+                break;
 #endif
 #ifdef DHTPIN2
-        case 2:
-            dht2.temperature().getEvent(&event);
-            break;
+            case 2:
+                dht2.temperature().getEvent(&event);
+                break;
 #endif
-        default:
-            errorString += "no%20sensor%20";
-            errorString += sensorIndex;
-            errorString += "%20";
-            sendMessage(errorString);
-            return;
+#ifdef DHTPIN3
+            case 3:
+                dht3.temperature().getEvent(&event);
+                break;
+#endif
+            default:
+                errorString += "no%20sensor%20";
+                errorString += sensorIndex;
+                errorString += "%20";
+                sendMessage(errorString);
+                return;
+        }
+        if (isnan(event.temperature)) {
+            sensorRetries--;
+            errorString += "retry%20";
+        } else {
+            sensorRetries = 0;
+        }
     }
     url += "&temperature=";
     if (isnan(event.temperature)) {
@@ -333,6 +354,11 @@ void serialiseTemperatureData(int sensorIndex, String &url, String &telemetryStr
 #ifdef DHTPIN2
         case 2:
             dht2.humidity().getEvent(&event);
+            break;
+#endif
+#ifdef DHTPIN3
+        case 3:
+            dht3.humidity().getEvent(&event);
             break;
 #endif
         default:
@@ -376,6 +402,10 @@ void sendMonitoredData() {
     pinMode(DHTPOWERPIN2, OUTPUT);
     digitalWrite(DHTPOWERPIN2, 1);
 #endif
+#ifdef DHTPOWERPIN3
+    pinMode(DHTPOWERPIN3, OUTPUT);
+    digitalWrite(DHTPOWERPIN3, 1);
+#endif
 #ifdef DHTPIN
     dht.begin();
 #endif
@@ -385,12 +415,18 @@ void sendMonitoredData() {
 #ifdef DHTPIN2
     dht2.begin();
 #endif
+#ifdef DHTPIN3
+    dht3.begin();
+#endif
     serialiseTemperatureData(0, url, telemetryString, errorString);
 #ifdef DHTPIN1
     serialiseTemperatureData(1, url, telemetryString, errorString);
 #endif
 #ifdef DHTPIN2
     serialiseTemperatureData(2, url, telemetryString, errorString);
+#endif
+#ifdef DHTPIN3
+    serialiseTemperatureData(3, url, telemetryString, errorString);
 #endif
 #ifdef DHTPOWERPIN
     // power down the DHT
@@ -403,6 +439,10 @@ void sendMonitoredData() {
 #ifdef DHTPOWERPIN2
     // power down the DHT
     pinMode(DHTPOWERPIN2, INPUT);
+#endif
+#ifdef DHTPOWERPIN3
+    // power down the DHT
+    pinMode(DHTPOWERPIN3, INPUT);
 #endif
 #endif
     telemetryString += "ADC: ";
@@ -577,11 +617,11 @@ void loop() {
         Serial.println("IP Address");
         Serial.println(WiFi.localIP());
 
-        #ifdef PRESSURE_MONITOR
+#ifdef PRESSURE_MONITOR
         if (interestingPressureData()) {
             sendMessage(serialisePressureData(false));
         }
-        #endif
+#endif
 
         sendMonitoredData();
 #ifdef GREEN_LED_PIN
@@ -675,9 +715,9 @@ void loop() {
 #endif
 #ifdef PRESSURE_MONITOR
     acquirePressureData();
-    #ifdef LedDataPin
+#ifdef LedDataPin
     updateLedPanel();
-    #endif
+#endif
 #endif
     delay(10);
     //Serial.print(".");
