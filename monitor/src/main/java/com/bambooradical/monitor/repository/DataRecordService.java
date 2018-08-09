@@ -298,7 +298,7 @@ public class DataRecordService {
         for (LocalDate date = startDate; date.isBefore(endDate); date = date.plusDays(1)) {
             String dateKey = date.toString("yyyy-MM-dd");
             if (!DAILY_PEEKS.containsKey(dateKey + "_" + location)) {
-                if (insertedDays < 3) { // only insert only 3 days data in one request
+                if (insertedDays < 30) { // only insert only 30 days data in one request
                     insertDailyPeeks(location, dateKey, date, resultList);
                     insertedDays++;
                 }
