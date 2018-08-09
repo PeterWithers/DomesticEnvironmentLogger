@@ -40,7 +40,7 @@ public class KnmiDataController {
         HttpURLConnection httpsURLConnection = (HttpURLConnection) obj.openConnection();
         httpsURLConnection.setRequestMethod("POST");
         int startYear = Integer.parseInt(startDate.substring(0, 4));
-        int startMonth = Integer.parseInt(startDate.substring(5, 7));
+        int startMonth = Integer.parseInt(startDate.substring(4, 6));
         final String endDate;
         if (startMonth > 11) {
             endDate = String.format("%04d%02d01", startYear + 1, 1);
