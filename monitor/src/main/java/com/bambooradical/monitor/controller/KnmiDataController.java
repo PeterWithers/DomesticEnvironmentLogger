@@ -32,14 +32,21 @@ public class KnmiDataController {
     DataRecordService dataRecordService;
 
     @RequestMapping("/import")
-    public String addEnergyRecord(@RequestParam(value = "startDate", required = true) /*@DateTimeFormat(pattern = "yyyyMMdd") Date*/ String startDate,
-            @RequestParam(value = "endDate", required = true) /*@DateTimeFormat(pattern = "yyyyMMdd") Date*/ String endDate) throws IOException, NumberFormatException, ParseException {
+    public String addEnergyRecord(@RequestParam(value = "startDate", required = true) /*@DateTimeFormat(pattern = "yyyyMMdd") Date*/ String startDate) throws IOException, NumberFormatException, ParseException {
         final StringBuffer response = new StringBuffer();
 //        http://www.knmi.nl/kennis-en-datacentrum/achtergrond/data-ophalen-vanuit-een-script
         String serviceUrlString = "http://projects.knmi.nl/klimatologie/daggegevens/getdata_dag.cgi";
         URL obj = new URL(serviceUrlString);
         HttpURLConnection httpsURLConnection = (HttpURLConnection) obj.openConnection();
         httpsURLConnection.setRequestMethod("POST");
+        int startYear = Integer.parseInt(startDate.substring(0, 4));
+        int startMonth = Integer.parseInt(startDate.substring(5, 7));
+        final String endDate;
+        if (startMonth > 11) {
+            endDate = String.format("%04d%02d01", startYear + 1, 1);
+        } else {
+            endDate = String.format("%04d%02d01", startYear, startMonth + 1);
+        }
         String postData = "start=" + startDate /*20171111*/ + "&end=" + endDate + "&vars=TN:TX:UN:UX:RH:EV24:FG:DDVEC&stns=275";
 //        RH       = Daily precipitation amount (in 0.1 mm) (-1 for <0.05 mm); 
 //        EV24     = Potential evapotranspiration (Makkink) (in 0.1 mm); 
@@ -51,6 +58,7 @@ public class KnmiDataController {
         dataOutputStream.flush();
         dataOutputStream.close();
 
+        response.append("<br/><a href=\"/monitor/import?startDate=").append(endDate).append("\">import?startDate=").append(endDate).append("</a><br/>");
         int responseCode = httpsURLConnection.getResponseCode();
         response.append("URL : ").append(serviceUrlString);
         response.append("<br/>");
