@@ -197,6 +197,10 @@ public class DataViewController {
         model.addAttribute("humidityData2", getHumidityArray("te", startDate, endDate));
         model.addAttribute("humidityData3", getHumidityArray("th", startDate, endDate));
         model.addAttribute("humidityData4", getHumidityArray("aqu", startDate, endDate));
+        model.addAttribute("precipitationDeelen", getTemperatureArray("precipitation", startDate, endDate));
+        model.addAttribute("evapotranspirationDeelen", getHumidityArray("precipitation", startDate, endDate));
+        model.addAttribute("windspeedDeelen", getTemperatureArray("windspeed", startDate, endDate));
+        model.addAttribute("windDirectionDeelen", getHumidityArray("windspeed", startDate, endDate));
         model.addAttribute("temperatureDeelen", getTemperatureArray("Deele", startDate, endDate));
         model.addAttribute("humidityDeelen", getHumidityArray("Deele", startDate, endDate));
         model.addAttribute("energyDataG3a", getGraphPointList("G3a", pageRequest, linear, startDate, endDate, gasPricePerUnit));
