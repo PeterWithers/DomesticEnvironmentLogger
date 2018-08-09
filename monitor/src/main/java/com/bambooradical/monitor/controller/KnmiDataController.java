@@ -39,7 +39,11 @@ public class KnmiDataController {
         URL obj = new URL(serviceUrlString);
         HttpURLConnection httpsURLConnection = (HttpURLConnection) obj.openConnection();
         httpsURLConnection.setRequestMethod("POST");
-        String postData = "start=" + startDate /*20171111*/ + "&vars=TN:TX:UN:UX&stns=275"; //&end=20170101
+        String postData = "start=" + startDate /*20171111*/ + "&vars=TN:TX:UN:UX:RH:EV24:FG:DDVEC&stns=275"; //&end=20170101
+//        RH       = Daily precipitation amount (in 0.1 mm) (-1 for <0.05 mm); 
+//        EV24     = Potential evapotranspiration (Makkink) (in 0.1 mm); 
+//        FG       = Daily mean windspeed (in 0.1 m/s); 
+//        DDVEC    = Vector mean wind direction in degrees (360=north, 90=east, 180=south, 270=west, 0=calm/variable); 
         httpsURLConnection.setDoOutput(true);
         DataOutputStream dataOutputStream = new DataOutputStream(httpsURLConnection.getOutputStream());
         dataOutputStream.writeBytes(postData);
@@ -70,10 +74,18 @@ public class KnmiDataController {
                 final Float humidityMin = Float.valueOf(splitLine[4]);
                 final Float temperatureMax = Float.valueOf(splitLine[3]) / 10;
                 final Float humidityMax = Float.valueOf(splitLine[5]);
+                final Float precipitation = Float.valueOf(splitLine[6]);
+                final Float evapotranspiration = Float.valueOf(splitLine[7]);
+                final Float windspeed = Float.valueOf(splitLine[8]);
+                final Float meanWindDirection = Float.valueOf(splitLine[9]);
                 final String keyStringMin = location + "-" + stationId + "-" + splitLine[1] + "-min";
                 final String keyStringMax = location + "-" + stationId + "-" + splitLine[1] + "-max";
+                final String keyStringPrecipitation = "precipitation" + "-" + stationId + "-" + splitLine[1];
+                final String keyStringWindspeed = "windspeed" + "-" + stationId + "-" + splitLine[1];
                 dataRecordService.save(location, timestamp, temperatureMin, humidityMin, keyStringMin);
                 dataRecordService.save(location, timestamp, temperatureMax, humidityMax, keyStringMax);
+                dataRecordService.save("precipitationDeelen", timestamp, precipitation, evapotranspiration, keyStringPrecipitation);
+                dataRecordService.save("windspeedDeelen", timestamp, windspeed, meanWindDirection, keyStringWindspeed);
             }
         }
         bufferedReader.close();
