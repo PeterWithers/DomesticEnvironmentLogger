@@ -32,14 +32,15 @@ public class KnmiDataController {
     DataRecordService dataRecordService;
 
     @RequestMapping("/import")
-    public String addEnergyRecord(@RequestParam(value = "startDate", required = true) /*@DateTimeFormat(pattern = "yyyyMMdd") Date*/ String startDate) throws IOException, NumberFormatException, ParseException {
+    public String addEnergyRecord(@RequestParam(value = "startDate", required = true) /*@DateTimeFormat(pattern = "yyyyMMdd") Date*/ String startDate,
+            @RequestParam(value = "endDate", required = true) /*@DateTimeFormat(pattern = "yyyyMMdd") Date*/ String endDate) throws IOException, NumberFormatException, ParseException {
         final StringBuffer response = new StringBuffer();
 //        http://www.knmi.nl/kennis-en-datacentrum/achtergrond/data-ophalen-vanuit-een-script
         String serviceUrlString = "http://projects.knmi.nl/klimatologie/daggegevens/getdata_dag.cgi";
         URL obj = new URL(serviceUrlString);
         HttpURLConnection httpsURLConnection = (HttpURLConnection) obj.openConnection();
         httpsURLConnection.setRequestMethod("POST");
-        String postData = "start=" + startDate /*20171111*/ + "&vars=TN:TX:UN:UX:RH:EV24:FG:DDVEC&stns=275"; //&end=20170101
+        String postData = "start=" + startDate /*20171111*/ + "&end=" + endDate + "&vars=TN:TX:UN:UX:RH:EV24:FG:DDVEC&stns=275";
 //        RH       = Daily precipitation amount (in 0.1 mm) (-1 for <0.05 mm); 
 //        EV24     = Potential evapotranspiration (Makkink) (in 0.1 mm); 
 //        FG       = Daily mean windspeed (in 0.1 m/s); 
