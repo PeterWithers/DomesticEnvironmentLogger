@@ -15,7 +15,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -79,22 +78,38 @@ public class KnmiDataController {
                 Date date = formatter.parse(splitLine[1] + "12");
                 final Timestamp timestamp = Timestamp.of(date);
                 final Integer stationId = Integer.valueOf(splitLine[0].trim());
-                final Float temperatureMin = Float.valueOf(splitLine[2]) / 10;
-                final Float humidityMin = Float.valueOf(splitLine[4]);
-                final Float temperatureMax = Float.valueOf(splitLine[3]) / 10;
-                final Float humidityMax = Float.valueOf(splitLine[5]);
-                final Float precipitation = Float.valueOf(splitLine[6]);
-                final Float evapotranspiration = Float.valueOf(splitLine[7]);
-                final Float windspeed = Float.valueOf(splitLine[8]);
-                final Float meanWindDirection = Float.valueOf(splitLine[9]);
-                final String keyStringMin = location + "-" + stationId + "-" + splitLine[1] + "-min";
-                final String keyStringMax = location + "-" + stationId + "-" + splitLine[1] + "-max";
-                final String keyStringPrecipitation = "precipitation" + "-" + stationId + "-" + splitLine[1];
-                final String keyStringWindspeed = "windspeed" + "-" + stationId + "-" + splitLine[1];
-                dataRecordService.save(location, timestamp, temperatureMin, humidityMin, keyStringMin);
-                dataRecordService.save(location, timestamp, temperatureMax, humidityMax, keyStringMax);
-                dataRecordService.save("precipitationDeelen", timestamp, precipitation, evapotranspiration, keyStringPrecipitation);
-                dataRecordService.save("windspeedDeelen", timestamp, windspeed, meanWindDirection, keyStringWindspeed);
+                try {
+                    final Float temperatureMin = Float.valueOf(splitLine[2]) / 10;
+                    final Float humidityMin = Float.valueOf(splitLine[4]);
+                    final String keyStringMin = location + "-" + stationId + "-" + splitLine[1] + "-min";
+                    dataRecordService.save(location, timestamp, temperatureMin, humidityMin, keyStringMin);
+                } catch (NumberFormatException exception) {
+                    System.out.println(exception.getMessage());
+                }
+                try {
+                    final Float temperatureMax = Float.valueOf(splitLine[3]) / 10;
+                    final Float humidityMax = Float.valueOf(splitLine[5]);
+                    final String keyStringMax = location + "-" + stationId + "-" + splitLine[1] + "-max";
+                    dataRecordService.save(location, timestamp, temperatureMax, humidityMax, keyStringMax);
+                } catch (NumberFormatException exception) {
+                    System.out.println(exception.getMessage());
+                }
+                try {
+                    final Float precipitation = Float.valueOf(splitLine[6]);
+                    final Float evapotranspiration = Float.valueOf(splitLine[7]);
+                    final String keyStringPrecipitation = "precipitation" + "-" + stationId + "-" + splitLine[1];
+                    dataRecordService.save("precipitationDeelen", timestamp, precipitation, evapotranspiration, keyStringPrecipitation);
+                } catch (NumberFormatException exception) {
+                    System.out.println(exception.getMessage());
+                }
+                try {
+                    final Float windspeed = Float.valueOf(splitLine[8]);
+                    final Float meanWindDirection = Float.valueOf(splitLine[9]);
+                    final String keyStringWindspeed = "windspeed" + "-" + stationId + "-" + splitLine[1];
+                    dataRecordService.save("windspeedDeelen", timestamp, windspeed, meanWindDirection, keyStringWindspeed);
+                } catch (NumberFormatException exception) {
+                    System.out.println(exception.getMessage());
+                }
             }
         }
         bufferedReader.close();
