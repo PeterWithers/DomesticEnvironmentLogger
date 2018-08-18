@@ -85,6 +85,7 @@ public class KnmiDataController {
                     dataRecordService.save(location, timestamp, temperatureMin, humidityMin, keyStringMin);
                 } catch (NumberFormatException exception) {
                     System.out.println(exception.getMessage());
+                    response.append("Invalid temperatureMin/humidityMin<br/>");
                 }
                 try {
                     final Float temperatureMax = Float.valueOf(splitLine[3]) / 10;
@@ -93,6 +94,7 @@ public class KnmiDataController {
                     dataRecordService.save(location, timestamp, temperatureMax, humidityMax, keyStringMax);
                 } catch (NumberFormatException exception) {
                     System.out.println(exception.getMessage());
+                    response.append("Invalid temperatureMax/humidityMax<br/>");
                 }
                 try {
                     final Float precipitation = Float.valueOf(splitLine[6]);
@@ -101,6 +103,7 @@ public class KnmiDataController {
                     dataRecordService.save("precipitationDeelen", timestamp, precipitation, evapotranspiration, keyStringPrecipitation);
                 } catch (NumberFormatException exception) {
                     System.out.println(exception.getMessage());
+                    response.append("Invalid precipitation/evapotranspiration<br/>");
                 }
                 try {
                     final Float windspeed = Float.valueOf(splitLine[8]);
@@ -109,6 +112,7 @@ public class KnmiDataController {
                     dataRecordService.save("windspeedDeelen", timestamp, windspeed, meanWindDirection, keyStringWindspeed);
                 } catch (NumberFormatException exception) {
                     System.out.println(exception.getMessage());
+                    response.append("Invalid windspeed/meanWindDirection<br/>");
                 }
             }
         }
