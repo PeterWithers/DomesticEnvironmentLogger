@@ -67,26 +67,38 @@ String locationString = "second%20top%20floor";
 #define ON_BOARD_BUTTON    14
  */
 
-/*
-String locationString = "rearwall%20top%20floor";
+// String locationString = "rearwall%20top%20floor";
+String locationString = "frontwall%20top%20floor";
 #define VCC_VOLTAGE_MONITOR
 //#define POWER_DHT_VIA_GPIO
 // D6
+// right of rear wall
+// left of front wall
 #define DHTPOWERPIN         12
 // D7
+// middle of rear wall
+// middle of front wall
 #define DHTPOWERPIN1        13
 // D1
+// left side of rear wall
+// right side of front wall
 #define DHTPOWERPIN2         5
 
-#define DHTPOWERPIN3         ?
+//#define DHTPOWERPIN3         ?
 // D5
+// right of rear wall
+// left of front wall
 #define DHTPIN              14
 // D2
+// middle of rear wall
+// middle of front wall
 #define DHTPIN1              4
 // D3
+// left side of rear wall
+// righ side of front wall
 #define DHTPIN2              0
 // D?
-#define DHTPIN3              ?
+//#define DHTPIN3              ?
 
 // D3 program button
 //#define ON_BOARD_BUTTON     0
@@ -105,7 +117,6 @@ String locationString = "rearwall%20top%20floor";
 //#define EXTERNAL_BUTTON1    4
 // D6
 // #define EXTERNAL_BUTTON2    12
- */
 
 /*
 String locationString = "aquarium";
@@ -127,12 +138,14 @@ String locationString = "pressure%20monitor";
 #define ON_BOARD_BUTTON      5
  */
 
+/*
 String locationString = "audio%20monitor";
 #define PRESSURE_MONITOR
 #define ON_BOARD_BUTTON      5
 #define LedDataPin          14
 #define LedClockPin         13
 #define LedCsPin            12
+*/
 
 /*
 String locationString = "second%20testing%20board";
@@ -323,6 +336,7 @@ void serialiseTemperatureData(int sensorIndex, String &url, String &telemetryStr
         if (isnan(event.temperature)) {
             sensorRetries--;
             errorString += "retry%20";
+            delay(3000);
         } else {
             sensorRetries = 0;
         }
