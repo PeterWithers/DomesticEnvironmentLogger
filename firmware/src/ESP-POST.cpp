@@ -16,6 +16,8 @@
 #include <DHT.h>
 #include <DHT_U.h>
 #include "LowFrequencyMonitor.h"
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 const char* ssid = "";
 const char* password = "";
@@ -59,14 +61,15 @@ String locationString = "third%20ground%20floor";
  */
 
 /*
-String locationString = "second%20top%20floor";
+String locationString = "second%20top%20floorA";
 #define VCC_VOLTAGE_MONITOR
 #define POWER_DHT_VIA_GPIO
-#define DHTPOWERPIN         5
-#define DHTPIN              4
+#define DHTPOWERPIN         5 // D1
+#define DHTPIN              4 // D2
 #define ON_BOARD_BUTTON    14
- */
+*/
 
+/*
 // String locationString = "rearwall%20top%20floor";
 String locationString = "frontwall%20top%20floor";
 #define VCC_VOLTAGE_MONITOR
@@ -99,7 +102,7 @@ String locationString = "frontwall%20top%20floor";
 #define DHTPIN2              0
 // D?
 //#define DHTPIN3              ?
-
+*/
 // D3 program button
 //#define ON_BOARD_BUTTON     0
 // known pins
@@ -118,16 +121,14 @@ String locationString = "frontwall%20top%20floor";
 // D6
 // #define EXTERNAL_BUTTON2    12
 
-/*
-String locationString = "aquarium";
+String locationString = "aquariumA";
 #define VCC_VOLTAGE_MONITOR
 #define DHTPIN              2
-#define BUTTONPIN           5
-#define GREEN_LED_PIN       13
-#define RED_LED_PIN         12
-#define BLUE_LED_PIN        14
+//#define BUTTONPIN           5
+//#define GREEN_LED_PIN       13
+//#define RED_LED_PIN         12
+//#define BLUE_LED_PIN        14
 #define DS18b20_PIN         0
- */
 
 /*
 String locationString = "pressure%20monitor";
@@ -176,6 +177,12 @@ DHT_Unified dht2(DHTPIN2, DHTTYPE);
 #endif
 #ifdef DHTPIN3
 DHT_Unified dht3(DHTPIN3, DHTTYPE);
+#endif
+
+#ifdef DS18b20_PIN
+OneWire oneWire(DS18b20_PIN);
+DallasTemperature sensors(&oneWire);
+DeviceAddress thermometer0;
 #endif
 
 struct SegmentRGB {
@@ -442,6 +449,13 @@ void sendMonitoredData() {
 #ifdef DHTPIN3
     serialiseTemperatureData(3, url, telemetryString, errorString);
 #endif
+#ifdef DS18b20_PIN
+   sensors.requestTemperatures();
+   float tempC = sensors.getTempC(thermometer0);
+   //sendMessage(String(tempC) + "c");
+   url += "&temperature=";
+   url += tempC;
+#endif
 #ifdef DHTPOWERPIN
     // power down the DHT
     pinMode(DHTPOWERPIN, INPUT);
@@ -623,6 +637,17 @@ void setup() {
     segmentRGB[7].duration = -1;
     segmentRGB[7].tween = false;
     requestRGB(locationString, true);
+#endif
+
+#ifdef DS18b20_PIN
+  sensors.begin();
+  if (!sensors.getAddress(thermometer0, 0)) {
+    sendMessage("Unable%20to%20find%20thermometer0");
+  } else {
+    sensors.requestTemperatures();
+    float tempC = sensors.getTempC(thermometer0);
+    sendMessage(String(tempC) + "c");
+  }
 #endif
 }
 
