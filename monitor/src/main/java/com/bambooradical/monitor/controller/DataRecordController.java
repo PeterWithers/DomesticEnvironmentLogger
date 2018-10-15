@@ -322,7 +322,7 @@ public class DataRecordController {
         calendar.add(Calendar.DAY_OF_MONTH, startDay);
         Date endDate = calendar.getTime();
 
-        calendar.add(Calendar.DAY_OF_MONTH, -spanDays);
+        calendar.add(Calendar.DAY_OF_MONTH, -spanDays - 1);
         Date startDate = calendar.getTime();
 
         final String pagebleMenu = ""
@@ -414,7 +414,19 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(75, 92, 192, 1)\","
                 + "            data: "
-                + getTemperatureArray("aqu", startDate, endDate)
+                + getTemperatureArray("aquariumA0", startDate, endDate)
+                + "        },"
+	        + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'Aquarium',\n"
+                + "            backgroundColor: \"rgba(75, 92, 192, 0.0)\",\n"
+                + "            borderColor: \"rgba(75, 92, 192, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(75, 92, 192, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(75, 92, 192, 1)\","
+                + "            data: "
+                + getTemperatureArray("aquariumA1", startDate, endDate)
                 + "        },"
                 + "{\n"
                 //                + "        lineTension: 0\n"
