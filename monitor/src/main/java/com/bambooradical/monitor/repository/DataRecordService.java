@@ -58,6 +58,7 @@ public class DataRecordService {
         } else {
             dayRecordsList.add(updatedRecord);
         }
+        //updatedRecord.setError(keyString);
     }
 
     public List<DataRecord> findAll() {
@@ -229,15 +230,16 @@ public class DataRecordService {
     }
 
     private void findDailyRecords(String location, LocalDate startDate, LocalDate endDate, List<DataRecord> resultList) {
-//        for (LocalDate date = startDate; date.isBefore(endDate); date = date.plusDays(1)) {
-//            String dateKey = date.toString("yyyy-MM-dd");
+        for (LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)) {
+            String dateKey = date.toString("yyyy-MM-dd");
+	    //System.out.println(dateKey);
             for (String currentKey : DAILY_RECORDS.keySet()) {
-//		    if (currentKey.toLowerCase().startsWith(dateKey + "_" + location.toLowerCase())) {
-                if (currentKey.toLowerCase().startsWith("2018-10-15_" + location.toLowerCase())) {
+	//	System.out.println(currentKey + ":" + dateKey + "_" + location.toLowerCase());
+		if (currentKey.toLowerCase().startsWith(dateKey + "_" + location.toLowerCase())) {
                     resultList.addAll(DAILY_RECORDS.get(currentKey));
                 }
             }
-//        }
+        }
     }
 
     private void findDailyPeeks(String location, LocalDate startDate, LocalDate endDate, List<DataRecord> resultList) {
