@@ -279,7 +279,7 @@ public class DataRecordService {
 //            }
 //        }
         int insertedDays = 0;
-        for (LocalDate date = startDate; date.isBefore(endDate); date = date.plusDays(1)) {
+        for (LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)) {
             String dateKey = date.toString("yyyy-MM-dd");
             if (!DAILY_PEEKS.containsKey(dateKey + "_" + location)) {
                 if (insertedDays < 14) { // only insert only 14 days data in one request
