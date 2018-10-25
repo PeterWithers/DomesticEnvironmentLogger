@@ -44,7 +44,7 @@ public class DataRecordService {
         keyFactory = datastore.newKeyFactory().setKind("DataRecord");
     }
 
-    private void updateRecordArrays(DataRecord updatedRecord) {
+    private synchronized void updateRecordArrays(DataRecord updatedRecord) {
         String recordLocation = updatedRecord.getLocation();
         LocalDate recordDate = new LocalDate(updatedRecord.getRecordDate());
         String dateKey = recordDate.toString("yyyy-MM-dd");
@@ -301,13 +301,24 @@ public class DataRecordService {
     //    public HashMap<DataRecord> findByRecordDateBetweenOrderByRecordDateAsc(String[] locations, Date startDate, Date endDate) {
 
     // todo: add an endpoint to trigger this data load method
-    private void loadDayOfData(Date startDate, Date endDate) {
-//    List<DataRecord> resultList = new ArrayList<>();
+    public void loadDayOfData(Date startDate, Date endDate) {
+     for (LocalDate date = new LocalDate(startDate); date.isBefore(new LocalDate(endDate).plusDays(1)); date = date.plusDays(1)) {
+       String dateKey = date.toString("yyyy-MM-dd");
+       boolean hasDate = false;
+       if (!date.equals(new LocalDate())) {
+         for (String currentKey : DAILY_RECORDS.keySet()) {
+           if (currentKey.toLowerCase().startsWith(dateKey + "_")) {
+              hasDate = true;
+              break;
+           }
+        }
+      }
+      if (!hasDate) {
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("DataRecord")
                 .setFilter(CompositeFilter.and(
-                        PropertyFilter.ge("RecordDate", Timestamp.of(startDate)),
-                        PropertyFilter.le("RecordDate", Timestamp.of(endDate))
+                        PropertyFilter.ge("RecordDate", Timestamp.of(date.toDate())),
+                        PropertyFilter.le("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
                 ))
                 .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
                 .build();
@@ -322,6 +333,8 @@ public class DataRecordService {
                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
             updateRecordArrays(dataRecord);
         }
+      }
+    }
     }
 
     public List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate) {
