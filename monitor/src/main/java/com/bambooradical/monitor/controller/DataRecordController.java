@@ -315,6 +315,17 @@ public class DataRecordController {
                 + "</body>";
     }
 
+    @RequestMapping("/load")
+    public String loadData(@RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "14") int spanDays) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_MONTH, startDay);
+        Date endDate = calendar.getTime();
+        calendar.add(Calendar.DAY_OF_MONTH, -spanDays - 1);
+        Date startDate = calendar.getTime();
+        dataRecordService.loadDayOfData(startDate, endDate);
+        return getCharts(startDay, spanDays);
+    }
+
     @RequestMapping("/charts")
     public String getCharts(@RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "14") int spanDays) {
 //        long totalRecords = dataRecordRepository.count();
@@ -326,6 +337,7 @@ public class DataRecordController {
         Date startDate = calendar.getTime();
 
         final String pagebleMenu = ""
+		+ "<a href=\"load?start=" + startDay + "&span=" + spanDays + "\">load current</a>&nbsp;&nbsp;&nbsp;"
                 + "<a href=\"charts?start=" + startDay + "&span=" + (spanDays * 2) + "\">zoom-</a>&nbsp;"
                 + "<a href=\"charts?start=" + startDay + "&span=" + (spanDays / 2) + "\">zoom+</a>&nbsp;"
                 + "<a href=\"charts?start=" + (startDay - spanDays) + "&span=" + spanDays + "\">prev</a>&nbsp;"
@@ -653,63 +665,63 @@ public class DataRecordController {
                 + "        }\n"
                 + "    }"
                 + "});"
-                + "var voltageContainer = $(\"#voltageContainer\");\n"
-                + "var voltageChart = new Chart(voltageContainer, {\n"
-                + "    type: 'line',\n"
-                + "    data: {\n"
-                + "        datasets: ["
-                + "{\n"
-                + "            label: 'Voltage 2',\n"
-                + "            backgroundColor: \"rgba(179,181,198,0.2)\",\n"
-                + "            borderColor: \"rgba(179,181,198,1)\",\n"
-                + "            pointBackgroundColor: \"rgba(179,181,198,1)\",\n"
-                + "            pointBorderColor: \"#fff\",\n"
-                + "            pointHoverBackgroundColor: \"#fff\",\n"
-                + "            pointHoverBorderColor: \"rgba(179,181,198,1)\","
-                + "            data: "
-                + getVoltageArray("s", startDate, endDate)
-                + "        },"
-                + "{\n"
-                + "            label: 'Voltage 1',\n"
-                + "            backgroundColor: \"rgba(255,99,132,0.2)\",\n"
-                + "            borderColor: \"rgba(255,99,132,1)\",\n"
-                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
-                + "            pointBorderColor: \"#fff\",\n"
-                + "            pointHoverBackgroundColor: \"#fff\",\n"
-                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
-                + "            data: "
-                + getVoltageArray("te", startDate, endDate)
-                + "        },"
-                + "{\n"
-                + "            label: 'Voltage 3',\n"
-                + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
-                + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
-                + "            pointBackgroundColor: \"rgba(75, 192, 192, 1)\",\n"
-                + "            pointBorderColor: \"#fff\",\n"
-                + "            pointHoverBackgroundColor: \"#fff\",\n"
-                + "            pointHoverBorderColor: \"rgba(75, 192, 192, 1)\","
-                + "            data: "
-                + getVoltageArray("th", startDate, endDate)
-                + "        }"
-                + "]\n"
-                + "    },\n"
-                + "    options: {\n"
-                + "        bezierCurve : false,\n"
-                + "        responsive: true,\n"
-                + "        maintainAspectRatio: true,\n"
-                + "        scales: {\n"
-                + "            xAxes: [{\n"
-                + "                type: 'time',\n"
-                + "                time: {\n"
-                + "                    displayFormats: {\n"
-                + "                        quarter: 'YYYY MMM D H:mm:ss'\n"
-                + "                    },\n"
-                + "                    tooltipFormat: 'YYYY MMM D H:mm:ss'\n"
-                + "                }\n"
-                + "            }]"
-                + "        }\n"
-                + "    }"
-                + "});"
+//                + "var voltageContainer = $(\"#voltageContainer\");\n"
+//                + "var voltageChart = new Chart(voltageContainer, {\n"
+//                + "    type: 'line',\n"
+//                + "    data: {\n"
+//                + "        datasets: ["
+//                + "{\n"
+//                + "            label: 'Voltage 2',\n"
+//                + "            backgroundColor: \"rgba(179,181,198,0.2)\",\n"
+//                + "            borderColor: \"rgba(179,181,198,1)\",\n"
+//                + "            pointBackgroundColor: \"rgba(179,181,198,1)\",\n"
+//                + "            pointBorderColor: \"#fff\",\n"
+//                + "            pointHoverBackgroundColor: \"#fff\",\n"
+//                + "            pointHoverBorderColor: \"rgba(179,181,198,1)\","
+//                + "            data: "
+//                + getVoltageArray("s", startDate, endDate)
+//                + "        },"
+//                + "{\n"
+//                + "            label: 'Voltage 1',\n"
+//                + "            backgroundColor: \"rgba(255,99,132,0.2)\",\n"
+//                + "            borderColor: \"rgba(255,99,132,1)\",\n"
+//                + "            pointBackgroundColor: \"rgba(255,99,132,1)\",\n"
+//                + "            pointBorderColor: \"#fff\",\n"
+//                + "            pointHoverBackgroundColor: \"#fff\",\n"
+//                + "            pointHoverBorderColor: \"rgba(255,99,132,1)\","
+//                + "            data: "
+//                + getVoltageArray("te", startDate, endDate)
+//                + "        },"
+//                + "{\n"
+//                + "            label: 'Voltage 3',\n"
+//                + "            backgroundColor: \"rgba(75, 192, 192, 0.2)\",\n"
+//                + "            borderColor: \"rgba(75, 192, 192, 1)\",\n"
+//                + "            pointBackgroundColor: \"rgba(75, 192, 192, 1)\",\n"
+//                + "            pointBorderColor: \"#fff\",\n"
+//                + "            pointHoverBackgroundColor: \"#fff\",\n"
+//                + "            pointHoverBorderColor: \"rgba(75, 192, 192, 1)\","
+//                + "            data: "
+//                + getVoltageArray("th", startDate, endDate)
+//                + "        }"
+//                + "]\n"
+//                + "    },\n"
+//                + "    options: {\n"
+//                + "        bezierCurve : false,\n"
+//                + "        responsive: true,\n"
+//                + "        maintainAspectRatio: true,\n"
+//                + "        scales: {\n"
+//                + "            xAxes: [{\n"
+//                + "                type: 'time',\n"
+//                + "                time: {\n"
+//                + "                    displayFormats: {\n"
+//                + "                        quarter: 'YYYY MMM D H:mm:ss'\n"
+//                + "                    },\n"
+//                + "                    tooltipFormat: 'YYYY MMM D H:mm:ss'\n"
+//                + "                }\n"
+//                + "            }]"
+//                + "        }\n"
+//                + "    }"
+//                + "});"
                 + "});";
         return "<head>"
                 + "<script src=\"/js/jquery.min.js\"></script>"
@@ -737,8 +749,8 @@ public class DataRecordController {
                 + "<canvas id=\"temperatureContainer\" width=\"800px\" height=\"400px\"></canvas>"
                 + "<br/>"
                 + "<canvas id=\"humidityContainer\" width=\"800px\" height=\"400px\"></canvas>"
-                + "<br/>"
-                + "<canvas id=\"voltageContainer\" width=\"800px\" height=\"400px\"></canvas>"
+//                + "<br/>"
+//                + "<canvas id=\"voltageContainer\" width=\"800px\" height=\"400px\"></canvas>"
                 + "</body>";
     }
 }
