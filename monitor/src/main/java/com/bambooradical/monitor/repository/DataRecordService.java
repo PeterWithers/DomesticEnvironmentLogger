@@ -4,10 +4,25 @@
 package com.bambooradical.monitor.repository;
 
 import com.bambooradical.monitor.model.DataRecord;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.channels.Channels;
+import com.google.appengine.tools.cloudstorage.GcsFileOptions;
+import com.google.appengine.tools.cloudstorage.GcsFilename;
+import com.google.appengine.tools.cloudstorage.GcsInputChannel;
+import com.google.appengine.tools.cloudstorage.GcsOutputChannel;
+import com.google.appengine.tools.cloudstorage.GcsService;
+import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
+import com.google.appengine.tools.cloudstorage.RetryParams;
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.FullEntity;
+import com.google.cloud.datastore.Key;
 import com.google.cloud.datastore.IncompleteKey;
 import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
@@ -15,10 +30,12 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
 import com.google.cloud.datastore.StructuredQuery.CompositeFilter;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +59,12 @@ public class DataRecordService {
     @PostConstruct
     public void initializeKeyFactories() {
         keyFactory = datastore.newKeyFactory().setKind("DataRecord");
+    }
+
+    private final GcsService gcsService = GcsServiceFactory.createGcsService(new RetryParams.Builder().initialRetryDelayMillis(10).retryMaxAttempts(3).totalRetryPeriodMillis(100).build());
+
+    private synchronized void updateDayRecordsList(final String keyString, final List<DataRecord> dayRecordsList) {
+        DAILY_RECORDS.put(keyString, dayRecordsList);
     }
 
     private synchronized void updateRecordArrays(DataRecord updatedRecord) {
@@ -302,6 +325,21 @@ public class DataRecordService {
 
     // todo: add an endpoint to trigger this data load method
     public void loadDayOfData(Date startDate, Date endDate) {
+	  try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DaysOfData");
+            GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(fileName, 0, 2097152);
+            final HashMap<String, List<DataRecord>> storedData = mapper.readValue(Channels.newInputStream(readChannel), new TypeReference<Map<String, List<DataRecord>>>() {
+            });
+            for (String currentKey : storedData.keySet()) {
+                if (!DAILY_RECORDS.containsKey(currentKey)) {
+                    updateDayRecordsList(currentKey, storedData.get(currentKey));
+                }
+            }
+        } catch (IOException exception) {
+            System.out.println(exception.getMessage());
+        }
      for (LocalDate date = new LocalDate(startDate); date.isBefore(new LocalDate(endDate).plusDays(1)); date = date.plusDays(1)) {
        String dateKey = date.toString("yyyy-MM-dd");
        boolean hasDate = false;
@@ -335,6 +373,34 @@ public class DataRecordService {
         }
       }
     }
+    try {
+            ObjectMapper mapper = new ObjectMapper();
+//        mapper.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
+//        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            String todayDateKey = new LocalDate().toString("yyyy-MM-dd");
+	    final HashMap<String, List<DataRecord>> storedData = new HashMap<>();
+            for (String currentKey : DAILY_RECORDS.keySet()) {
+                if (!currentKey.startsWith(todayDateKey)) {
+                    storedData.put(currentKey, DAILY_RECORDS.get(currentKey));
+                }
+            }
+//            Key key = keyFactory.setKind("AllDataRecords").newKey("DaysOfData");
+//            final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
+//            for (String currentKey : DAILY_RECORDS.keySet()) {
+//                if (!currentKey.startsWith(todayDateKey)) {
+//                    builder.set(currentKey, mapper.writeValueAsString(DAILY_RECORDS.get(currentKey)));
+//                }
+//            }
+//            FullEntity entity = builder.build();
+//            datastore.put(entity);
+            GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
+            GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DaysOfData");
+            GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, instance);
+            mapper.writeValue(Channels.newOutputStream(outputChannel), storedData);
+        } catch (IOException exception) {
+            System.out.println(exception.getMessage());
+        }
     }
 
     public List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate) {
