@@ -67,6 +67,10 @@ public class DataRecordService {
         DAILY_RECORDS.put(keyString, dayRecordsList);
     }
 
+    private synchronized void updateDayPeeksList(final String keyString, final List<DataRecord> dayPeekList) {
+        DAILY_PEEKS.put(keyString, dayPeekList);
+    }
+
     private synchronized void updateRecordArrays(DataRecord updatedRecord) {
         String recordLocation = updatedRecord.getLocation();
         LocalDate recordDate = new LocalDate(updatedRecord.getRecordDate());
@@ -166,6 +170,8 @@ public class DataRecordService {
     }
 
     public void insertDailyPeeks(String location, String dateKey, LocalDate date, List<DataRecord> resultList) {
+        DataRecord firstRecord = null;
+        DataRecord lastRecord = null;
         DataRecord minHumidityRecord = null;
         DataRecord maxHumidityRecord = null;
         DataRecord minTemperatureRecord = null;
@@ -173,6 +179,8 @@ public class DataRecordService {
         for (String currentKey : DAILY_RECORDS.keySet()) {
             if (currentKey.toLowerCase().startsWith(dateKey + "_" + location.toLowerCase())) {
                 for (DataRecord currentRecord : DAILY_RECORDS.get(currentKey)) {
+                if (firstRecord == null) firstRecord = currentRecord;
+                lastRecord = currentRecord;
 //            final String meterLocation = currentEntity.getString("Location");
 //            if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
                     if (currentRecord.getHumidity() != null) {
@@ -220,12 +228,13 @@ public class DataRecordService {
 //            DAILY_PEEKS.put(dateKey + "_" + location, new ArrayList<>());
 //        } else {
         final ArrayList<DataRecord> arrayDataRecord = new ArrayList<>();
-        DAILY_PEEKS.put(dateKey + "_" + location, arrayDataRecord);
         for (DataRecord currentRecord : new DataRecord[]{
+            firstRecord,
             minHumidityRecord,
             maxHumidityRecord,
             minTemperatureRecord,
-            maxTemperatureRecord}) {
+            maxTemperatureRecord,
+	    lastRecord}) {
             if (currentRecord != null) {
                 resultList.add(currentRecord);
 //                        IncompleteKey key = keyFactory.setKind("DataRecordPeek").newKey();
@@ -250,6 +259,7 @@ public class DataRecordService {
 //                }
             }
         }
+        updateDayPeeksList(dateKey + "_" + location, arrayDataRecord);
     }
 
     private void findDailyRecords(String location, LocalDate startDate, LocalDate endDate, List<DataRecord> resultList) {
@@ -305,7 +315,7 @@ public class DataRecordService {
         for (LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)) {
             String dateKey = date.toString("yyyy-MM-dd");
             if (!DAILY_PEEKS.containsKey(dateKey + "_" + location)) {
-                if (insertedDays < 14) { // only insert only 14 days data in one request
+                if (insertedDays < 100) { // only insert only 100 days data in one request
                     insertDailyPeeks(location, dateKey, date, resultList);
                     insertedDays++;
                 }
