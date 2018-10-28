@@ -16,6 +16,7 @@ import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,8 @@ public class EnergyRecordService {
     @Autowired
     Datastore datastore;
 
+    private static HashMap<String,List<EnergyRecord>> energyRecordLocationMap = new HashMap<>();
+
     private KeyFactory keyFactory;
 
     @PostConstruct
@@ -39,9 +42,17 @@ public class EnergyRecordService {
         keyFactory = datastore.newKeyFactory().setKind("EnergyRecord");
     }
 
+    private synchronized void addEntry(String meterLocation, List<EnergyRecord> records){
+        energyRecordLocationMap.put(meterLocation, records);
+    }
+
+    private synchronized void clearEntry(String meterLocation){
+        energyRecordLocationMap.remove(meterLocation);
+    }
+
     public List<EnergyRecord> findAll() {
         List<EnergyRecord> resultList = new ArrayList<>();
-        Query<Entity> query = Query.newEntityQueryBuilder()
+/*        Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("EnergyRecord")
                 .build();
         QueryResults<Entity> results = datastore.run(query);
@@ -52,12 +63,13 @@ public class EnergyRecordService {
                     currentEntity.getDouble("MeterValue"),
                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
         }
+	*/
         return resultList;
     }
 
     public long count() {
         long resultCount = 0;
-        Query<Entity> query = Query.newEntityQueryBuilder()
+        /*Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("EnergyRecord")
                 .build();
         QueryResults<Entity> results = datastore.run(query);
@@ -65,6 +77,7 @@ public class EnergyRecordService {
             results.next();
             resultCount++;
         }
+	*/
         return resultCount;
     }
 
@@ -75,6 +88,7 @@ public class EnergyRecordService {
                 .set("MeterValue", energyRecord.getMeterValue())
                 .set("RecordDate", Timestamp.of(energyRecord.getRecordDate()))
                 .build();
+	clearEntry(energyRecord.getMeterLocation());
         return datastore.put(entity);
 
     }
@@ -85,6 +99,10 @@ public class EnergyRecordService {
     }
 
     public List<EnergyRecord> findByMeterLocationOrderByRecordDateAsc(String meterLocation, final Pageable pageable) {
+	    List<EnergyRecord> records = energyRecordLocationMap.get(meterLocation);
+	    if(records != null){
+		    return records;
+	    } else {
         // todo: handle Pageable values
         List<EnergyRecord> resultList = new ArrayList<>();
         Query<Entity> query = Query.newEntityQueryBuilder()
@@ -103,11 +121,14 @@ public class EnergyRecordService {
         resultList.sort((EnergyRecord o1, EnergyRecord o2) -> {
             return o1.getRecordDate().compareTo(o2.getRecordDate());
         });
+	addEntry(meterLocation, resultList);
         return resultList;
+	    }
     }
 
     public List<EnergyRecord> findByMeterLocationAndRecordDate(String meterLocation, Date recordDate) {
         List<EnergyRecord> resultList = new ArrayList<>();
+	/*
         Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("EnergyRecord")
                 .setFilter(PropertyFilter.eq("MeterLocation", meterLocation))
@@ -121,6 +142,7 @@ public class EnergyRecordService {
                     currentEntity.getDouble("MeterValue"),
                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
         }
+	*/
         return resultList;
     }
 }
