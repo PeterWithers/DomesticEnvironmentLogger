@@ -209,6 +209,7 @@ public class DataViewController {
         model.addAttribute("energyDataW3a", getGraphPointList("W3a", pageRequest, linear, startDate, endDate, waterPricePerUnit));
         model.addAttribute("energyDataW4", getGraphPointList("W4", pageRequest, linear, startDate, endDate, waterPricePerUnit));
         model.addAttribute("energyDataE3a", getGraphPointList("E3a", pageRequest, linear, startDate, endDate, electPricePerUnit));
+	model.addAttribute("energyDataE3a_d", getGraphPointList("E3a_d", pageRequest, linear, startDate, endDate, electPricePerUnit));
         model.addAttribute("energyDataE4", getGraphPointList("E4", pageRequest, linear, startDate, endDate, electPricePerUnit));
         return "energyviewer";
     }
