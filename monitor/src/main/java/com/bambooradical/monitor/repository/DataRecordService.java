@@ -349,17 +349,23 @@ public class DataRecordService {
 
     // todo: add an endpoint to trigger this data load method
     public void loadDayOfData(Date startDate, Date endDate) {
+        HashMap<String, List<DataRecord>> storedPeekData;
         try {
             ObjectMapper peeksMapper = new ObjectMapper();
             peeksMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             GcsFilename peeksFileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayPeeksOfData");
             GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(peeksFileName, 0, 2097152);
-            final HashMap<String, List<DataRecord>> storedPeekData = peeksMapper.readValue(Channels.newInputStream(readChannel), new TypeReference<Map<String, List<DataRecord>>>() {
+            storedPeekData = peeksMapper.readValue(Channels.newInputStream(readChannel), new TypeReference<Map<String, List<DataRecord>>>() {
             });
-            for (LocalDate date = new LocalDate(startDate); date.isBefore(new LocalDate(endDate).plusDays(1)); date = date.plusDays(1)) {
-                String dateKey = date.toString("yyyy-MM-dd");
-                boolean hasDate = false;
-                if (!date.equals(new LocalDate())) {
+        } catch (IOException exception) {
+            System.out.println(exception.getMessage());
+            storedPeekData = new HashMap<>();
+        }
+
+        for (LocalDate date = new LocalDate(startDate); date.isBefore(new LocalDate(endDate).plusDays(1)); date = date.plusDays(1)) {
+            String dateKey = date.toString("yyyy-MM-dd");
+            boolean hasDate = false;
+            if (!date.equals(new LocalDate())) {
 //                    for (String currentKey : storedPeekData.keySet()) {
 //                        if (currentKey.toLowerCase().startsWith(dateKey + "_")) {
 //                            if (!DAILY_RECORDS.containsKey(currentKey)) {
@@ -367,60 +373,64 @@ public class DataRecordService {
 //                            }
 //                        }
 //                    }
-                    for (String currentKey : storedPeekData.keySet()) {
-                        if (currentKey.toLowerCase().startsWith(dateKey + "_")) {
-                            updateDayPeeksList(currentKey, storedPeekData.get(currentKey));
-                            if (!DAILY_RECORDS.containsKey(currentKey)) {
-                                updateDayRecordsList(currentKey, storedPeekData.get(currentKey));
-                            }
-                            hasDate = true;
-                            break;
+                for (String currentKey : storedPeekData.keySet()) {
+                    if (currentKey.toLowerCase().startsWith(dateKey + "_")) {
+                        updateDayPeeksList(currentKey, storedPeekData.get(currentKey));
+                        if (!DAILY_RECORDS.containsKey(currentKey)) {
+                            updateDayRecordsList(currentKey, storedPeekData.get(currentKey));
                         }
+                        hasDate = true;
+                        break;
                     }
                 }
-                if (!hasDate) {
-                    Query<Entity> query = Query.newEntityQueryBuilder()
-                            .setKind("DataRecord")
-                            .setFilter(CompositeFilter.and(
-                                    PropertyFilter.ge("RecordDate", Timestamp.of(date.toDate())),
-                                    PropertyFilter.le("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
-                            ))
-                            .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
-                            .build();
-                    QueryResults<Entity> results = datastore.run(query);
-                    ObjectMapper daylyMapper = new ObjectMapper();
-                    daylyMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-                    final List<DataRecord> dataRecordList = new ArrayList<>();
-                    while (results.hasNext()) {
-                        Entity currentEntity = results.next();
-                        final DataRecord dataRecord = new DataRecord(
-                                (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
-                                (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
-                                (float) currentEntity.getDouble("Voltage"), currentEntity.getString("Location"),
-                                currentEntity.getString("Error"),
-                                new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
+            }
+            if (!hasDate) {
+                Query<Entity> query = Query.newEntityQueryBuilder()
+                        .setKind("DataRecord")
+                        .setFilter(CompositeFilter.and(
+                                PropertyFilter.ge("RecordDate", Timestamp.of(date.toDate())),
+                                PropertyFilter.le("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
+                        ))
+                        .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
+                        .build();
+                QueryResults<Entity> results = datastore.run(query);
+                ObjectMapper daylyMapper = new ObjectMapper();
+                daylyMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                final List<DataRecord> dataRecordList = new ArrayList<>();
+                while (results.hasNext()) {
+                    Entity currentEntity = results.next();
+                    final DataRecord dataRecord = new DataRecord(
+                            (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                            (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
+                            (float) currentEntity.getDouble("Voltage"), currentEntity.getString("Location"),
+                            currentEntity.getString("Error"),
+                            new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
 //                        updateRecordArrays(dataRecord);
-                        updateDailyPeeks(dateKey, dataRecord);
-                        dataRecordList.add(dataRecord);
-                    }
+                    updateDailyPeeks(dateKey, dataRecord);
+                    dataRecordList.add(dataRecord);
+                }
+                try {
                     GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
                     GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey);
                     GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, instance);
                     daylyMapper.writeValue(Channels.newOutputStream(outputChannel), dataRecordList);
+                } catch (IOException exception) {
+                    System.out.println(exception.getMessage());
                 }
             }
-            try {
-                ObjectMapper outputMapper = new ObjectMapper();
+        }
+        try {
+            ObjectMapper outputMapper = new ObjectMapper();
 //        mapper.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
 //        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-                outputMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-                String todayDateKey = new LocalDate().toString("yyyy-MM-dd");
-                final HashMap<String, List<DataRecord>> storedData = new HashMap<>();
-                for (String currentKey : DAILY_PEEKS.keySet()) {
-                    if (!currentKey.startsWith(todayDateKey)) {
-                        storedData.put(currentKey, DAILY_PEEKS.get(currentKey));
-                    }
+            outputMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            String todayDateKey = new LocalDate().toString("yyyy-MM-dd");
+            final HashMap<String, List<DataRecord>> storedData = new HashMap<>();
+            for (String currentKey : DAILY_PEEKS.keySet()) {
+                if (!currentKey.startsWith(todayDateKey)) {
+                    storedData.put(currentKey, DAILY_PEEKS.get(currentKey));
                 }
+            }
 //            Key key = keyFactory.setKind("AllDataRecords").newKey("DaysOfData");
 //            final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
 //            for (String currentKey : DAILY_RECORDS.keySet()) {
@@ -430,13 +440,10 @@ public class DataRecordService {
 //            }
 //            FullEntity entity = builder.build();
 //            datastore.put(entity);
-                GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
-                GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayPeeksOfData");
-                GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, instance);
-                outputMapper.writeValue(Channels.newOutputStream(outputChannel), storedData);
-            } catch (IOException exception) {
-                System.out.println(exception.getMessage());
-            }
+            GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
+            GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayPeeksOfData");
+            GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, instance);
+            outputMapper.writeValue(Channels.newOutputStream(outputChannel), storedData);
         } catch (IOException exception) {
             System.out.println(exception.getMessage());
         }
