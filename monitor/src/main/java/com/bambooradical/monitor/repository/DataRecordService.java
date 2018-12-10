@@ -169,51 +169,61 @@ public class DataRecordService {
 //        return resultList;
     }
 
-    public void insertDailyPeeks(String location, String dateKey, LocalDate date, List<DataRecord> resultList) {
-        DataRecord firstRecord = null;
+    public void updateDailyPeeks(String dateKey, final DataRecord dataRecord) {
+        DataRecord firstRecord = dataRecord;
         DataRecord lastRecord = null;
         DataRecord minHumidityRecord = null;
         DataRecord maxHumidityRecord = null;
         DataRecord minTemperatureRecord = null;
         DataRecord maxTemperatureRecord = null;
-        for (String currentKey : DAILY_RECORDS.keySet()) {
-            if (currentKey.toLowerCase().startsWith(dateKey + "_" + location.toLowerCase())) {
-                for (DataRecord currentRecord : DAILY_RECORDS.get(currentKey)) {
-                if (firstRecord == null) firstRecord = currentRecord;
-                lastRecord = currentRecord;
+        final String location = dataRecord.getLocation().toLowerCase();
+        String currentKey = dateKey + "_" + location;
+        if (DAILY_PEEKS.containsKey(currentKey)) {
+            for (DataRecord currentRecord : DAILY_PEEKS.get(currentKey)) {
+                if (firstRecord == null) {
+                    firstRecord = currentRecord;
+                } else {
+                    firstRecord = (firstRecord.getRecordDate().before(currentRecord.getRecordDate())) ? firstRecord : currentRecord;
+                }
+                if (lastRecord == null) {
+                    lastRecord = currentRecord;
+                } else {
+                    lastRecord = (lastRecord.getRecordDate().after(currentRecord.getRecordDate())) ? lastRecord : currentRecord;
+                }
 //            final String meterLocation = currentEntity.getString("Location");
 //            if (meterLocation.toLowerCase().startsWith(location.toLowerCase())) {
-                    if (currentRecord.getHumidity() != null) {
-                        if (minHumidityRecord == null) {
-                            minHumidityRecord = currentRecord;
-                        }
-                        if (maxHumidityRecord == null) {
-                            maxHumidityRecord = currentRecord;
-                        }
-                        if (minHumidityRecord.getHumidity() > currentRecord.getHumidity()) {
-                            minHumidityRecord = currentRecord;
-                        }
-                        if (maxHumidityRecord.getHumidity() < currentRecord.getHumidity()) {
-                            maxHumidityRecord = currentRecord;
-                        }
+                if (currentRecord.getHumidity() != null) {
+                    if (minHumidityRecord == null) {
+                        minHumidityRecord = currentRecord;
                     }
-                    if (currentRecord.getTemperature() != null) {
-                        if (minTemperatureRecord == null) {
-                            minTemperatureRecord = currentRecord;
-                        }
-                        if (maxTemperatureRecord == null) {
-                            maxTemperatureRecord = currentRecord;
-                        }
-                        if (minTemperatureRecord.getTemperature() > currentRecord.getTemperature()) {
-                            minTemperatureRecord = currentRecord;
-                        }
-                        if (maxTemperatureRecord.getTemperature() < currentRecord.getTemperature()) {
-                            maxTemperatureRecord = currentRecord;
-                        }
+                    if (maxHumidityRecord == null) {
+                        maxHumidityRecord = currentRecord;
+                    }
+                    if (minHumidityRecord.getHumidity() > currentRecord.getHumidity()) {
+                        minHumidityRecord = currentRecord;
+                    }
+                    if (maxHumidityRecord.getHumidity() < currentRecord.getHumidity()) {
+                        maxHumidityRecord = currentRecord;
+                    }
+                }
+                if (currentRecord.getTemperature() != null) {
+                    if (minTemperatureRecord == null) {
+                        minTemperatureRecord = currentRecord;
+                    }
+                    if (maxTemperatureRecord == null) {
+                        maxTemperatureRecord = currentRecord;
+                    }
+                    if (minTemperatureRecord.getTemperature() > currentRecord.getTemperature()) {
+                        minTemperatureRecord = currentRecord;
+                    }
+                    if (maxTemperatureRecord.getTemperature() < currentRecord.getTemperature()) {
+                        maxTemperatureRecord = currentRecord;
                     }
                 }
             }
         }
+//            }
+//        }
 //        if (minHumidityRecord == null && maxHumidityRecord == null && minTemperatureRecord == null && maxTemperatureRecord == null) {
 //                IncompleteKey key = keyFactory.setKind("DataRecordPeek").newKey();
 //                final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
@@ -234,9 +244,9 @@ public class DataRecordService {
             maxHumidityRecord,
             minTemperatureRecord,
             maxTemperatureRecord,
-	    lastRecord}) {
+            lastRecord}) {
             if (currentRecord != null) {
-                resultList.add(currentRecord);
+//                resultList.add(currentRecord);
 //                        IncompleteKey key = keyFactory.setKind("DataRecordPeek").newKey();
 //                        final Float humidity = currentRecord.getHumidity();
 //                        final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
@@ -265,10 +275,10 @@ public class DataRecordService {
     private void findDailyRecords(String location, LocalDate startDate, LocalDate endDate, List<DataRecord> resultList) {
         for (LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)) {
             String dateKey = date.toString("yyyy-MM-dd");
-	    //System.out.println(dateKey);
+            //System.out.println(dateKey);
             for (String currentKey : DAILY_RECORDS.keySet()) {
-	//	System.out.println(currentKey + ":" + dateKey + "_" + location.toLowerCase());
-		if (currentKey.toLowerCase().startsWith(dateKey + "_" + location.toLowerCase())) {
+                //	System.out.println(currentKey + ":" + dateKey + "_" + location.toLowerCase());
+                if (currentKey.toLowerCase().startsWith(dateKey + "_" + location.toLowerCase())) {
                     resultList.addAll(DAILY_RECORDS.get(currentKey));
                 }
             }
@@ -311,17 +321,21 @@ public class DataRecordService {
 ////                }
 //            }
 //        }
-        int insertedDays = 0;
+//        int insertedDays = 0;
         for (LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)) {
             String dateKey = date.toString("yyyy-MM-dd");
-            if (!DAILY_PEEKS.containsKey(dateKey + "_" + location)) {
-                if (insertedDays < 100) { // only insert only 100 days data in one request
-                    insertDailyPeeks(location, dateKey, date, resultList);
-                    insertedDays++;
+//            if (!DAILY_PEEKS.containsKey(dateKey + "_" + location)) {
+//                //if (insertedDays < 100) { // only insert only 100 days data in one request
+//                    insertDailyPeeks(location, dateKey, date, resultList);
+////                    insertedDays++;
+//                //}
+//            } else {
+            for (String currentKey : DAILY_PEEKS.keySet()) {
+                if (!currentKey.startsWith(dateKey + "_" + location)) {
+                    resultList.addAll(DAILY_PEEKS.get(currentKey));
                 }
-            } else {
-                resultList.addAll(DAILY_PEEKS.get(dateKey + "_" + location));
             }
+//            }
         }
 //        if (endDate.isAfter(new LocalDate().minusDays(1))) {
 //            for (String lastRecordLocation : LATEST_RECORDS.keySet()) {
@@ -335,66 +349,78 @@ public class DataRecordService {
 
     // todo: add an endpoint to trigger this data load method
     public void loadDayOfData(Date startDate, Date endDate) {
-	  try {
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DaysOfData");
-            GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(fileName, 0, 2097152);
-            final HashMap<String, List<DataRecord>> storedData = mapper.readValue(Channels.newInputStream(readChannel), new TypeReference<Map<String, List<DataRecord>>>() {
+        try {
+            ObjectMapper peeksMapper = new ObjectMapper();
+            peeksMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            GcsFilename peeksFileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayPeeksOfData");
+            GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(peeksFileName, 0, 2097152);
+            final HashMap<String, List<DataRecord>> storedPeekData = peeksMapper.readValue(Channels.newInputStream(readChannel), new TypeReference<Map<String, List<DataRecord>>>() {
             });
-            for (String currentKey : storedData.keySet()) {
-                if (!DAILY_RECORDS.containsKey(currentKey)) {
-                    updateDayRecordsList(currentKey, storedData.get(currentKey));
+            for (LocalDate date = new LocalDate(startDate); date.isBefore(new LocalDate(endDate).plusDays(1)); date = date.plusDays(1)) {
+                String dateKey = date.toString("yyyy-MM-dd");
+                boolean hasDate = false;
+                if (!date.equals(new LocalDate())) {
+//                    for (String currentKey : storedPeekData.keySet()) {
+//                        if (currentKey.toLowerCase().startsWith(dateKey + "_")) {
+//                            if (!DAILY_RECORDS.containsKey(currentKey)) {
+//                                updateDayRecordsList(currentKey, storedPeekData.get(currentKey));
+//                            }
+//                        }
+//                    }
+                    for (String currentKey : storedPeekData.keySet()) {
+                        if (currentKey.toLowerCase().startsWith(dateKey + "_")) {
+                            updateDayPeeksList(currentKey, storedPeekData.get(currentKey));
+                            if (!DAILY_RECORDS.containsKey(currentKey)) {
+                                updateDayRecordsList(currentKey, storedPeekData.get(currentKey));
+                            }
+                            hasDate = true;
+                            break;
+                        }
+                    }
+                }
+                if (!hasDate) {
+                    Query<Entity> query = Query.newEntityQueryBuilder()
+                            .setKind("DataRecord")
+                            .setFilter(CompositeFilter.and(
+                                    PropertyFilter.ge("RecordDate", Timestamp.of(date.toDate())),
+                                    PropertyFilter.le("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
+                            ))
+                            .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
+                            .build();
+                    QueryResults<Entity> results = datastore.run(query);
+                    ObjectMapper daylyMapper = new ObjectMapper();
+                    daylyMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                    final List<DataRecord> dataRecordList = new ArrayList<>();
+                    while (results.hasNext()) {
+                        Entity currentEntity = results.next();
+                        final DataRecord dataRecord = new DataRecord(
+                                (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                                (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
+                                (float) currentEntity.getDouble("Voltage"), currentEntity.getString("Location"),
+                                currentEntity.getString("Error"),
+                                new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
+//                        updateRecordArrays(dataRecord);
+                        updateDailyPeeks(dateKey, dataRecord);
+                        dataRecordList.add(dataRecord);
+                    }
+                    GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
+                    GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey);
+                    GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, instance);
+                    daylyMapper.writeValue(Channels.newOutputStream(outputChannel), dataRecordList);
                 }
             }
-        } catch (IOException exception) {
-            System.out.println(exception.getMessage());
-        }
-     for (LocalDate date = new LocalDate(startDate); date.isBefore(new LocalDate(endDate).plusDays(1)); date = date.plusDays(1)) {
-       String dateKey = date.toString("yyyy-MM-dd");
-       boolean hasDate = false;
-       if (!date.equals(new LocalDate())) {
-         for (String currentKey : DAILY_RECORDS.keySet()) {
-           if (currentKey.toLowerCase().startsWith(dateKey + "_")) {
-              hasDate = true;
-              break;
-           }
-        }
-      }
-      if (!hasDate) {
-        Query<Entity> query = Query.newEntityQueryBuilder()
-                .setKind("DataRecord")
-                .setFilter(CompositeFilter.and(
-                        PropertyFilter.ge("RecordDate", Timestamp.of(date.toDate())),
-                        PropertyFilter.le("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
-                ))
-                .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
-                .build();
-        QueryResults<Entity> results = datastore.run(query);
-        while (results.hasNext()) {
-            Entity currentEntity = results.next();
-            final DataRecord dataRecord = new DataRecord(
-                    (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
-                    (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
-                    (float) currentEntity.getDouble("Voltage"), currentEntity.getString("Location"),
-                    currentEntity.getString("Error"),
-                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
-            updateRecordArrays(dataRecord);
-        }
-      }
-    }
-    try {
-            ObjectMapper mapper = new ObjectMapper();
+            try {
+                ObjectMapper outputMapper = new ObjectMapper();
 //        mapper.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
 //        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            String todayDateKey = new LocalDate().toString("yyyy-MM-dd");
-	    final HashMap<String, List<DataRecord>> storedData = new HashMap<>();
-            for (String currentKey : DAILY_RECORDS.keySet()) {
-                if (!currentKey.startsWith(todayDateKey)) {
-                    storedData.put(currentKey, DAILY_RECORDS.get(currentKey));
+                outputMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                String todayDateKey = new LocalDate().toString("yyyy-MM-dd");
+                final HashMap<String, List<DataRecord>> storedData = new HashMap<>();
+                for (String currentKey : DAILY_PEEKS.keySet()) {
+                    if (!currentKey.startsWith(todayDateKey)) {
+                        storedData.put(currentKey, DAILY_PEEKS.get(currentKey));
+                    }
                 }
-            }
 //            Key key = keyFactory.setKind("AllDataRecords").newKey("DaysOfData");
 //            final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
 //            for (String currentKey : DAILY_RECORDS.keySet()) {
@@ -404,10 +430,13 @@ public class DataRecordService {
 //            }
 //            FullEntity entity = builder.build();
 //            datastore.put(entity);
-            GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
-            GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DaysOfData");
-            GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, instance);
-            mapper.writeValue(Channels.newOutputStream(outputChannel), storedData);
+                GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
+                GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayPeeksOfData");
+                GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, instance);
+                outputMapper.writeValue(Channels.newOutputStream(outputChannel), storedData);
+            } catch (IOException exception) {
+                System.out.println(exception.getMessage());
+            }
         } catch (IOException exception) {
             System.out.println(exception.getMessage());
         }
@@ -428,4 +457,3 @@ public class DataRecordService {
         return resultList;
     }
 }
-
