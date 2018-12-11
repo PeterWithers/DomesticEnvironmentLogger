@@ -331,7 +331,7 @@ public class DataRecordService {
 //                //}
 //            } else {
             for (String currentKey : DAILY_PEEKS.keySet()) {
-                if (!currentKey.startsWith(dateKey + "_" + location)) {
+                if (currentKey.toLowerCase().startsWith(dateKey + "_" + location.toLowerCase())) {
                     resultList.addAll(DAILY_PEEKS.get(currentKey));
                 }
             }
