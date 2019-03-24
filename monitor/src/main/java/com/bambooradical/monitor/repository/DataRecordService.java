@@ -169,7 +169,7 @@ public class DataRecordService {
 //        return resultList;
     }
 
-    public void updateDailyPeeks(String dateKey, final DataRecord dataRecord) {
+    public void updateDailyPeeks(String dateKey, final DataRecord dataRecord, HashMap<String, List<DataRecord>> storedPeekData) {
         DataRecord firstRecord = dataRecord;
         DataRecord lastRecord = null;
         DataRecord minHumidityRecord = null;
@@ -270,6 +270,7 @@ public class DataRecordService {
             }
         }
         updateDayPeeksList(dateKey + "_" + location, arrayDataRecord);
+	storedPeekData.put(dateKey + "_" + location, arrayDataRecord);
     }
 
     private void findDailyRecords(String location, LocalDate startDate, LocalDate endDate, List<DataRecord> resultList) {
@@ -350,6 +351,7 @@ public class DataRecordService {
     // todo: add an endpoint to trigger this data load method
     public void loadDayOfData(Date startDate, Date endDate) {
         HashMap<String, List<DataRecord>> storedPeekData;
+	boolean loadedMoreData = false;
         try {
             ObjectMapper peeksMapper = new ObjectMapper();
             peeksMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -394,7 +396,8 @@ public class DataRecordService {
                     dataRecordList = dayMapper.readValue(Channels.newInputStream(readChannel), new TypeReference<List<DataRecord>>() {
                     });
                     for (final DataRecord dataRecord : dataRecordList) {
-                        updateDailyPeeks(dateKey, dataRecord);
+                        updateDailyPeeks(dateKey, dataRecord, storedPeekData);
+			loadedMoreData = true;
                     }
                 } catch (IOException exception) {
                     Query<Entity> query = Query.newEntityQueryBuilder()
@@ -418,7 +421,8 @@ public class DataRecordService {
                                 currentEntity.getString("Error"),
                                 new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
 //                        updateRecordArrays(dataRecord);
-                        updateDailyPeeks(dateKey, dataRecord);
+                        updateDailyPeeks(dateKey, dataRecord, storedPeekData);
+			loadedMoreData=true;
                         dataRecordList.add(dataRecord);
                     }
                     try {
@@ -431,6 +435,7 @@ public class DataRecordService {
             }
         }
 	}
+	if(loadedMoreData){
         try {
             ObjectMapper outputMapper = new ObjectMapper();
 //        mapper.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
@@ -459,7 +464,7 @@ public class DataRecordService {
         } catch (IOException exception) {
             System.out.println(exception.getMessage());
         }
-    }
+	}}
 
     public List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate) {
         // if the date range is greater than three days, then use min max records
