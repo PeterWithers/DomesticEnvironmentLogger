@@ -120,7 +120,7 @@ String locationString = "frontwall%20top%20floor";
 //#define EXTERNAL_BUTTON1    4
 // D6
 // #define EXTERNAL_BUTTON2    12
-
+/*
 String locationString = "aquariumA";
 #define VCC_VOLTAGE_MONITOR
 #define DHTPIN              2
@@ -128,6 +128,11 @@ String locationString = "aquariumA";
 //#define GREEN_LED_PIN       13
 //#define RED_LED_PIN         12
 //#define BLUE_LED_PIN        14
+#define DS18b20_PIN         0
+*/
+
+String locationString = "aquariumB";
+#define VCC_VOLTAGE_MONITOR
 #define DS18b20_PIN         0
 
 /*
