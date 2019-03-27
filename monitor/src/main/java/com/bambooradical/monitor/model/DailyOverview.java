@@ -15,29 +15,33 @@ import java.util.TreeSet;
  */
 public class DailyOverview {
 
-    private final Map<String, Map> dateMap = new HashMap<>();
-    private final Map<String, DaySummaryData> daySummaryMap;
+    private final Map<String, Map> locationMap = new HashMap<>();
+    private final Map<String, SortedSet<Float>> valuesList = new HashMap<>();
 
     public class DaySummaryData {
 
-        float average;
-        float upperPeek;
-        float upperQuartile;
-        float middleQuartile;
-        float lowerQuartile;
-        float lowerPeek;
-    }
-
-    public DailyOverview() {
-        this.daySummaryMap = new HashMap<>();
-    }
-
-    public DailyOverview(final Map<String, DaySummaryData> daySummaryMap) {
-        this.daySummaryMap = daySummaryMap;
+        public float[] average = new float[32];
+        public float[] maximum = new float[32];
+        public float[] upperQuartile = new float[32];
+        public float[] middleQuartile = new float[32];
+        public float[] lowerQuartile = new float[32];
+        public float[] minimum = new float[32];
     }
 
     public boolean hasDate(String dateKey) {
-        return dateMap.containsKey(dateKey);
+        String yearMonth = dateKey.substring(0, 7);
+        int dayInt = Integer.parseInt(dateKey.substring(8, 10));
+        for (Map<String, Map> channelMap : locationMap.values()) {
+            for (Map<String, DaySummaryData> dateMap : channelMap.values()) {
+                final DaySummaryData daySummaryData = dateMap.get(yearMonth);
+                if (daySummaryData != null) {
+//                    if (daySummaryData.average.length > dayInt) {
+                    return daySummaryData.average[dayInt] != 0;
+//                    }
+                }
+            }
+        }
+        return false;
     }
 
     public void addRecord(final String dateKey, final DataRecord dataRecord) {
@@ -51,28 +55,16 @@ public class DailyOverview {
     }
 
     public void addRecord(final String dateKey, final String locationKey, final String channelKey, final float value) {
-        final Map<String, Map> locationMap;
-        if (dateMap.containsKey(dateKey)) {
-            locationMap = dateMap.get(dateKey);
+        String valuesListKey = locationKey + "_" + channelKey + "_" + dateKey;
+        final SortedSet<Float> currentValueList;
+
+        if (valuesList.containsKey(valuesListKey)) {
+            currentValueList = valuesList.get(valuesListKey);
         } else {
-            locationMap = new HashMap<>();
-            dateMap.put(dateKey, locationMap);
+            currentValueList = new TreeSet<>();
+            valuesList.put(valuesListKey, currentValueList);
         }
-        final Map<String, SortedSet<Float>> channelMap;
-        if (locationMap.containsKey(locationKey)) {
-            channelMap = locationMap.get(locationKey);
-        } else {
-            channelMap = new HashMap<>();
-            locationMap.put(locationKey, channelMap);
-        }
-        final SortedSet<Float> valuesList;
-        if (channelMap.containsKey(channelKey)) {
-            valuesList = channelMap.get(channelKey);
-        } else {
-            valuesList = new TreeSet<>();
-            channelMap.put(channelKey, valuesList);
-        }
-        valuesList.add(value);
+        currentValueList.add(value);
     }
 
     public DaySummaryData getDaySummaryData(final String dateKey, final String locationKey, final String channelKey) {
@@ -82,15 +74,55 @@ public class DailyOverview {
 
     public void calculateSummaryData() {
         // todo: traverse the freshly added data and calculate the respective DaySummaryData
+        for (String valuesListKey : valuesList.keySet()) {
+            final String[] splitKey = valuesListKey.split("_");
+            final String dateKey = splitKey[2];
+            final String locationKey = splitKey[0];
+            final String channelKey = splitKey[1];
+            final Map<String, Map> channelMap;
+            if (locationMap.containsKey(locationKey)) {
+                channelMap = locationMap.get(locationKey);
+            } else {
+                channelMap = new HashMap<>();
+                locationMap.put(locationKey, channelMap);
+            }
+            final Map<String, DaySummaryData> dateMap;
+            if (channelMap.containsKey(channelKey)) {
+                dateMap = channelMap.get(channelKey);
+            } else {
+                dateMap = new HashMap<>();
+                channelMap.put(channelKey, dateMap);
+            }
+            String yearMonth = dateKey.substring(0, 7);
+            int dayInt = Integer.parseInt(dateKey.substring(8, 10));
+            final DaySummaryData daySummaryData = new DaySummaryData();
+            dateMap.put(yearMonth, daySummaryData);
+            final SortedSet<Float> valuesSortedSet = valuesList.get(valuesListKey);
+            double total = 0;
+            int index = 0;
+            int quarterIndex = valuesSortedSet.size() / 4;
+            int halfIndex = valuesSortedSet.size() / 2;
+            for (float value : valuesSortedSet) {
+                total += value;
+                if (index == quarterIndex) {
+                    daySummaryData.lowerQuartile[dayInt] = value;
+                }
+                if (index == halfIndex) {
+                    daySummaryData.middleQuartile[dayInt] = value;
+                }
+                if (index == halfIndex + quarterIndex) {
+                    daySummaryData.upperQuartile[dayInt] = value;
+                }
+                index++;
+            }
+            daySummaryData.average[dayInt] = (float) (total / valuesSortedSet.size());
+            daySummaryData.maximum[dayInt] = valuesSortedSet.first();
+            daySummaryData.maximum[dayInt] = valuesSortedSet.last();
+        }
     }
 
     @JsonAnyGetter
-    public Map<String, Map> getDateMap() {
-        return dateMap;
+    public Map<String, Map> getLocationMap() {
+        return locationMap;
     }
-
-//    @JsonAnyGetter
-//    public Map<String, DaySummaryData> getDaySummaryMap() {
-//        return daySummaryMap;
-//    }
 }
