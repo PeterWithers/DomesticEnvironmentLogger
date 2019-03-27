@@ -17,7 +17,7 @@ public class DailyOverviewTest {
 
     public DailyOverviewTest() {
     }
-    private final String expectedJson = "{\"location\": {\"temperature\":{\"2019-01\": [1.1F,1.1F,1.1F,1.1F,1.1F,1.1F]}}}";
+    private final String expectedJson = "{\"location\": {\"temperature\":{\"2019-01\": {a:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F],p:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F],m:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F],q1:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F],q2:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F],q3:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F]}}}}";
 
     private DailyOverview getDailyOverview() {
         final DailyOverview dailyOverview = new DailyOverview();
@@ -38,6 +38,7 @@ public class DailyOverviewTest {
     public void testHasDate() {
         System.out.println("hasDate");
         DailyOverview instance = getDailyOverview();
+        instance.calculateSummaryData();
         assertEquals(true, instance.hasDate("2019-01-03"));
         assertEquals(false, instance.hasDate("2019-01-02"));
         assertEquals(true, instance.hasDate("2011-11-30"));
@@ -52,6 +53,7 @@ public class DailyOverviewTest {
         System.out.println("addRecord");
         DailyOverview instance = new DailyOverview();
         instance.addRecord("2016-06-06", new DataRecord(1.9F, 1F, null, "location", null, null));
+        instance.calculateSummaryData();
         assertEquals(true, instance.hasDate("2016-06-06"));
         assertEquals(false, instance.hasDate("2011-11-02"));
         // todo: add internal checks here
@@ -66,12 +68,12 @@ public class DailyOverviewTest {
         DailyOverview instance = getDailyOverview();
         instance.calculateSummaryData();
         DailyOverview.DaySummaryData result = instance.getDaySummaryData("2019-01-03", "location", "temperature");
-        assertEquals(0, result.average, 0);
-        assertEquals(0, result.lowerPeek, 0);
-        assertEquals(0, result.lowerQuartile, 0);
-        assertEquals(0, result.middleQuartile, 0);
-        assertEquals(0, result.upperQuartile, 0);
-        assertEquals(0, result.upperPeek, 0);
+        assertEquals(0, result.average[3], 0);
+        assertEquals(0, result.minimum[3], 0);
+        assertEquals(0, result.lowerQuartile[3], 0);
+        assertEquals(0, result.middleQuartile[3], 0);
+        assertEquals(0, result.upperQuartile[3], 0);
+        assertEquals(0, result.maximum[3], 0);
     }
 
     /**
