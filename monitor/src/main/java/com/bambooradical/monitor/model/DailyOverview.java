@@ -4,6 +4,8 @@
 package com.bambooradical.monitor.model;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
@@ -20,12 +22,12 @@ public class DailyOverview {
 
     public class DaySummaryData {
 
-        public float[] average = new float[32];
-        public float[] maximum = new float[32];
-        public float[] upperQuartile = new float[32];
-        public float[] middleQuartile = new float[32];
-        public float[] lowerQuartile = new float[32];
-        public float[] minimum = new float[32];
+        public float[] avg = new float[0];
+        public float[] max = new float[0];
+        public float[] Q3 = new float[0];
+        public float[] Q2 = new float[0
+        public float[] Q1 = new float[0];
+        public float[] min = new float[0];
     }
 
     public boolean hasDate(String dateKey) {
@@ -36,7 +38,7 @@ public class DailyOverview {
                 final DaySummaryData daySummaryData = dateMap.get(yearMonth);
                 if (daySummaryData != null) {
 //                    if (daySummaryData.average.length > dayInt) {
-                    return daySummaryData.average[dayInt] != 0;
+                    return daySummaryData.avg[dayInt] != 0;
 //                    }
                 }
             }
@@ -68,7 +70,17 @@ public class DailyOverview {
     }
 
     public DaySummaryData getDaySummaryData(final String dateKey, final String locationKey, final String channelKey) {
-        // todo: retrieve the DaySummaryData
+        String yearMonth = dateKey.substring(0, 7);
+        final Map<String, Map> channelMap = locationMap.get(locationKey);
+        if (channelMap != null) {
+            final Map<String, DaySummaryData> dateMap = channelMap.get(channelKey);
+            if (dateMap != null) {
+                final DaySummaryData daySummaryData = dateMap.get(yearMonth);
+                if (daySummaryData != null) {
+                    return daySummaryData;
+                }
+            }
+        }
         return new DaySummaryData();
     }
 
@@ -95,29 +107,43 @@ public class DailyOverview {
             }
             String yearMonth = dateKey.substring(0, 7);
             int dayInt = Integer.parseInt(dateKey.substring(8, 10));
-            final DaySummaryData daySummaryData = new DaySummaryData();
-            dateMap.put(yearMonth, daySummaryData);
+            final DaySummaryData daySummaryData;
+            if (dateMap.containsKey(yearMonth)) {
+                daySummaryData = dateMap.get(yearMonth);
+            } else {
+                daySummaryData = new DaySummaryData();
+                dateMap.put(yearMonth, daySummaryData);
+            }
             final SortedSet<Float> valuesSortedSet = valuesList.get(valuesListKey);
             double total = 0;
             int index = 0;
-            int quarterIndex = valuesSortedSet.size() / 4;
-            int halfIndex = valuesSortedSet.size() / 2;
+            int lowerIndex = (int) (valuesSortedSet.size() * 0.25);
+            int middleIndex = (int) (valuesSortedSet.size() * 0.5);
+            int upperIndex = (int) (valuesSortedSet.size() * 0.75);
+            if (daySummaryData.avg.length < dayInt) {
+                daySummaryData.avg = Arrays.copyOf(daySummaryData.avg, dayInt + 1);
+                daySummaryData.min = Arrays.copyOf(daySummaryData.min, dayInt + 1);
+                daySummaryData.Q1 = Arrays.copyOf(daySummaryData.Q1, dayInt + 1);
+                daySummaryData.Q2 = Arrays.copyOf(daySummaryData.Q2, dayInt + 1);
+                daySummaryData.Q3 = Arrays.copyOf(daySummaryData.Q3, dayInt + 1);
+                daySummaryData.max = Arrays.copyOf(daySummaryData.max, dayInt + 1);
+            }
             for (float value : valuesSortedSet) {
                 total += value;
-                if (index == quarterIndex) {
-                    daySummaryData.lowerQuartile[dayInt] = value;
+                if (index == lowerIndex) {
+                    daySummaryData.Q1[dayInt] = value;
                 }
-                if (index == halfIndex) {
-                    daySummaryData.middleQuartile[dayInt] = value;
+                if (index == middleIndex) {
+                    daySummaryData.Q2[dayInt] = value;
                 }
-                if (index == halfIndex + quarterIndex) {
-                    daySummaryData.upperQuartile[dayInt] = value;
+                if (index == upperIndex) {
+                    daySummaryData.Q3[dayInt] = value;
                 }
                 index++;
             }
-            daySummaryData.average[dayInt] = (float) (total / valuesSortedSet.size());
-            daySummaryData.maximum[dayInt] = valuesSortedSet.first();
-            daySummaryData.maximum[dayInt] = valuesSortedSet.last();
+            daySummaryData.avg[dayInt] = (float) (total / valuesSortedSet.size());
+            daySummaryData.min[dayInt] = valuesSortedSet.first();
+            daySummaryData.max[dayInt] = valuesSortedSet.last();
         }
     }
 

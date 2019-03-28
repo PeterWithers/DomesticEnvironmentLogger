@@ -17,7 +17,43 @@ public class DailyOverviewTest {
 
     public DailyOverviewTest() {
     }
-    private final String expectedJson = "{\"location\": {\"temperature\":{\"2019-01\": {a:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F],p:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F],m:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F],q1:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F],q2:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F],q3:[1.1F,1.1F,1.1F,1.1F,1.1F,1.1F]}}}}";
+    private final String expectedJson = "{\"location\":{\"temperature\":{"
+            + "\"2019-02\":{"
+            + "\"avg\":[0.0,0.0,0.0,1.9,0.0,0.0,9.1],"
+            + "\"max\":[0.0,0.0,0.0,1.9,0.0,0.0,9.1],"
+            + "\"Q3\":[0.0,0.0,0.0,1.9,0.0,0.0,9.1],"
+            + "\"Q2\":[0.0,0.0,0.0,1.9,0.0,0.0,9.1],"
+            + "\"Q1\":[0.0,0.0,0.0,1.9,0.0,0.0,9.1],"
+            + "\"min\":[0.0,0.0,0.0,1.9,0.0,0.0,9.1]},"
+            + "\"2019-01\":{"
+            + "\"avg\":[0.0,0.0,0.0,1.1],"
+            + "\"max\":[0.0,0.0,0.0,1.1],"
+            + "\"Q3\":[0.0,0.0,0.0,1.1],"
+            + "\"Q2\":[0.0,0.0,0.0,1.1],"
+            + "\"Q1\":[0.0,0.0,0.0,1.1],"
+            + "\"min\":[0.0,0.0,0.0,1.1]},"
+            + "\"2011-11\":{"
+            + "\"avg\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.1],"
+            + "\"max\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.1],"
+            + "\"Q3\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.1],"
+            + "\"Q2\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.1],"
+            + "\"Q1\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.1],"
+            + "\"min\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,4.1]},"
+            + "\"2019-03\":{"
+            + "\"avg\":[0.0,6.1],"
+            + "\"max\":[0.0,6.1],"
+            + "\"Q3\":[0.0,6.1],"
+            + "\"Q2\":[0.0,6.1],"
+            + "\"Q1\":[0.0,6.1],"
+            + "\"min\":[0.0,6.1]},"
+            + "\"2011-01\":{"
+            + "\"avg\":[0.0,0.0,0.0,2.1],"
+            + "\"max\":[0.0,0.0,0.0,2.1],"
+            + "\"Q3\":[0.0,0.0,0.0,2.1],"
+            + "\"Q2\":[0.0,0.0,0.0,2.1],"
+            + "\"Q1\":[0.0,0.0,0.0,2.1],"
+            + "\"min\":[0.0,0.0,0.0,2.1]"
+            + "}}}}";
 
     private DailyOverview getDailyOverview() {
         final DailyOverview dailyOverview = new DailyOverview();
@@ -65,15 +101,30 @@ public class DailyOverviewTest {
     @Test
     public void testGetDaySummaryData() {
         System.out.println("getDaySummaryData");
-        DailyOverview instance = getDailyOverview();
+        DailyOverview instance = new DailyOverview();
+        instance.addRecord("2019-03-03", "location", "channel", 41F);
+        instance.addRecord("2019-03-03", "location", "channel", 6F);
+        instance.addRecord("2019-03-03", "location", "channel", 47F);
+        instance.addRecord("2019-03-03", "location", "channel", 7F);
+        instance.addRecord("2019-03-03", "location", "channel", 36F);
+        instance.addRecord("2019-03-03", "location", "channel", 43F);
+        instance.addRecord("2019-03-03", "location", "channel", 40F);
+        instance.addRecord("2019-03-03", "location", "channel", 42F);
+        instance.addRecord("2019-03-03", "location", "channel", 39F);
+        instance.addRecord("2019-03-03", "location", "channel", 49F);
+        instance.addRecord("2019-03-03", "location", "channel", 15F);
         instance.calculateSummaryData();
-        DailyOverview.DaySummaryData result = instance.getDaySummaryData("2019-01-03", "location", "temperature");
-        assertEquals(0, result.average[3], 0);
-        assertEquals(0, result.minimum[3], 0);
-        assertEquals(0, result.lowerQuartile[3], 0);
-        assertEquals(0, result.middleQuartile[3], 0);
-        assertEquals(0, result.upperQuartile[3], 0);
-        assertEquals(0, result.maximum[3], 0);
+        DailyOverview.DaySummaryData result = instance.getDaySummaryData("2019-03-03", "location", "channel");
+        assertEquals(33.1, result.avg[3], 0.5);
+        assertEquals(6, result.min[3], 0);
+        assertEquals(15, result.Q1[3], 0);
+        assertEquals(40, result.Q2[3], 0);
+        assertEquals(43, result.Q3[3], 0);
+        assertEquals(49, result.max[3], 0);
+//      Method 1	Method 2	Method 3
+//Q1	15	25.5	20.25
+//Q2	40	40	40
+//Q3	43	42.5	42.75
     }
 
     /**
