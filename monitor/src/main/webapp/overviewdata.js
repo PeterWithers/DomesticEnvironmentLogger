@@ -49,21 +49,16 @@ $.getJSON("/monitor/overview", function (locationData) {
             });
             if (!labelsDone) {
                 overviewChart.data.labels = labels;
+                console.log(labels);
+                console.log(dataValues);
+                overviewChart.data.datasets.push({
+                    label: locationKey + " " + channelKey + " " + setKeyFilter,
+                    data: dataValues,
+                    backgroundColor: "rgba(255,99,132,0.2)",
+                    borderColor: "rgba(255,99,132,1)"
+                });
             }
             labelsDone = true;
-            overviewChart.data.datasets.push({
-                label: locationKey + " " + channelKey + " " + setKeyFilter,
-                data: dataValues,
-                radius: 1,
-                borderWidth: 1,
-                spanGaps: true,
-                backgroundColor: "rgba(255,99,132,0.2)",
-                borderColor: "rgba(255,99,132,1)",
-                pointBackgroundColor: "rgba(255,99,132,1)",
-                pointBorderColor: "#fff",
-                pointHoverBackgroundColor: "#fff",
-                pointHoverBorderColor: "rgba(255,99,132,1)"
-            });
         });
     });
 });
