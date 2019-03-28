@@ -340,8 +340,9 @@ public class DataRecordController {
         try (OutputStream outputStream = response.getOutputStream()) {
             final InputStream overviewStream = dataRecordService.getOverviewStream();
             byte[] bytes = new byte[1024];
-            while (overviewStream.read(bytes) > 0) {
-                outputStream.write(bytes);
+            int bytesRead = 0;
+            while ((bytesRead = overviewStream.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, bytesRead);
             }
         }
     }
