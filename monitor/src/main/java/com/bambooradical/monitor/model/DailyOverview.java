@@ -25,7 +25,7 @@ public class DailyOverview {
         public float[] avg = new float[0];
         public float[] max = new float[0];
         public float[] Q3 = new float[0];
-        public float[] Q2 = new float[0
+        public float[] Q2 = new float[0];
         public float[] Q1 = new float[0];
         public float[] min = new float[0];
     }
