@@ -40,7 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * @since Oct 14, 2017 1:32:09 PM (creation date)
+ * @since 14 Oct 2017 1:32:09 PM (creation date)
  * @author : Peter Withers <peter-gthb@bambooradical.com>
  */
 @Service
