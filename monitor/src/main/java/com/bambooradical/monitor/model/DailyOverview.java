@@ -38,7 +38,7 @@ public class DailyOverview {
                 final DaySummaryData daySummaryData = dateMap.get(yearMonth);
                 if (daySummaryData != null) {
 //                    if (daySummaryData.average.length > dayInt) {
-                    return daySummaryData.avg[dayInt] != 0;
+                    return daySummaryData.avg[dayInt - 1] != 0;
 //                    }
                 }
             }
@@ -121,29 +121,29 @@ public class DailyOverview {
             int middleIndex = (int) (valuesSortedSet.size() * 0.5);
             int upperIndex = (int) (valuesSortedSet.size() * 0.75);
             if (daySummaryData.avg.length < dayInt) {
-                daySummaryData.avg = Arrays.copyOf(daySummaryData.avg, dayInt + 1);
-                daySummaryData.min = Arrays.copyOf(daySummaryData.min, dayInt + 1);
-                daySummaryData.Q1 = Arrays.copyOf(daySummaryData.Q1, dayInt + 1);
-                daySummaryData.Q2 = Arrays.copyOf(daySummaryData.Q2, dayInt + 1);
-                daySummaryData.Q3 = Arrays.copyOf(daySummaryData.Q3, dayInt + 1);
-                daySummaryData.max = Arrays.copyOf(daySummaryData.max, dayInt + 1);
+                daySummaryData.avg = Arrays.copyOf(daySummaryData.avg, dayInt);
+                daySummaryData.min = Arrays.copyOf(daySummaryData.min, dayInt);
+                daySummaryData.Q1 = Arrays.copyOf(daySummaryData.Q1, dayInt);
+                daySummaryData.Q2 = Arrays.copyOf(daySummaryData.Q2, dayInt);
+                daySummaryData.Q3 = Arrays.copyOf(daySummaryData.Q3, dayInt);
+                daySummaryData.max = Arrays.copyOf(daySummaryData.max, dayInt);
             }
             for (float value : valuesSortedSet) {
                 total += value;
                 if (index == lowerIndex) {
-                    daySummaryData.Q1[dayInt] = value;
+                    daySummaryData.Q1[dayInt - 1] = value;
                 }
                 if (index == middleIndex) {
-                    daySummaryData.Q2[dayInt] = value;
+                    daySummaryData.Q2[dayInt - 1] = value;
                 }
                 if (index == upperIndex) {
-                    daySummaryData.Q3[dayInt] = value;
+                    daySummaryData.Q3[dayInt - 1] = value;
                 }
                 index++;
             }
-            daySummaryData.avg[dayInt] = (float) (total / valuesSortedSet.size());
-            daySummaryData.min[dayInt] = valuesSortedSet.first();
-            daySummaryData.max[dayInt] = valuesSortedSet.last();
+            daySummaryData.avg[dayInt - 1] = (float) (total / valuesSortedSet.size());
+            daySummaryData.min[dayInt - 1] = valuesSortedSet.first();
+            daySummaryData.max[dayInt - 1] = valuesSortedSet.last();
         }
     }
 
