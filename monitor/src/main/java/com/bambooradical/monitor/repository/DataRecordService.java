@@ -472,6 +472,7 @@ public class DataRecordService {
     }
 
     public void saveDailyOverview(DailyOverview dailyOverview) throws IOException {
+        dailyOverview.calculateSummaryData();
         ObjectMapper outputMapper = new ObjectMapper();
         GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
         GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DailyOverview");
