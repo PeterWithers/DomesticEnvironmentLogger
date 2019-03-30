@@ -27,38 +27,46 @@ var overviewChart = new Chart(overviewContainer, {
                     }
                 }]}
     }});
+var graphDataChannels = {};
 $.getJSON("/monitor/overview", function (locationData) {
-    var labels = [];
-    var labelsDone = false;
     $.each(locationData, function (locationKey, channelData) {
         $.each(channelData, function (channelKey, yearMonthData) {
-            var setKeyFilter = "avg";
-            var dataValues = [];
+            var locationChannel = (locationKey + "_" + channelKey).split(" ").join("_");
+            graphDataChannels[locationChannel] = {"avg": [], "min": [], "Q1": [], "Q2": [], "Q3": [], "max": []};
             $.each(yearMonthData, function (yearMonthKey, setOfData) {
                 $.each(setOfData, function (setKey, daysOfData) {
-                    if (setKey === setKeyFilter) {
-                        $.each(daysOfData, function (index, daysValue) {
-                            if (!labelsDone) {
-                                var yearMonthParts = yearMonthKey.split("-");
-                                labels.push(new Date(yearMonthParts[0], parseInt(yearMonthParts[1]) - 1, index));
-                                dataValues.push(daysValue);
-                            }
-                        });
-                    }
+                    $.each(daysOfData, function (index, daysValue) {
+                        var yearMonthParts = yearMonthKey.split("-");
+                        var dateX = new Date(yearMonthParts[0], parseInt(yearMonthParts[1]) - 1, index);
+                        graphDataChannels[locationChannel][setKey].push({'x': dateX, 'y': daysValue});
+                    });
                 });
             });
-            if (!labelsDone) {
-                overviewChart.data.labels = labels;
-                console.log(labels);
-                console.log(dataValues);
-                overviewChart.data.datasets.push({
-                    label: locationKey + " " + channelKey + " " + setKeyFilter,
-                    data: dataValues,
-                    backgroundColor: "rgba(255,99,132,0.2)",
-                    borderColor: "rgba(255,99,132,1)"
-                });
-            }
-            labelsDone = true;
+            $("<button onclick=\"addChannel('" + locationChannel + "')\">" + locationKey + " " + channelKey + "</button>").appendTo("body");
         });
     });
 });
+function addChannel(locationChannel) {
+    console.log(locationChannel);
+    overviewChart.data.datasets.push({
+        label: locationChannel + " min",
+        data: graphDataChannels[locationChannel].min,
+        backgroundColor: "rgba(255,99,132,0.2)",
+        borderColor: "rgba(255,99,132,1)"
+    });
+    console.log(locationChannel);
+    overviewChart.data.datasets.push({
+        label: locationChannel + " avg",
+        data: graphDataChannels[locationChannel].avg,
+        backgroundColor: "rgba(255,99,132,0.2)",
+        borderColor: "rgba(255,99,132,1)"
+    });
+    console.log(locationChannel);
+    overviewChart.data.datasets.push({
+        label: locationChannel + " max",
+        data: graphDataChannels[locationChannel].max,
+        backgroundColor: "rgba(255,99,132,0.2)",
+        borderColor: "rgba(255,99,132,1)"
+    });
+    overviewChart.update();
+}
