@@ -86,9 +86,11 @@ $(document).ready(function () {
                 $.each(yearMonthData, function (yearMonthKey, setOfData) {
                     $.each(setOfData, function (setKey, daysOfData) {
                         $.each(daysOfData, function (index, daysValue) {
-                            var yearMonthParts = yearMonthKey.split("-");
-                            var dateX = new Date(yearMonthParts[0], parseInt(yearMonthParts[1]) - 1, index);
-                            graphDataChannels[locationChannel][setKey].push({'x': dateX, 'y': daysValue});
+                            if (daysValue > 0) {
+                                var yearMonthParts = yearMonthKey.split("-");
+                                var dateX = new Date(yearMonthParts[0], parseInt(yearMonthParts[1]) - 1, index);
+                                graphDataChannels[locationChannel][setKey].push({'x': dateX, 'y': daysValue});
+                            }
                         });
                     });
                 });
