@@ -99,7 +99,7 @@ public class LightingController {
     @ResponseBody
     public String currentRGB(
             @RequestParam(value = "location", required = true) String location,
-            @RequestParam(value = "refresh", required = false, defaultValue = "false") boolean refresh
+            @RequestParam(value = "refresh", required = false, defaultValue = "true") boolean refresh
     ) {
         if (needsUpdate || refresh) {
             DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
