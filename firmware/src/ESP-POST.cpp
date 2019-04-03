@@ -129,11 +129,14 @@ String locationString = "aquariumA";
 //#define RED_LED_PIN         12
 //#define BLUE_LED_PIN        14
 #define DS18b20_PIN         0
-*/
-
-String locationString = "aquariumB";
++*/
+String locationString = "aquariumB1";
 #define VCC_VOLTAGE_MONITOR
-#define DS18b20_PIN         0
+#define BUTTONPIN           0
+#define GREEN_LED_PIN       13
+#define RED_LED_PIN         12
+#define BLUE_LED_PIN        14
+#define DS18b20_PIN         4
 
 /*
 String locationString = "pressure%20monitor";
@@ -204,6 +207,7 @@ int segmentPreviousIndex = 0;
 int segmentMessageIndex = -1;
 
 void sendMessage(String messageString) {
+    Serial.println(messageString);
     WiFiClientSecure client;
     if (!client.connect(messageServer, httpsPort)) {
         Serial.println("message failed");
@@ -220,25 +224,23 @@ void sendMessage(String messageString) {
     connectionString += messageServer;
     connectionString += "\r\n";
     connectionString += "Connection: close\r\n\r\n";
-    //Serial.println(connectionString);
+    Serial.println(connectionString);
     client.print(connectionString);
-    unsigned long timeout = millis();
-    while (client.available() == 0) {
-        if (millis() - timeout > 5000) {
-            Serial.println("timeout");
-            client.stop();
-            return;
-        }
+    while (client.connected() || client.available())
+    {
+      if (client.available())
+      {
+        String line = client.readStringUntil('\n');
+        Serial.println(line);
+      }
     }
-    while (client.available()) {
-        String line = client.readStringUntil('\r');
-        Serial.print(line);
-    }
+    client.stop();
 }
 
 void requestRGB(String locationString, bool refresh) {
     WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
+        Serial.println("connection failed requestRGB");
         sendMessage("connection%20failed%20requestRGB");
         return;
     }
@@ -253,54 +255,57 @@ void requestRGB(String locationString, bool refresh) {
     connectionString += "Connection: close\r\n\r\n";
     Serial.println(connectionString);
     client.print(connectionString);
-    unsigned long timeout = millis();
-    while (client.available() == 0) {
-        if (millis() - timeout > 5000) {
-            client.stop();
-#ifdef GREEN_LED_PIN
-            analogWrite(RED_LED_PIN, 100);
-            analogWrite(GREEN_LED_PIN, 0);
-            analogWrite(BLUE_LED_PIN, 0);
-#endif
-            sendMessage("timeout%20currentRGB%20" + locationString);
-            return;
-        }
-    }
+    //unsigned long timeout = millis();
     long requestMillisOffset = millis();
     String parsedValues = "";
     //String receivedValues = "";
     int segmentIndex = 0;
-    while (client.connected()) {
-        if (client.available()) {
-            String line = client.readStringUntil('\r');
-            if (line[15] == ';') {
-                if (line[7] == ':' || line[7] == 'T') {
-                    for (int substringIndex = 0; substringIndex < line.length() && segmentIndex < SEGMENTSIZE; substringIndex += 15) {
-                        if (line[substringIndex + 15] == ';') {
-                            if (line[substringIndex + 7] == ':' || line[substringIndex + 7] == 'T') {
-                                String redString = line.substring(substringIndex + 1, substringIndex + 3);
-                                String greenString = line.substring(substringIndex + 3, substringIndex + 5);
-                                String blueString = line.substring(substringIndex + 5, substringIndex + 7);
-                                String delayString = line.substring(substringIndex + 8, substringIndex + 15);
-                                //sendMessage(redString + "-" + greenString + "-" + blueString + "-" + delayString);
-                                parsedValues = parsedValues + segmentIndex + "_" + redString + "-" + greenString + "-" + blueString + "_" + delayString + "%0A";
-                                int redValue = (int) strtol(redString.c_str(), NULL, 16);
-                                int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
-                                int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
-                                long delayValue = strtol(delayString.c_str(), NULL, 16);
-                                segmentRGB[segmentIndex].duration = delayValue;
-                                segmentRGB[segmentIndex].redValue = redValue;
-                                segmentRGB[segmentIndex].greenValue = greenValue;
-                                segmentRGB[segmentIndex].blueValue = blueValue;
-                                segmentRGB[segmentIndex].tween = line[substringIndex + 7] == 'T';
-                                segmentIndex++;
-                            }
+    while (client.connected() || client.available())
+    {
+      if (client.available()) {
+        #ifdef GREEN_LED_PIN
+            analogWrite(RED_LED_PIN, 0xff);
+            analogWrite(GREEN_LED_PIN, 0xff);
+            analogWrite(BLUE_LED_PIN, 50);
+        #endif
+        String line = client.readStringUntil('\r');
+        Serial.println(line);
+        if (line[15] == ';') {
+            if (line[7] == ':' || line[7] == 'T') {
+                for (int substringIndex = 0; substringIndex < line.length() && segmentIndex < SEGMENTSIZE; substringIndex += 15) {
+                    if (line[substringIndex + 15] == ';') {
+                        if (line[substringIndex + 7] == ':' || line[substringIndex + 7] == 'T') {
+                            String redString = line.substring(substringIndex + 1, substringIndex + 3);
+                            String greenString = line.substring(substringIndex + 3, substringIndex + 5);
+                            String blueString = line.substring(substringIndex + 5, substringIndex + 7);
+                            String delayString = line.substring(substringIndex + 8, substringIndex + 15);
+                            //sendMessage(redString + "-" + greenString + "-" + blueString + "-" + delayString);
+                            //Serial.println(redString + "-" + greenString + "-" + blueString + "-" + delayString);
+                            parsedValues = parsedValues + segmentIndex + "_" + redString + "-" + greenString + "-" + blueString + "_" + delayString + "%0A";
+                            int redValue = (int) strtol(redString.c_str(), NULL, 16);
+                            int greenValue = (int) strtol(greenString.c_str(), NULL, 16);
+                            int blueValue = (int) strtol(blueString.c_str(), NULL, 16);
+                            long delayValue = strtol(delayString.c_str(), NULL, 16);
+                            segmentRGB[segmentIndex].duration = delayValue;
+                            segmentRGB[segmentIndex].redValue = redValue;
+                            segmentRGB[segmentIndex].greenValue = greenValue;
+                            segmentRGB[segmentIndex].blueValue = blueValue;
+                            segmentRGB[segmentIndex].tween = line[substringIndex + 7] == 'T';
+                            segmentIndex++;
                         }
                     }
                 }
             }
         }
+    } else {
+        #ifdef GREEN_LED_PIN
+            analogWrite(RED_LED_PIN, 50);
+            analogWrite(GREEN_LED_PIN, 0xff);
+            analogWrite(BLUE_LED_PIN, 0xff);
+        #endif
+      }
     }
+    client.stop();
     if (segmentIndex > 0) {
         if (segmentIndex < SEGMENTSIZE) {
             segmentRGB[segmentIndex].duration = -1;
@@ -454,13 +459,6 @@ void sendMonitoredData() {
 #ifdef DHTPIN3
     serialiseTemperatureData(3, url, telemetryString, errorString);
 #endif
-#ifdef DS18b20_PIN
-   sensors.requestTemperatures();
-   float tempC = sensors.getTempC(thermometer0);
-   //sendMessage(String(tempC) + "c");
-   url += "&temperature=";
-   url += tempC;
-#endif
 #ifdef DHTPOWERPIN
     // power down the DHT
     pinMode(DHTPOWERPIN, INPUT);
@@ -477,6 +475,13 @@ void sendMonitoredData() {
     // power down the DHT
     pinMode(DHTPOWERPIN3, INPUT);
 #endif
+#endif
+#ifdef DS18b20_PIN
+   sensors.requestTemperatures();
+   float tempC = sensors.getTempC(thermometer0);
+   //sendMessage(String(tempC) + "c");
+   url += "&temperature=";
+   url += tempC;
 #endif
     telemetryString += "ADC: ";
     telemetryString += analogRead(A0);
@@ -516,20 +521,13 @@ void sendMonitoredData() {
     connectionString += "Connection: close\r\n\r\n";
     Serial.println(connectionString);
     client.print(connectionString);
-    unsigned long timeout = millis();
-    while (client.available() == 0) {
-        if (millis() - timeout > 5000) {
-            Serial.println("timeout");
-            client.stop();
-            sendMessage("timeout%20add%20" + locationString);
-            return;
-        }
+    while (client.connected() || client.available()) {
+      if (client.available()) {
+        String line = client.readStringUntil('\n');
+        Serial.println(line);
+      }
     }
-
-    while (client.available()) {
-        String line = client.readStringUntil('\r');
-        Serial.print(line);
-    }
+    client.stop();
 }
 
 void requestRGBInterrupt() {
@@ -551,7 +549,7 @@ void externalButton2ChangeInterrupt() {
 void setup() {
     //Serial.begin(115200);
 #ifdef PRESSURE_MONITOR
-    Serial.begin(115200);
+    //Serial.begin(115200);
 #ifdef SdaPin
     startPressureMonitor(SdaPin, SclPin);
 #else
@@ -581,12 +579,13 @@ void setup() {
     attachInterrupt(EXTERNAL_BUTTON2, externalButton2ChangeInterrupt, CHANGE);
 #endif
 #ifdef GREEN_LED_PIN
+    analogWriteRange(0xff);
     pinMode(RED_LED_PIN, OUTPUT);
-    analogWrite(RED_LED_PIN, 0);
+    analogWrite(RED_LED_PIN, 0xff);
     pinMode(GREEN_LED_PIN, OUTPUT);
-    analogWrite(GREEN_LED_PIN, 0);
+    analogWrite(GREEN_LED_PIN, 0xff);
     pinMode(BLUE_LED_PIN, OUTPUT);
-    analogWrite(BLUE_LED_PIN, 0);
+    analogWrite(BLUE_LED_PIN, 0xff);
 
     pinMode(BUTTONPIN, INPUT_PULLUP);
     attachInterrupt(BUTTONPIN, requestRGBInterrupt, CHANGE);
@@ -674,7 +673,7 @@ void loop() {
         lastDataSentMs = millis();
     }
     if (onBoardButtonChanged > 0 || externalButton1Changed > 0 || externalButton2Changed > 0) {
-        IPAddress broadcastIp;
+        /*IPAddress broadcastIp;
         broadcastIp = ~WiFi.subnetMask() | WiFi.gatewayIP();
         udp.beginPacketMulticast(broadcastIp, localUdpPort, WiFi.localIP());
         if (onBoardButtonChanged > 0) udp.write(buttonMessage0);
@@ -708,6 +707,7 @@ void loop() {
         onBoardButtonChanged = 0;
         externalButton1Changed = 0;
         externalButton2Changed = 0;
+        */
     }
     if (requestRGBButtonChanged > 0) {
         sendMessage("requestRGBButton");
@@ -722,6 +722,7 @@ void loop() {
             segmentMillisOffset = millis();
             break;
         } else if (segmentRGB[segmentIndex].duration > segmentDuration) {
+          //Serial.println("setting LEDs: " + segmentIndex);
             if (segmentRGB[segmentIndex].tween) {
                 int lastRed = segmentRGB[segmentPreviousIndex].redValue;
                 int lastGreen = segmentRGB[segmentPreviousIndex].greenValue;
@@ -738,19 +739,20 @@ void loop() {
                     int tweenedRed = (int) ((segmentRGB[segmentIndex].redValue - lastRed) / durationDifference * durationPortion) + lastRed;
                     int tweenedGreen = (int) ((segmentRGB[segmentIndex].greenValue - lastGreen) / durationDifference * durationPortion) + lastGreen;
                     int tweenedBlue = (int) ((segmentRGB[segmentIndex].blueValue - lastBlue) / durationDifference * durationPortion) + lastBlue;
-                    analogWrite(RED_LED_PIN, tweenedRed);
-                    analogWrite(GREEN_LED_PIN, tweenedGreen);
-                    analogWrite(BLUE_LED_PIN, tweenedBlue);
+                    analogWrite(RED_LED_PIN, 0xff - tweenedRed);
+                    analogWrite(GREEN_LED_PIN, 0xff - tweenedGreen);
+                    analogWrite(BLUE_LED_PIN, 0xff - tweenedBlue);
                 }
             } else {
-                analogWrite(RED_LED_PIN, segmentRGB[segmentPreviousIndex].redValue);
-                analogWrite(GREEN_LED_PIN, segmentRGB[segmentPreviousIndex].greenValue);
-                analogWrite(BLUE_LED_PIN, segmentRGB[segmentPreviousIndex].blueValue);
+                analogWrite(RED_LED_PIN, 0xff - segmentRGB[segmentPreviousIndex].redValue);
+                analogWrite(GREEN_LED_PIN, 0xff - segmentRGB[segmentPreviousIndex].greenValue);
+                analogWrite(BLUE_LED_PIN, 0xff - segmentRGB[segmentPreviousIndex].blueValue);
                 if (segmentPreviousIndex != segmentMessageIndex) {
                     sendMessage(String("I") + segmentPreviousIndex + "%20R" + String(segmentRGB[segmentPreviousIndex].redValue, HEX) + "%20G" + String(segmentRGB[segmentPreviousIndex].greenValue, HEX) + "%20B" + String(segmentRGB[segmentPreviousIndex].blueValue, HEX));
                     segmentMessageIndex = segmentPreviousIndex;
                 }
             }
+            //Serial.println(String("I") + segmentPreviousIndex + " R" + String(segmentRGB[segmentPreviousIndex].redValue, HEX) + " G" + String(segmentRGB[segmentPreviousIndex].greenValue, HEX) + " B" + String(segmentRGB[segmentPreviousIndex].blueValue, HEX));
             break;
         } else {
             segmentPreviousIndex = segmentIndex;
