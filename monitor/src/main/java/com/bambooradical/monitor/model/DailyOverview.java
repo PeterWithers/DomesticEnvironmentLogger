@@ -37,9 +37,11 @@ public class DailyOverview {
             for (Map<String, DaySummaryData> dateMap : channelMap.values()) {
                 final DaySummaryData daySummaryData = dateMap.get(yearMonth);
                 if (daySummaryData != null) {
-//                    if (daySummaryData.average.length > dayInt) {
-                    return daySummaryData.avg[dayInt - 1] != 0;
-//                    }
+                    if (daySummaryData.avg.length >= dayInt) {
+                        return daySummaryData.avg[dayInt - 1] != 0;
+                    } else {
+                        return false;
+                    }
                 }
             }
         }
