@@ -264,9 +264,11 @@ void requestRGB(String locationString, bool refresh) {
     {
       if (client.available()) {
         #ifdef GREEN_LED_PIN
+        if (refresh) {
             analogWrite(RED_LED_PIN, 0xff);
             analogWrite(GREEN_LED_PIN, 0xff);
             analogWrite(BLUE_LED_PIN, 50);
+          }
         #endif
         String line = client.readStringUntil('\r');
         Serial.println(line);
@@ -299,9 +301,11 @@ void requestRGB(String locationString, bool refresh) {
         }
     } else {
         #ifdef GREEN_LED_PIN
+        if (refresh) {
             analogWrite(RED_LED_PIN, 50);
             analogWrite(GREEN_LED_PIN, 0xff);
             analogWrite(BLUE_LED_PIN, 0xff);
+          }
         #endif
       }
     }
