@@ -4,8 +4,11 @@
 package com.bambooradical.monitor.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -137,6 +140,23 @@ public class DailyOverviewTest {
         instance.calculateSummaryData();
         ObjectMapper outputMapper = new ObjectMapper();
         outputMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        String jsonString = outputMapper.writeValueAsString(instance);
+        System.out.println(jsonString);
+        assertEquals(expectedJson, jsonString);
+    }
+
+    /**
+     * Test of deserialisation, of class DailyOverview.
+     */
+    @Test
+    public void testDeserialisationDaySummaryData() throws IOException {
+        System.out.println("Deserialisation of DaySummaryData");
+        ObjectMapper outputMapper = new ObjectMapper();
+        outputMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>> instanceMap = outputMapper.readValue(expectedJson, new TypeReference<Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>>>() {
+        });
+        DailyOverview instance = new DailyOverview();
+        instance.addData(instanceMap);
         String jsonString = outputMapper.writeValueAsString(instance);
         System.out.println(jsonString);
         assertEquals(expectedJson, jsonString);

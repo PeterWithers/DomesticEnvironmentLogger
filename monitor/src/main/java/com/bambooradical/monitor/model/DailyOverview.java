@@ -4,9 +4,9 @@
 package com.bambooradical.monitor.model;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -17,7 +17,7 @@ import java.util.TreeSet;
  */
 public class DailyOverview {
 
-    private final Map<String, Map> locationMap = new HashMap<>();
+    private final Map<String, Map<String, Map<String, DaySummaryData>>> locationMap = new HashMap<>();
     private final Map<String, SortedSet<Float>> valuesList = new HashMap<>();
 
     public class DaySummaryData {
@@ -33,7 +33,7 @@ public class DailyOverview {
     public boolean hasDate(String dateKey) {
         String yearMonth = dateKey.substring(0, 7);
         int dayInt = Integer.parseInt(dateKey.substring(8, 10));
-        for (Map<String, Map> channelMap : locationMap.values()) {
+        for (Map<String, Map<String, DaySummaryData>> channelMap : locationMap.values()) {
             for (Map<String, DaySummaryData> dateMap : channelMap.values()) {
                 final DaySummaryData daySummaryData = dateMap.get(yearMonth);
                 if (daySummaryData != null) {
@@ -71,7 +71,7 @@ public class DailyOverview {
 
     public DaySummaryData getDaySummaryData(final String dateKey, final String locationKey, final String channelKey) {
         String yearMonth = dateKey.substring(0, 7);
-        final Map<String, Map> channelMap = locationMap.get(locationKey);
+        final Map<String, Map<String, DaySummaryData>> channelMap = locationMap.get(locationKey);
         if (channelMap != null) {
             final Map<String, DaySummaryData> dateMap = channelMap.get(channelKey);
             if (dateMap != null) {
@@ -91,7 +91,7 @@ public class DailyOverview {
             final String dateKey = splitKey[2];
             final String locationKey = splitKey[0];
             final String channelKey = splitKey[1];
-            final Map<String, Map> channelMap;
+            final Map<String, Map<String, DaySummaryData>> channelMap;
             if (locationMap.containsKey(locationKey)) {
                 channelMap = locationMap.get(locationKey);
             } else {
@@ -148,7 +148,65 @@ public class DailyOverview {
     }
 
     @JsonAnyGetter
-    public Map<String, Map> getLocationMap() {
+    public Map<String, Map<String, Map<String, DaySummaryData>>> getLocationMap() {
         return locationMap;
+    }
+
+    private void mergeDaySummaryData(final String locationKey, final String channelKey, final String yearMonthKey, final LinkedHashMap<String, float[]> inputDaySummaryData) {
+        final Map<String, Map<String, DaySummaryData>> channelMap;
+        if (locationMap.containsKey(locationKey)) {
+            channelMap = locationMap.get(locationKey);
+        } else {
+            channelMap = new HashMap<>();
+            locationMap.put(locationKey, channelMap);
+        }
+        final Map<String, DaySummaryData> dateMap;
+        if (channelMap.containsKey(channelKey)) {
+            dateMap = channelMap.get(channelKey);
+        } else {
+            dateMap = new HashMap<>();
+            channelMap.put(channelKey, dateMap);
+        }
+        final DaySummaryData daySummaryData;
+        if (dateMap.containsKey(yearMonthKey)) {
+            daySummaryData = dateMap.get(yearMonthKey);
+        } else {
+            daySummaryData = new DaySummaryData();
+            dateMap.put(yearMonthKey, daySummaryData);
+        }
+        final int length = inputDaySummaryData.get("avg").length;
+        if (daySummaryData.avg.length < length) {
+            daySummaryData.avg = Arrays.copyOf(daySummaryData.avg, length);
+            daySummaryData.min = Arrays.copyOf(daySummaryData.min, length);
+            daySummaryData.Q1 = Arrays.copyOf(daySummaryData.Q1, length);
+            daySummaryData.Q2 = Arrays.copyOf(daySummaryData.Q2, length);
+            daySummaryData.Q3 = Arrays.copyOf(daySummaryData.Q3, length);
+            daySummaryData.max = Arrays.copyOf(daySummaryData.max, length);
+        }
+        for (int dayIndex = 0; dayIndex < length; dayIndex++) {
+            if (inputDaySummaryData.get("avg")[dayIndex] != 0) {
+                daySummaryData.avg[dayIndex] = inputDaySummaryData.get("avg")[dayIndex];
+                daySummaryData.min[dayIndex] = inputDaySummaryData.get("min")[dayIndex];
+                daySummaryData.Q1[dayIndex] = inputDaySummaryData.get("Q1")[dayIndex];
+                daySummaryData.Q2[dayIndex] = inputDaySummaryData.get("Q2")[dayIndex];
+                daySummaryData.Q3[dayIndex] = inputDaySummaryData.get("Q3")[dayIndex];
+                daySummaryData.max[dayIndex] = inputDaySummaryData.get("max")[dayIndex];
+            }
+        }
+    }
+
+    public void addData(Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>> inputMap) {
+        for (String locationKey : inputMap.keySet()) {
+            Map<String, Map<String, LinkedHashMap<String, float[]>>> channelMap = inputMap.get(locationKey);
+            for (String channelKey : channelMap.keySet()) {
+                Map<String, LinkedHashMap<String, float[]>> dateMap = channelMap.get(channelKey);
+                for (String yearMonthKey : dateMap.keySet()) {
+                    final LinkedHashMap<String, float[]> inputDaySummaryData = dateMap.get(yearMonthKey);
+                    if (inputDaySummaryData != null) {
+                        mergeDaySummaryData(locationKey, channelKey, yearMonthKey, inputDaySummaryData);
+                    }
+                }
+            }
+        }
     }
 }
