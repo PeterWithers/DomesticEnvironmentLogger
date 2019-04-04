@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.annotation.PostConstruct;
@@ -486,8 +487,10 @@ public class DataRecordService {
             dailyOverviewMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             GcsFilename dailyOverviewFileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DailyOverview");
             GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(dailyOverviewFileName, 0, 2097152);
-            DailyOverview dailyOverview = dailyOverviewMapper.readValue(Channels.newInputStream(readChannel), new TypeReference<DailyOverview>() {
+            Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>> instanceMap = dailyOverviewMapper.readValue(Channels.newInputStream(readChannel), new TypeReference<Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>>>() {
             });
+            DailyOverview dailyOverview = new DailyOverview();
+            dailyOverview.addData(instanceMap);
             return dailyOverview;
         } catch (IOException exception) {
             System.out.println(exception.getMessage());
