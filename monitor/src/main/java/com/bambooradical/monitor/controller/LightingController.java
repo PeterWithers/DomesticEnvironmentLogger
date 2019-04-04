@@ -63,7 +63,7 @@ public class LightingController {
     }
 
     private String getCssGradient() {
-        DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
+        DateTime dateTime = new DateTime(DateTimeZone.forID("Europe/Amsterdam"));
         int millisOfDay = dateTime.getMillisOfDay();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("height: 864px; background: linear-gradient(");
@@ -102,7 +102,7 @@ public class LightingController {
             @RequestParam(value = "refresh", required = false, defaultValue = "true") boolean refresh
     ) {
         if (needsUpdate || refresh) {
-            DateTime dateTime = new DateTime(DateTimeZone.forOffsetHours(+1));
+            DateTime dateTime = new DateTime(DateTimeZone.forID("Europe/Amsterdam"));
             int millisOfDay = dateTime.getMillisOfDay();
             StringBuilder stringBuilder = new StringBuilder();
             ProgramRecord firstRecord = null;
