@@ -266,7 +266,8 @@ function addChannelMin(locationKey, locationChannel) {
         backgroundColor: channelColours[locationKey].backgroundColor,
         borderColor: channelColours[locationKey].borderColor,
         fill: false,
-        pointRadius: 0
+        showLine: false
+//        pointRadius: 0
     });
     overviewChart.update();
 }
@@ -306,7 +307,8 @@ function addChannelMax(locationKey, locationChannel) {
         backgroundColor: channelColours[locationKey].backgroundColor,
         borderColor: channelColours[locationKey].borderColor,
         fill: false,
-        pointRadius: 0
+        showLine: false
+//        pointRadius: 0
     });
     overviewChart.update();
 }
