@@ -95,8 +95,8 @@ var channelColours = {
         borderColor: "rgba(75, 92, 192, 1)"},
     'third testing messaging': {
         label: 'third testing messaging',
-        backgroundColor: "rgba(123,123,123, 0.2)",
-        borderColor: "rgba(123,123,123, 1)"},
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        borderColor: "rgba(75, 192, 192, 1)"},
     'second testing board': {
         label: 'second testing board',
         backgroundColor: "rgba(179,181,198, 0.2)",
@@ -163,8 +163,8 @@ var channelColours = {
         borderColor: "rgba(255,99,132,1)"},
     'testing board': {
         label: 'testing board',
-        backgroundColor: "rgba(123,123,123, 0.2)",
-        borderColor: "rgba(123,123,123, 1)"},
+        backgroundColor: "rgba(255,99,132, 0.2)",
+        borderColor: "rgba(255,99,132, 1)"},
     'invalid-second top floor': {
         label: 'invalid-second top floor',
         backgroundColor: "rgba(179,181,198, 0.2)",
@@ -189,9 +189,9 @@ $(document).ready(function () {
             datasets: []
         },
         options: {
-//            legend: {
-//                display: false,
-//            },
+            legend: {
+                display: false,
+            },
             bezierCurve: false,
             responsive: true,
             maintainAspectRatio: true,
