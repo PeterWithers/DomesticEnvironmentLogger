@@ -11,7 +11,6 @@ import com.google.cloud.datastore.KeyFactory;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,7 @@ public class LightingService {
 
     private KeyFactory keyFactory;
 
-    private static final HashMap<String, String> HOURLY_PROGRAMS = new HashMap<>();
+//    private static final HashMap<String, String> HOURLY_PROGRAMS = new HashMap<>();
     private static final List<ProgramRecord> PROGRAM_RECORDS = new ArrayList<>();
 
     @PostConstruct
@@ -82,14 +81,19 @@ public class LightingService {
     }
 
     public List<ProgramRecord> findProgram(final int millisOfDay) {
-        if (HOURLY_PROGRAMS.isEmpty()) {
-            Key lightSettingsKey = keyFactory.newKey("defaultSettings");
-            Entity lightSettings = datastore.get(lightSettingsKey);
-            if (lightSettings != null) {
-                for (String propertyName : lightSettings.getNames()) {
-                    HOURLY_PROGRAMS.put(propertyName, lightSettings.getString(propertyName));
-                }
-            }
+//        if (HOURLY_PROGRAMS.isEmpty()) {
+//            Key lightSettingsKey = keyFactory.newKey("defaultSettings");
+//            Entity lightSettings = datastore.get(lightSettingsKey);
+//            if (lightSettings != null) {
+//                for (String propertyName : lightSettings.getNames()) {
+//                    HOURLY_PROGRAMS.put(propertyName, lightSettings.getString(propertyName));
+//                }
+//            }
+//        }
+        try {
+            getProgramRecords();
+        } catch (ParseException parseException) {
+            System.err.print(parseException.getMessage());
         }
         for (ProgramRecord programRecord : PROGRAM_RECORDS) {
             programRecord.setOffset(millisOfDay);
