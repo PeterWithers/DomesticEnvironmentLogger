@@ -182,6 +182,7 @@ var channelColours = {
 $(document).ready(function () {
     $("<canvas id=\"overviewContainer\" width=\"800\" height=\"400\"></canvas>").appendTo("body");
     var overviewContainer = $("#overviewContainer");
+//    var overviewContainer = document.getElementById('overviewContainer').getContext('2d');
     overviewChart = new Chart(overviewContainer, {
         type: 'line',
         data: {
@@ -239,10 +240,10 @@ $(document).ready(function () {
                         });
                     });
                 });
-                $("<button style=\"border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelMin('" + locationKey + "', '" + locationChannel + "')\">min</button>").appendTo("#" + channelKey + "_" + locationId);
-                $("<button style=\"border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelAvg('" + locationKey + "', '" + locationChannel + "')\">avg</button>").appendTo("#" + channelKey + "_" + locationId);
-                $("<button style=\"border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelMax('" + locationKey + "', '" + locationChannel + "')\">max</button>").appendTo("#" + channelKey + "_" + locationId);
-                $("<button style=\"border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelQ123('" + locationKey + "', '" + locationChannel + "')\">Q1 Q2 Q3</button>").appendTo("#" + channelKey + "_" + locationId);
+                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelMin('" + locationKey + "', '" + locationChannel + "')\">min</button>").appendTo("#" + channelKey + "_" + locationId);
+                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelAvg('" + locationKey + "', '" + locationChannel + "')\">avg</button>").appendTo("#" + channelKey + "_" + locationId);
+                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelMax('" + locationKey + "', '" + locationChannel + "')\">max</button>").appendTo("#" + channelKey + "_" + locationId);
+                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelQ123('" + locationKey + "', '" + locationChannel + "')\">Q1 Q2 Q3</button>").appendTo("#" + channelKey + "_" + locationId);
             });
         });
     });
@@ -253,7 +254,8 @@ function addChannelAvg(locationKey, locationChannel) {
         data: graphDataChannels[locationChannel].avg,
         backgroundColor: channelColours[locationKey].backgroundColor,
         borderColor: channelColours[locationKey].borderColor,
-        fill: false
+        fill: false,
+        pointRadius: 0
     });
     overviewChart.update();
 }
@@ -263,7 +265,8 @@ function addChannelMin(locationKey, locationChannel) {
         data: graphDataChannels[locationChannel].min,
         backgroundColor: channelColours[locationKey].backgroundColor,
         borderColor: channelColours[locationKey].borderColor,
-        fill: false
+        fill: false,
+        pointRadius: 0
     });
     overviewChart.update();
 }
@@ -272,22 +275,27 @@ function addChannelQ123(locationKey, locationChannel) {
         label: locationChannel + " Q1",
         data: graphDataChannels[locationChannel].Q1,
         backgroundColor: channelColours[locationKey].backgroundColor,
-        borderColor: channelColours[locationKey].borderColor,
-        fill: +1
+        borderColor: channelColours[locationKey].backgroundColor,
+        fill: false,
+//        showLine: false,
+        pointRadius: 0
     });
     overviewChart.data.datasets.push({
         label: locationChannel + " Q2",
         data: graphDataChannels[locationChannel].Q2,
         backgroundColor: channelColours[locationKey].backgroundColor,
         borderColor: channelColours[locationKey].borderColor,
-        fill: -1
+        fill: false,
+        pointRadius: 0
     });
     overviewChart.data.datasets.push({
         label: locationChannel + " Q3",
         data: graphDataChannels[locationChannel].Q3,
         backgroundColor: channelColours[locationKey].backgroundColor,
-        borderColor: channelColours[locationKey].borderColor,
-        fill: -1
+        borderColor: channelColours[locationKey].backgroundColor,
+        fill: -2,
+//        showLine: false,
+        pointRadius: 0
     });
     overviewChart.update();
 }
@@ -297,7 +305,8 @@ function addChannelMax(locationKey, locationChannel) {
         data: graphDataChannels[locationChannel].max,
         backgroundColor: channelColours[locationKey].backgroundColor,
         borderColor: channelColours[locationKey].borderColor,
-        fill: false
+        fill: false,
+        pointRadius: 0
     });
     overviewChart.update();
 }
