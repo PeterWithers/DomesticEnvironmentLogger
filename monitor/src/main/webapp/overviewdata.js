@@ -95,8 +95,8 @@ $(document).ready(function () {
                 }
                 var locationChannel = (locationKey + "_" + channelKey).split(" ").join("_");
                 graphDataChannels[locationChannel] = {"avg": [], "min": [], "Q1": [], "Q2": [], "Q3": [], "max": []};
-                $.each(yearMonthData, function (yearMonthKey, setOfData) {
-                    $.each(setOfData, function (setKey, daysOfData) {
+                Object.keys(yearMonthData).sort().forEach(function(yearMonthKey) {
+                    $.each(yearMonthData[yearMonthKey], function (setKey, daysOfData) {
                         $.each(daysOfData, function (index, daysValue) {
                             if (daysValue > 0) {
                                 var yearMonthParts = yearMonthKey.split("-");
