@@ -78,9 +78,21 @@ $(document).ready(function () {
                         }
                     }]}
         }});
+    var columnLabels = [];
+    $("<table id=\"buttonsTable\"/>").appendTo("body");
+    $("<tr id=\"headerRow\"><td id=\"emptyCell\"/></tr>").appendTo("#buttonsTable");
     $.getJSON("/monitor/overview", function (locationData) {
         $.each(locationData, function (locationKey, channelData) {
+            $("<tr id=\"" + locationKey + "\"><td>" + locationKey + "</td></tr>").appendTo("#buttonsTable");
+            for (var value in columnLabels) {
+                $("<td id=\"" + columnLabels[value] + "_" + locationKey + "\">").appendTo("#" + locationKey);
+            }
             $.each(channelData, function (channelKey, yearMonthData) {
+                if (columnLabels.indexOf(channelKey) < 0) {
+                    columnLabels.push(channelKey);
+                    $("<td>" + channelKey + "</td>").appendTo("#headerRow");
+                    $("<td id=\"" + channelKey + "_" + locationKey + "\"/>").appendTo("#" + locationKey);
+                }
                 var locationChannel = (locationKey + "_" + channelKey).split(" ").join("_");
                 graphDataChannels[locationChannel] = {"avg": [], "min": [], "Q1": [], "Q2": [], "Q3": [], "max": []};
                 $.each(yearMonthData, function (yearMonthKey, setOfData) {
@@ -94,7 +106,7 @@ $(document).ready(function () {
                         });
                     });
                 });
-                $("<button onclick=\"addChannel('" + locationKey + "', '" + locationChannel + "')\">" + locationKey + " " + channelKey + "</button>").appendTo("body");
+                $("<button onclick=\"addChannel('" + locationKey + "', '" + locationChannel + "')\">" + locationKey + " " + channelKey + "</button>").appendTo("#" + channelKey + "_" + locationKey);
             });
         });
     });
