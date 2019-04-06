@@ -768,6 +768,8 @@ public class DataRecordController {
                 + "<br/>"
                 + "<a href=\"list\">list</a>"
                 + "<br/>"
+                + "<br/><a href=\"/overview.html\">overview</a>"
+                + "<br/>"
                 + "<br/><a href=\"/spectrogram.html\">spectrogram</a>"
                 + "<br/>"
                 + "<a href=\"energy\">energy graph</a>"
