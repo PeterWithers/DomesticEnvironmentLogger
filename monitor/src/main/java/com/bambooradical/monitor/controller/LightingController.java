@@ -116,8 +116,8 @@ public class LightingController {
             }
             if (lastRecord != null) {
                 int millisecondsPerDay = 0x5265C00; //86400000;
-                // todo: this colour should be tweened with firstRecord if the tween is active
-                stringBuilder.append(new ProgramRecord(lastRecord.getLocation(), millisecondsPerDay, lastRecord.getColour(), lastRecord.isTween()).getProgramCode());
+                // add the last record to the list again, at the beging, with a full days offset
+                stringBuilder.append(new ProgramRecord(lastRecord.getLocation(), millisOfDay - millisecondsPerDay, lastRecord.getColour(), lastRecord.isTween()).getProgramCode());
             }
             needsUpdate = false;
             return stringBuilder.toString();
