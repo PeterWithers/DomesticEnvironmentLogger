@@ -97,6 +97,10 @@ var channelColours = {
         label: 'third testing messaging',
         backgroundColor: "rgba(75, 192, 192, 0.2)",
         borderColor: "rgba(75, 192, 192, 1)"},
+    'second testing board bg': {
+        label: 'second testing board',
+        backgroundColor: "rgba(179,181,198, 0.2)",
+        borderColor: "rgba(179,181,198, 1)"},
     'second testing board': {
         label: 'second testing board',
         backgroundColor: "rgba(179,181,198, 0.2)",
@@ -173,6 +177,14 @@ var channelColours = {
         label: 'third ground floor',
         backgroundColor: "rgba(75, 192, 192, 0.2)",
         borderColor: "rgba(75, 192, 192, 1)"},
+    'third testing board': {
+        label: 'third ground floor',
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        borderColor: "rgba(75, 192, 192, 1)"},
+    'third testing board bg': {
+        label: 'third ground floor',
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        borderColor: "rgba(75, 192, 192, 1)"},
     'windspeeddeelen': {
         label: 'windspeeddeelen',
         backgroundColor: "rgba(123,123,123, 0.2)",
@@ -240,6 +252,7 @@ $(document).ready(function () {
                         });
                     });
                 });
+                console.log(locationKey);
                 $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelMin('" + locationKey + "', '" + locationChannel + "')\">min</button>").appendTo("#" + channelKey + "_" + locationId);
                 $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelAvg('" + locationKey + "', '" + locationChannel + "')\">avg</button>").appendTo("#" + channelKey + "_" + locationId);
                 $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelMax('" + locationKey + "', '" + locationChannel + "')\">max</button>").appendTo("#" + channelKey + "_" + locationId);
