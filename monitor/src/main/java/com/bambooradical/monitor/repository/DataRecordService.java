@@ -504,6 +504,13 @@ public class DataRecordService {
         return Channels.newInputStream(readChannel);
     }
 
+    public InputStream getDayOfDataStream(int yyyy, int MM, int dd) {
+        String dateKey = String.format("%04d-%02d-%02d", yyyy, MM, dd);
+        GcsFilename dayOfDataOverviewFileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey);
+        GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(dayOfDataOverviewFileName, 0, 2097152);
+        return Channels.newInputStream(readChannel);
+    }
+
     public List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate) {
         // if the date range is greater than three days, then use min max records
         int daysBetween = (int) ((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));

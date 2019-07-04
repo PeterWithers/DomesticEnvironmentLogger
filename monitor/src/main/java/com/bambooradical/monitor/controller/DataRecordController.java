@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -347,6 +348,20 @@ public class DataRecordController {
         }
     }
 
+    @RequestMapping("/DayOfData{yyyy}-{MM}-{dd}")
+    public void getDayOfData(HttpServletResponse response, @PathVariable("yyyy") int yyyy, @PathVariable("MM") int MM, @PathVariable("dd") int dd) throws IOException {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.addHeader("Content-Transfer-Encoding", "text");
+        try (OutputStream outputStream = response.getOutputStream()) {
+            final InputStream dayOfDataStream = dataRecordService.getDayOfDataStream(yyyy, MM, dd);
+            byte[] bytes = new byte[1024];
+            int bytesRead = 0;
+            while ((bytesRead = dayOfDataStream.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, bytesRead);
+            }
+        }
+    }
+    
     @RequestMapping("/charts")
     public String getCharts(@RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "14") int spanDays) {
 //        long totalRecords = dataRecordRepository.count();
