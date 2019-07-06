@@ -5,24 +5,19 @@ package com.bambooradical.monitor.controller;
 
 import com.bambooradical.monitor.model.DataRecord;
 import com.bambooradical.monitor.model.EnergyRecord;
-import com.bambooradical.monitor.repository.DataRecordRepository;
 import com.bambooradical.monitor.repository.DataRecordService;
-import com.bambooradical.monitor.repository.EnergyRecordRepository;
+import com.bambooradical.monitor.repository.DayOfDataGcsFileStore;
 import com.bambooradical.monitor.repository.EnergyRecordService;
 import com.bambooradical.monitor.repository.MagnitudeRecordService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -49,6 +44,9 @@ public class DataRecordController {
     EnergyRecordService energyRecordService;
     @Autowired
     MagnitudeRecordService magnitudeRecordService;
+
+//    private final DayOfDataFileStore dataFileStore = new DayOfDataFileStore();
+    private final DayOfDataGcsFileStore dataFileStore = new DayOfDataGcsFileStore();
 
     @RequestMapping("/add")
     public List<DataRecord> addRecord(
@@ -106,7 +104,7 @@ public class DataRecordController {
         energyRecordRepository.save(energyRecordList);
         return energyRecordRepository.count();
     }*/
-    /*@RequestMapping("/migrateRecords")
+ /*@RequestMapping("/migrateRecords")
     public String migrateRecords(@RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
         int addedCounter = 0;
         final PageRequest pageRequest = new PageRequest(startRecord, recordsToDo);
@@ -121,7 +119,7 @@ public class DataRecordController {
         return "Added " + addedCounter + " DataRecords<br/><a href=\"?start=" + (startRecord + 1) + "&count=" + recordsToDo + "\">next</a>";
     }*/
 
-    /*@RequestMapping("/migrateEnergy")
+ /*@RequestMapping("/migrateEnergy")
     public String migrateEnergy(@RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
         final PageRequest pageRequest = new PageRequest(startRecord, recordsToDo);
         final Page<EnergyRecord> recordsToMigrate = energyRecordRepository.findAll(pageRequest);
@@ -136,7 +134,6 @@ public class DataRecordController {
         }
         return "Found " + energyRecordService.count() + " EnergyRecords out of " + energyRecordRepository.count() + " uploaded<br/><a href=\"?start=" + (startRecord + 1) + "&count=" + recordsToDo + "\">next</a>";
     }*/
-
     @RequestMapping("/addList")
     public String addRecordList(@RequestBody List<DataRecord> recordList, @RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
         for (long currentIndex = (startRecord * recordsToDo); currentIndex < recordList.size() && currentIndex < ((startRecord * recordsToDo) + recordsToDo); currentIndex++) {
@@ -172,7 +169,6 @@ public class DataRecordController {
     public List<DataRecord> listRecords() {
         return dataRecordRepository.findAll();
     }*/
-
     @RequestMapping(value = "/magnitudes", produces = {"application/JSON"})
     //@RequestMapping("/magnitudes")
     public String getMagnitudes(@RequestParam(value = "location", required = true) String location, @RequestParam(value = "date", required = false, defaultValue = "") String dateString) {
@@ -330,7 +326,7 @@ public class DataRecordController {
         Date endDate = calendar.getTime();
         calendar.add(Calendar.DAY_OF_MONTH, -spanDays - 1);
         Date startDate = calendar.getTime();
-        dataRecordService.loadDayOfData(startDate, endDate);
+        dataFileStore.loadDayOfData(startDate, endDate);
         return getCharts(startDay, spanDays);
     }
 
@@ -339,7 +335,7 @@ public class DataRecordController {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.addHeader("Content-Transfer-Encoding", "text");
         try (OutputStream outputStream = response.getOutputStream()) {
-            final InputStream overviewStream = dataRecordService.getOverviewStream();
+            final InputStream overviewStream = dataFileStore.getOverviewStream();
             byte[] bytes = new byte[1024];
             int bytesRead = 0;
             while ((bytesRead = overviewStream.read(bytes)) != -1) {
@@ -353,7 +349,7 @@ public class DataRecordController {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.addHeader("Content-Transfer-Encoding", "text");
         try (OutputStream outputStream = response.getOutputStream()) {
-            final InputStream dayOfDataStream = dataRecordService.getDayOfDataStream(yyyy, MM, dd);
+            final InputStream dayOfDataStream = dataFileStore.getDayOfDataStream(yyyy, MM, dd);
             byte[] bytes = new byte[1024];
             int bytesRead = 0;
             while ((bytesRead = dayOfDataStream.read(bytes)) != -1) {
@@ -361,7 +357,7 @@ public class DataRecordController {
             }
         }
     }
-    
+
     @RequestMapping("/charts")
     public String getCharts(@RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "14") int spanDays) {
 //        long totalRecords = dataRecordRepository.count();
