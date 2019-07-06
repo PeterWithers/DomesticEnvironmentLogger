@@ -1,0 +1,20 @@
+#
+# @since July 4, 2019 19:58 PM (creation date)
+# @author Peter Withers <peter.withers@mpi.nl>
+#
+FROM openjdk:8
+RUN apt-get update # --fix-missing
+RUN apt-get -y upgrade # --fix-missing
+RUN apt-get -y install maven vim mysql-server
+RUN git clone --depth 30000 https://github.com/PeterWithers/DomesticEnvironmentLogger.git
+RUN sed -i 's|<packaging>war</packaging>|<packaging>jar</packaging>|g' /DomesticEnvironmentLogger/monitor/pom.xml
+RUN sed -i 's|<exclusions>|<!--<exclusions>|g' /DomesticEnvironmentLogger/monitor/pom.xml
+RUN sed -i 's|</exclusions>|</exclusions>-->|g' /DomesticEnvironmentLogger/monitor/pom.xml
+RUN rm /DomesticEnvironmentLogger/monitor/src/main/resources/application.properties
+
+RUN cd /DomesticEnvironmentLogger/monitor/ \
+    && mvn install
+
+#WORKDIR /target
+VOLUME ["/data"]
+CMD java -jar /DomesticEnvironmentLogger/monitor/target/monitor-1.0-SNAPSHOT.jar
