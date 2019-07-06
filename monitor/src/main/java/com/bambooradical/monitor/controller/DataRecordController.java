@@ -39,10 +39,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/monitor")
 public class DataRecordController {
 
-    @Autowired
-    DataRecordRepository dataRecordRepository;
-    @Autowired
-    EnergyRecordRepository energyRecordRepository;
+//    @Autowired
+//    DataRecordRepository dataRecordRepository;
+//    @Autowired
+//    EnergyRecordRepository energyRecordRepository;
     @Autowired
     DataRecordService dataRecordService;
     @Autowired
@@ -64,7 +64,7 @@ public class DataRecordController {
         if (temperature != null) {
             for (int index = 0; index < temperature.length; index++) {
                 final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, voltage, location + returnRecords.size(), error, new Date());
-                dataRecordRepository.save(dataRecord);
+//                dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
             }
@@ -72,7 +72,7 @@ public class DataRecordController {
         if (humidity != null) {
             for (int index = returnRecords.size(); index < humidity.length; index++) {
                 final DataRecord dataRecord = new DataRecord(null, humidity[index], voltage, location + returnRecords.size(), error, new Date());
-                dataRecordRepository.save(dataRecord);
+//                dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
             }
@@ -90,9 +90,9 @@ public class DataRecordController {
             @RequestParam(value = "readingDate", required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date readingDate
     ) {
         final EnergyRecord energyRecord = new EnergyRecord(meterLocation, meterValue, readingDate);
-        energyRecordRepository.save(energyRecord);
+//        energyRecordRepository.save(energyRecord);
         energyRecordService.save(energyRecord);
-        return energyRecordRepository.findAll();
+        return energyRecordService.findAll();
     }
 
     /*    @RequestMapping("/addList")
@@ -106,7 +106,7 @@ public class DataRecordController {
         energyRecordRepository.save(energyRecordList);
         return energyRecordRepository.count();
     }*/
-    @RequestMapping("/migrateRecords")
+    /*@RequestMapping("/migrateRecords")
     public String migrateRecords(@RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
         int addedCounter = 0;
         final PageRequest pageRequest = new PageRequest(startRecord, recordsToDo);
@@ -119,9 +119,9 @@ public class DataRecordController {
             }
         }
         return "Added " + addedCounter + " DataRecords<br/><a href=\"?start=" + (startRecord + 1) + "&count=" + recordsToDo + "\">next</a>";
-    }
+    }*/
 
-    @RequestMapping("/migrateEnergy")
+    /*@RequestMapping("/migrateEnergy")
     public String migrateEnergy(@RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
         final PageRequest pageRequest = new PageRequest(startRecord, recordsToDo);
         final Page<EnergyRecord> recordsToMigrate = energyRecordRepository.findAll(pageRequest);
@@ -135,7 +135,7 @@ public class DataRecordController {
             }
         }
         return "Found " + energyRecordService.count() + " EnergyRecords out of " + energyRecordRepository.count() + " uploaded<br/><a href=\"?start=" + (startRecord + 1) + "&count=" + recordsToDo + "\">next</a>";
-    }
+    }*/
 
     @RequestMapping("/addList")
     public String addRecordList(@RequestBody List<DataRecord> recordList, @RequestParam(value = "start", required = false, defaultValue = "0") int startRecord, @RequestParam(value = "count", required = false, defaultValue = "10") int recordsToDo) {
@@ -168,10 +168,10 @@ public class DataRecordController {
         return "Found " + energyRecordService.count() + " EnergyRecords";
     }
 
-    @RequestMapping("/list")
+    /*@RequestMapping("/list")
     public List<DataRecord> listRecords() {
         return dataRecordRepository.findAll();
-    }
+    }*/
 
     @RequestMapping(value = "/magnitudes", produces = {"application/JSON"})
     //@RequestMapping("/magnitudes")
@@ -181,7 +181,7 @@ public class DataRecordController {
 
     @RequestMapping("/listEnergy")
     public List<EnergyRecord> listEnergyRecords() {
-        return energyRecordRepository.findAll();
+        return energyRecordService.findAll();
     }
 
     private String getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {
