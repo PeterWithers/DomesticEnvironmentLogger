@@ -3,6 +3,7 @@
  */
 package com.bambooradical.monitor.controller;
 
+import com.bambooradical.monitor.model.DataRecord;
 import com.bambooradical.monitor.repository.DataRecordService;
 import com.google.cloud.Timestamp;
 import java.io.BufferedReader;
@@ -29,6 +30,10 @@ public class KnmiDataController {
 
     @Autowired
     DataRecordService dataRecordService;
+
+    public void save(final String location, final Timestamp timestamp, final Float temperature, final Float humidity, final String keyString) {
+        dataRecordService.save(new DataRecord(temperature, humidity, 0.0f, location, keyString, new Date(timestamp.getSeconds() * 1000L)));
+    }
 
     @RequestMapping("/import")
     public String addEnergyRecord(@RequestParam(value = "startDate", required = true) /*@DateTimeFormat(pattern = "yyyyMMdd") Date*/ String startDate) throws IOException, NumberFormatException, ParseException {
@@ -82,7 +87,7 @@ public class KnmiDataController {
                     final Float temperatureMin = Float.valueOf(splitLine[2]) / 10;
                     final Float humidityMin = Float.valueOf(splitLine[4]);
                     final String keyStringMin = location + "-" + stationId + "-" + splitLine[1] + "-min";
-                    dataRecordService.save(location, timestamp, temperatureMin, humidityMin, keyStringMin);
+                    save(location, timestamp, temperatureMin, humidityMin, keyStringMin);
                 } catch (NumberFormatException exception) {
                     System.out.println(exception.getMessage());
                     response.append("Invalid temperatureMin/humidityMin<br/>");
@@ -91,7 +96,7 @@ public class KnmiDataController {
                     final Float temperatureMax = Float.valueOf(splitLine[3]) / 10;
                     final Float humidityMax = Float.valueOf(splitLine[5]);
                     final String keyStringMax = location + "-" + stationId + "-" + splitLine[1] + "-max";
-                    dataRecordService.save(location, timestamp, temperatureMax, humidityMax, keyStringMax);
+                    save(location, timestamp, temperatureMax, humidityMax, keyStringMax);
                 } catch (NumberFormatException exception) {
                     System.out.println(exception.getMessage());
                     response.append("Invalid temperatureMax/humidityMax<br/>");
@@ -100,7 +105,7 @@ public class KnmiDataController {
                     final Float precipitation = Float.valueOf(splitLine[6]);
                     final Float evapotranspiration = Float.valueOf(splitLine[7]);
                     final String keyStringPrecipitation = "precipitation" + "-" + stationId + "-" + splitLine[1];
-                    dataRecordService.save("precipitationDeelen", timestamp, precipitation, evapotranspiration, keyStringPrecipitation);
+                    save("precipitationDeelen", timestamp, precipitation, evapotranspiration, keyStringPrecipitation);
                 } catch (NumberFormatException exception) {
                     System.out.println(exception.getMessage());
                     response.append("Invalid precipitation/evapotranspiration<br/>");
@@ -109,7 +114,7 @@ public class KnmiDataController {
                     final Float windspeed = Float.valueOf(splitLine[8]);
                     final Float meanWindDirection = Float.valueOf(splitLine[9]);
                     final String keyStringWindspeed = "windspeed" + "-" + stationId + "-" + splitLine[1];
-                    dataRecordService.save("windspeedDeelen", timestamp, windspeed, meanWindDirection, keyStringWindspeed);
+                    save("windspeedDeelen", timestamp, windspeed, meanWindDirection, keyStringWindspeed);
                 } catch (NumberFormatException exception) {
                     System.out.println(exception.getMessage());
                     response.append("Invalid windspeed/meanWindDirection<br/>");
@@ -119,7 +124,7 @@ public class KnmiDataController {
         bufferedReader.close();
 //        response.append("<br/><a href=\"/monitor/clear\">clear cache</a><br/>");
         response.append("<br/><a href=\"/monitor/energy\">energy viewer</a><br/>");
-        dataRecordService.clearCachedData();
+        dataRecordService.clearCachedData(); // todo: it is better to update rather than clear this
         return response.toString();
     }
 }
