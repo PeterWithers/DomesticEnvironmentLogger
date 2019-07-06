@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @since Nov 21, 2016 8:01:11 PM (creation date)
- * @author @author : Peter Withers <peter@gthb-bambooradical.com>
+ * @author @author : Peter Withers <peter-gthb@bambooradical.com>
  */
 @Controller
 public class DataViewController {
