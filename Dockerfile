@@ -10,8 +10,11 @@ RUN apt-get -y install maven vim
 RUN git clone --depth 30000 https://github.com/PeterWithers/DomesticEnvironmentLogger.git
 RUN sed -i 's|<packaging>war</packaging>|<packaging>jar</packaging>|g' /DomesticEnvironmentLogger/monitor/pom.xml
 RUN sed -i 's|<exclusions>|<!--<exclusions>|g' /DomesticEnvironmentLogger/monitor/pom.xml
+RUN sed -i 's|</exclusions>|</exclusions>-->|g' /DomesticEnvironmentLogger/monitor/pom.xml
+RUN sed -i 's|>1.8<|>1.7<|g' /DomesticEnvironmentLogger/monitor/pom.xml
 RUN sed -i 's|@Autowired|//@Autowired|g' /DomesticEnvironmentLogger/monitor/src/main/java/com/bambooradical/monitor/repository/*.java
 RUN sed -i 's|@PostConstruct|//@PostConstruct|g' /DomesticEnvironmentLogger/monitor/src/main/java/com/bambooradical/monitor/repository/*.java
+RUN sed -i 's|resultList.sort(|//resultList.sort(|g' /DomesticEnvironmentLogger/monitor/src/main/java/com/bambooradical/monitor/repository/*.java
 RUN rm /DomesticEnvironmentLogger/monitor/src/main/resources/application.properties
 
 RUN cd /DomesticEnvironmentLogger/monitor/ \
