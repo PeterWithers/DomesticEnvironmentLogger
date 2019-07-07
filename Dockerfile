@@ -5,7 +5,8 @@
 FROM openjdk:7
 RUN apt-get update # --fix-missing
 RUN apt-get -y upgrade # --fix-missing
-RUN apt-get -y install maven vim mysql-server
+RUN apt-get -y install maven vim 
+#mysql-server
 RUN git clone --depth 30000 https://github.com/PeterWithers/DomesticEnvironmentLogger.git
 RUN sed -i 's|<packaging>war</packaging>|<packaging>jar</packaging>|g' /DomesticEnvironmentLogger/monitor/pom.xml
 RUN sed -i 's|<exclusions>|<!--<exclusions>|g' /DomesticEnvironmentLogger/monitor/pom.xml
