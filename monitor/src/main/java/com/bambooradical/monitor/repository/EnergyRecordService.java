@@ -118,9 +118,7 @@ public class EnergyRecordService {
                     currentEntity.getDouble("MeterValue"),
                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
         }
-        resultList.sort((EnergyRecord o1, EnergyRecord o2) -> {
-            return o1.getRecordDate().compareTo(o2.getRecordDate());
-        });
+        resultList.sort((EnergyRecord o1, EnergyRecord o2) -> o1.getRecordDate().compareTo(o2.getRecordDate()));
 	addEntry(meterLocation, resultList);
         return resultList;
 	    }
