@@ -170,6 +170,9 @@ public class DayOfDataGcsFileStore {
                             final DataRecord dataRecord = new DataRecord(
                                     (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
                                     (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
+				    (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("tvoc") : null,
+                                    (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("co2") : null,
+                                    (currentEntity.contains("pa")) ? (int) currentEntity.getDouble("pa") : null,
                                     (float) currentEntity.getDouble("Voltage"), currentEntity.getString("Location"),
                                     currentEntity.getString("Error"),
                                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));

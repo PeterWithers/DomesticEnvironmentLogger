@@ -23,6 +23,9 @@ public class DataRecord implements Serializable {
     private Long id;
     private Float temperature;
     private Float humidity;
+    private Integer pa;
+    private Integer tvoc;
+    private Integer co2;
     private Float voltage;
     private String location;
     private String error;
@@ -32,9 +35,12 @@ public class DataRecord implements Serializable {
     public DataRecord() {
     }
 
-    public DataRecord(Float temperature, Float humidity, Float voltage, String location, String error, Date recordDate) {
+    public DataRecord(Float temperature, Float humidity, Integer tvoc, Integer co2, Integer pa, Float voltage, String location, String error, Date recordDate) {
         this.temperature = temperature;
         this.humidity = humidity;
+	this.tvoc = tvoc;
+        this.co2 = co2;
+        this.pa = pa;
         this.voltage = voltage;
         this.location = location;
         this.error = error;
@@ -43,8 +49,8 @@ public class DataRecord implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("Customer[id=%d, temperature=%.2f, humidity=%.2f,  voltage=%.2f,  location='%s',  error='%s',  date='%s']", id,
-                temperature, humidity, voltage, location, error, recordDate);
+	return String.format("DataRecord[id=%d, temperature=%.2f, humidity=%.2f, tvoc=%d, co2=%d, pa=%d, voltage=%.2f, location='%s', error='%s', date='%s']", id,
+                temperature, humidity, tvoc, co2, pa, voltage, location, error, recordDate);
     }
 
     public Long getId() {
@@ -69,6 +75,30 @@ public class DataRecord implements Serializable {
 
     public void setHumidity(Float humidity) {
         this.humidity = humidity;
+    }
+
+    public Integer getPa() {
+        return pa;
+    }
+
+    public void setPa(Integer pa) {
+        this.pa = pa;
+    }
+
+    public Integer getTvoc() {
+        return tvoc;
+    }
+
+    public void setTvoc(Integer tvoc) {
+        this.tvoc = tvoc;
+    }
+
+    public Integer getCo2() {
+        return co2;
+    }
+
+    public void setCo2(Integer co2) {
+        this.co2 = co2;
     }
 
     public Float getVoltage() {

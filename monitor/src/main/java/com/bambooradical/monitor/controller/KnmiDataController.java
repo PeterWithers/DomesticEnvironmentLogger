@@ -32,7 +32,7 @@ public class KnmiDataController {
     DataRecordService dataRecordService;
 
     public void save(final String location, final Timestamp timestamp, final Float temperature, final Float humidity, final String keyString) {
-        dataRecordService.save(new DataRecord(temperature, humidity, 0.0f, location, keyString, new Date(timestamp.getSeconds() * 1000L)));
+        dataRecordService.save(new DataRecord(temperature, humidity, null, null, null, 0.0f, location, keyString, new Date(timestamp.getSeconds() * 1000L)));
     }
 
     @RequestMapping("/import")

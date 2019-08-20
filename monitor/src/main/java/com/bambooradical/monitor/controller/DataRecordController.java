@@ -52,7 +52,16 @@ public class DataRecordController {
     public List<DataRecord> addRecord(
             @RequestParam(value = "temperature", required = false) Float[] temperature,
             @RequestParam(value = "humidity", required = false) Float[] humidity,
-            @RequestParam(value = "voltage", required = true) Float voltage,
+            @RequestParam(value = "voltage", required = false) Float voltage,
+	    @RequestParam(value = "tvocMin", required = false) Integer tvocMin,
+            @RequestParam(value = "tvocAvg", required = false) Integer tvocAvg,
+            @RequestParam(value = "tvocMax", required = false) Integer tvocMax,
+            @RequestParam(value = "co2Min", required = false) Integer co2Min,
+            @RequestParam(value = "co2Avg", required = false) Integer co2Avg,
+            @RequestParam(value = "co2Max", required = false) Integer co2Max,
+            @RequestParam(value = "paMin", required = false) Integer paMin,
+            @RequestParam(value = "paAvg", required = false) Integer paAvg,
+            @RequestParam(value = "paMax", required = false) Integer paMax,
             @RequestParam(value = "location", required = true) String location,
             @RequestParam(value = "magnitudes", required = false, defaultValue = "") String magnitudes,
             @RequestParam(value = "maxMsError", required = false, defaultValue = "") String maxMsError,
@@ -61,7 +70,7 @@ public class DataRecordController {
         List<DataRecord> returnRecords = new ArrayList<>();
         if (temperature != null) {
             for (int index = 0; index < temperature.length; index++) {
-                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, voltage, location + returnRecords.size(), error, new Date());
+                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, null, null, null, voltage, location + returnRecords.size(), error, new Date());
 //                dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
@@ -69,11 +78,25 @@ public class DataRecordController {
         }
         if (humidity != null) {
             for (int index = returnRecords.size(); index < humidity.length; index++) {
-                final DataRecord dataRecord = new DataRecord(null, humidity[index], voltage, location + returnRecords.size(), error, new Date());
+                final DataRecord dataRecord = new DataRecord(null, humidity[index], null, null, null, voltage, location + returnRecords.size(), error, new Date());
 //                dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
             }
+        }
+	if (tvocMin != null) {
+            final DataRecord dataMinRecord = new DataRecord(null, null, tvocMin, co2Min, paMin, null, location + "Min", error, new Date());
+//                dataRecordRepository.save(dataRecord);
+            dataRecordService.save(dataMinRecord);
+            returnRecords.add(dataMinRecord);
+            final DataRecord dataAvgRecord = new DataRecord(null, null, tvocAvg, co2Avg, paAvg, null, location + "Avg", error, new Date());
+//                dataRecordRepository.save(dataRecord);
+            dataRecordService.save(dataAvgRecord);
+            returnRecords.add(dataAvgRecord);
+            final DataRecord dataMaxRecord = new DataRecord(null, null, tvocMax, co2Max, paMax, null, location + "Max", error, new Date());
+//                dataRecordRepository.save(dataRecord);
+            dataRecordService.save(dataMaxRecord);
+            returnRecords.add(dataMaxRecord);
         }
         if (magnitudes != null && !magnitudes.isEmpty()) {
             magnitudeRecordService.save(magnitudes, maxMsError, location, new Date());

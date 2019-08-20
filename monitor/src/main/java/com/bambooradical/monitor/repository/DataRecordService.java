@@ -94,6 +94,15 @@ public class DataRecordService {
         if (humidity != null) {
             builder.set("Humidity", humidity);
         }
+	if (dataRecord.getTvoc() != null) {
+            builder.set("tvoc", dataRecord.getTvoc());
+        }
+        if (dataRecord.getCo2() != null) {
+            builder.set("co2", dataRecord.getCo2());
+        }
+        if (dataRecord.getPa() != null) {
+            builder.set("pa", dataRecord.getPa());
+        }
         final Float temperature = dataRecord.getTemperature();
         if (temperature != null) {
             builder.set("Temperature", temperature);
