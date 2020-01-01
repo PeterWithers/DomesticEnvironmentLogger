@@ -875,7 +875,7 @@ void loop() {
 #endif
 #ifdef TX433PIN
     if (rf433Results != "") {
-        String urlencodedString = urlencode(rf433Results);
+        String urlencodedString = urlEncode(rf433Results);
         rf433Results = "";
         Serial.println(urlencodedString);
         sendMessage(urlencodedString);
