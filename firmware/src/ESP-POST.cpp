@@ -697,7 +697,7 @@ void setup() {
     Serial.println("Connected: ");
     Serial.println(ssid);
     sendMessage(startMessage);
-    sendMessage(urlencode(ESP.getResetReason()));
+    sendMessage(urlEncode(ESP.getResetReason()));
 #ifdef GREEN_LED_PIN
     segmentRGB[0].blueValue = 0;
     segmentRGB[0].redValue = 0;
