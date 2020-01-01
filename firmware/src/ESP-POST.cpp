@@ -18,11 +18,13 @@
 #include "LowFrequencyMonitor.h"
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <ESPiLight.h>
 
 const char* ssid = "";
 const char* password = "";
 const char* reportingServer = "";
 const char* messageServer = "";
+const char messageServerFingerprint[] PROGMEM = "";
 const char* messageServerPath = "";
 const char* buttonMessage0 = "on%20board%20button";
 const char* buttonMessage1 = "external%20button%201";
@@ -68,6 +70,17 @@ String locationString = "second%20top%20floorA";
 #define DHTPIN              4 // D2
 #define ON_BOARD_BUTTON    14
 */
+
+//
+String locationString = "front%20door4";
+#define VCC_VOLTAGE_MONITOR
+#define POWER_DHT_VIA_GPIO
+#define DHTPOWERPIN         5 // D1
+#define DHTPIN              4 // D2
+#define ON_BOARD_BUTTON     14
+#define RX433PIN            13 // D7
+#define TX433PIN            -1 
+//
 
 /*
 // String locationString = "rearwall%20top%20floor";
@@ -130,6 +143,8 @@ String locationString = "aquariumA";
 //#define BLUE_LED_PIN        14
 #define DS18b20_PIN         0
 +*/
+
+/*
 String locationString = "aquariumB1";
 #define VCC_VOLTAGE_MONITOR
 #define BUTTONPIN           0
@@ -137,6 +152,7 @@ String locationString = "aquariumB1";
 #define RED_LED_PIN         12
 #define BLUE_LED_PIN        14
 #define DS18b20_PIN         4
+*/
 
 /*
 String locationString = "pressure%20monitor";
@@ -193,6 +209,10 @@ DallasTemperature sensors(&oneWire);
 DeviceAddress thermometer0;
 #endif
 
+#ifdef TX433PIN
+ESPiLight rf433(TX433PIN);
+#endif
+
 struct SegmentRGB {
     int redValue;
     int greenValue;
@@ -209,6 +229,7 @@ int segmentMessageIndex = -1;
 void sendMessage(String messageString) {
     Serial.println(messageString);
     WiFiClientSecure client;
+    client.setFingerprint(messageServerFingerprint);
     if (!client.connect(messageServer, httpsPort)) {
         Serial.println("message failed");
         return;
@@ -534,21 +555,94 @@ void sendMonitoredData() {
     client.stop();
 }
 
-void requestRGBInterrupt() {
+ICACHE_RAM_ATTR void requestRGBInterrupt() {
     requestRGBButtonChanged++;
 }
 
-void onBoardButtonChangeInterrupt() {
+ICACHE_RAM_ATTR void onBoardButtonChangeInterrupt() {
     onBoardButtonChanged++;
 }
 
-void externalButton1ChangeInterrupt() {
+ICACHE_RAM_ATTR void externalButton1ChangeInterrupt() {
     externalButton1Changed++;
 }
 
-void externalButton2ChangeInterrupt() {
+ICACHE_RAM_ATTR void externalButton2ChangeInterrupt() {
     externalButton2Changed++;
 }
+
+String urlEncode(String inputString) {
+    String encodedString = "";
+    char currentChar;
+    char msv;
+    char lsv;
+    for (int index = 0; index < inputString.length(); index++) {
+        currentChar = inputString.charAt(index);
+        if (currentChar == ' ') {
+            encodedString += '+';
+        } else if (isalnum(currentChar)) {
+            encodedString += currentChar;
+        } else {
+            if ((currentChar & 0xf) > 9) {
+                lsv = (currentChar & 0xf) - 10 + 'A';
+            } else {
+                lsv = (currentChar & 0xf) + '0';
+            }
+            currentChar = (currentChar >> 4) & 0xf;
+            if (currentChar > 9) {
+                msv = currentChar - 10 + 'A';
+            } else {
+                msv = currentChar + '0';
+            }
+            encodedString += '%';
+            encodedString += msv;
+            encodedString += lsv;
+        }
+    }
+    return encodedString;
+}
+
+#ifdef TX433PIN
+String rf433Results = "";
+uint16_t pulsesLast[100];
+uint16_t matchCount = 0;
+uint8_t indexCurrent = 0;
+ICACHE_RAM_ATTR void rfRawCallback(const uint16_t* pulses, size_t length) {
+    for (unsigned int pulseIndex = 0; pulseIndex < length; pulseIndex++) {
+        if(indexCurrent < 100) {
+            if (matchCount == 0) {
+                pulsesLast[indexCurrent] = pulses[pulseIndex];
+            } else {
+                uint16_t pulseDiff = abs(pulsesLast[indexCurrent] - pulses[pulseIndex]);
+                if (pulseDiff > 500) {
+                    //Serial.print("pulseDiff:");
+                    //Serial.println(pulseDiff);
+                    indexCurrent = 0;
+                    matchCount = 0;
+                    pulsesLast[indexCurrent] = pulses[pulseIndex];
+                }
+            }
+        }
+        indexCurrent++;
+        if (pulses[pulseIndex] > 5100) {
+            if (matchCount == 1) {
+                unsigned int maxLength = 100*5;
+                char restultString[maxLength];
+                unsigned int resultLength = 0;
+                for (uint8_t outputIndex = 0; outputIndex < indexCurrent; outputIndex++) {
+                    Serial.print(pulsesLast[outputIndex]);
+                    Serial.print(" ");
+                    resultLength += snprintf(restultString + resultLength, maxLength - resultLength, " %u", pulsesLast[outputIndex]);
+                }
+                Serial.println();
+                rf433Results = String(restultString);
+            }
+            indexCurrent = 0;
+            matchCount++;
+        }
+    }
+}
+#endif
 
 void setup() {
     //Serial.begin(115200);
@@ -603,6 +697,7 @@ void setup() {
     Serial.println("Connected: ");
     Serial.println(ssid);
     sendMessage(startMessage);
+    sendMessage(urlencode(ESP.getResetReason()));
 #ifdef GREEN_LED_PIN
     segmentRGB[0].blueValue = 0;
     segmentRGB[0].redValue = 0;
@@ -657,9 +752,18 @@ void setup() {
     sendMessage(String(tempC) + "c");
   }
 #endif
+
+#ifdef TX433PIN
+  Serial.println("initReceiver");
+  rf433.setPulseTrainCallBack(rfRawCallback);
+  rf433.initReceiver(RX433PIN);
+#endif
 }
 
 void loop() {
+#ifdef TX433PIN
+    rf433.disableReceiver();
+#endif
     if (lastDataSentMs + dataSendDelayMs < millis()) {
         Serial.println("IP Address");
         Serial.println(WiFi.localIP());
@@ -768,6 +872,16 @@ void loop() {
 #ifdef LedDataPin
     updateLedPanel();
 #endif
+#endif
+#ifdef TX433PIN
+    if (rf433Results != "") {
+        String urlencodedString = urlencode(rf433Results);
+        rf433Results = "";
+        Serial.println(urlencodedString);
+        sendMessage(urlencodedString);
+    }
+rf433.enableReceiver();
+    rf433.loop();
 #endif
     delay(10);
     //Serial.print(".");
