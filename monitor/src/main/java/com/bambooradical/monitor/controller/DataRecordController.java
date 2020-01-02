@@ -5,9 +5,11 @@ package com.bambooradical.monitor.controller;
 
 import com.bambooradical.monitor.model.DataRecord;
 import com.bambooradical.monitor.model.EnergyRecord;
+import com.bambooradical.monitor.model.RadioData;
 import com.bambooradical.monitor.repository.DataRecordService;
 import com.bambooradical.monitor.repository.DayOfDataGcsFileStore;
 import com.bambooradical.monitor.repository.EnergyRecordService;
+import com.bambooradical.monitor.repository.RadioDataService;
 import com.bambooradical.monitor.repository.MagnitudeRecordService;
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +44,8 @@ public class DataRecordController {
     DataRecordService dataRecordService;
     @Autowired
     EnergyRecordService energyRecordService;
+    @Autowired
+    RadioDataService radioDataService;
     @Autowired
     MagnitudeRecordService magnitudeRecordService;
 
@@ -114,6 +118,21 @@ public class DataRecordController {
 //        energyRecordRepository.save(energyRecord);
         energyRecordService.save(energyRecord);
         return energyRecordService.findAll();
+    }
+
+    @RequestMapping("/addRadioData")
+    public List<RadioData> addRadioData(
+            @RequestParam(value = "location", required = true) String location,
+            @RequestParam(value = "dataValues", required = true) int[][] dataValuesArray
+    ) {
+        final List<RadioData> radioDataRecords = new ArrayList<RadioData>();
+        for (int[] dataValues : dataValuesArray) {
+            final RadioData radioData = new RadioData(location, dataValues, new Date());
+    //        radioDataRepository.save(radioData);
+            radioDataService.save(radioData);
+            radioDataRecords.add(radioData);
+        }
+        return radioData;
     }
 
     /*    @RequestMapping("/addList")
@@ -201,6 +220,11 @@ public class DataRecordController {
     @RequestMapping("/listEnergy")
     public List<EnergyRecord> listEnergyRecords() {
         return energyRecordService.findAll();
+    }
+
+    @RequestMapping("/listRadioData")
+    public List<RadioData> listRadioData() {
+        return radioDataService.findAll();
     }
 
     private String getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {

@@ -2,3 +2,5 @@
 .clang_complete
 .gcc-flags.json
 /monitor/target/
+firmware/.pio
+firmware/.vscode
