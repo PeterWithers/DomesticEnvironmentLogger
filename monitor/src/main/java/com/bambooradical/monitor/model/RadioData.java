@@ -23,14 +23,15 @@ public class RadioData implements Serializable {
     @javax.persistence.Id
     private Long id;
     private String location;
-    private int[] dataValues;
+    private String dataValues;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Temporal(javax.persistence.TemporalType.TIMESTAMP)
     private Date recordDate;
 
-    public EnergyRecord() {
+    public RadioData() {
     }
 
-    public EnergyRecord(String location, int[] dataValues, Date recordDate) {
+    public RadioData(String location, String dataValues, Date recordDate) {
         this.location = location;
         this.dataValues = dataValues;
         this.recordDate = recordDate;
@@ -52,11 +53,11 @@ public class RadioData implements Serializable {
         this.location = location;
     }
 
-    public int[] getDataValues() {
+    public String getDataValues() {
         return dataValues;
     }
 
-    public void setDataValues(int[] dataValues) {
+    public void setDataValues(String dataValues) {
         this.dataValues = dataValues;
     }
 

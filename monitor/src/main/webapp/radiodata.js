@@ -9,12 +9,12 @@ $(document).ready(function () {
     $("<table id=\"radioDataTable\"/>").appendTo("body");
     $("<tr id=\"headerRow\"><td id=\"emptyCell\"/></tr>").appendTo("#radioDataTable");
     $.getJSON("/monitor/listRadioData", function (radioDataArray) {
-        Object.keys(radioDataArray).sort().forEach(function (index, radioData) {
-            var locationId = radioData.location.replace(/ /g, "_");
-            $("<tr id=\"" + locationId + "\"><td>" + radioData.location + "</td><td>" + radioData.recordDate + "</td></tr>").appendTo("#radioDataTable");
-            for (var value in dataValues) {
-                $("<td>" + value +"</>").appendTo("#" + locationId);
-            }
+        $.each(radioDataArray, function (index, radioData) {
+            var radioDataIdex = "radioData" + index;
+            $("<tr><td>" + radioData.location + " " + radioData.recordDate + "</td></tr><tr id=\"" + radioDataIdex + "\"></tr>").appendTo("#radioDataTable");
+            $.each(radioData.dataValues.split(" "), function (splitIndex, value) {
+                $("<td>" + value + "</td>").appendTo("#" + radioDataIdex);
+            });
         });
     });
 });

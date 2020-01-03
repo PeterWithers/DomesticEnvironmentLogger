@@ -11,6 +11,7 @@ import com.bambooradical.monitor.repository.DayOfDataGcsFileStore;
 import com.bambooradical.monitor.repository.EnergyRecordService;
 import com.bambooradical.monitor.repository.RadioDataService;
 import com.bambooradical.monitor.repository.MagnitudeRecordService;
+import com.bambooradical.monitor.repository.RadioDataRepository;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -45,6 +46,8 @@ public class DataRecordController {
     @Autowired
     EnergyRecordService energyRecordService;
     @Autowired
+//    RadioDataRepository radioDataRepository;
+//    @Autowired
     RadioDataService radioDataService;
     @Autowired
     MagnitudeRecordService magnitudeRecordService;
@@ -123,16 +126,16 @@ public class DataRecordController {
     @RequestMapping("/addRadioData")
     public List<RadioData> addRadioData(
             @RequestParam(value = "location", required = true) String location,
-            @RequestParam(value = "dataValues", required = true) int[][] dataValuesArray
+            @RequestParam(value = "dataValues", required = true) String[] dataValuesArray
     ) {
-        final List<RadioData> radioDataRecords = new ArrayList<RadioData>();
-        for (int[] dataValues : dataValuesArray) {
+        final List<RadioData> radioDataRecords = new ArrayList<>();
+        for (String dataValues : dataValuesArray) {
             final RadioData radioData = new RadioData(location, dataValues, new Date());
-    //        radioDataRepository.save(radioData);
+//            radioDataRepository.save(radioData);
             radioDataService.save(radioData);
             radioDataRecords.add(radioData);
         }
-        return radioData;
+        return radioDataRecords;
     }
 
     /*    @RequestMapping("/addList")
@@ -225,6 +228,7 @@ public class DataRecordController {
     @RequestMapping("/listRadioData")
     public List<RadioData> listRadioData() {
         return radioDataService.findAll();
+//        return radioDataRepository.findAll();
     }
 
     private String getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {

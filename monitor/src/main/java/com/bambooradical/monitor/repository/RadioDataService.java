@@ -86,15 +86,15 @@ public class RadioDataService {
         FullEntity entity = FullEntity.newBuilder(key)
                 .set("Location", radioData.getLocation())
                 .set("DataValues", radioData.getDataValues())
-                .set("RecordDate", Timestamp.of(RadioData.getRecordDate()))
+                .set("RecordDate", Timestamp.of(radioData.getRecordDate()))
                 .build();
-	clearEntry(RadioData.getLocation());
+	clearEntry(radioData.getLocation());
         return datastore.put(entity);
 
     }
 
     public void delete(RadioData radioData) {
-        Key key = keyFactory.newKey(RadioData.getId());
+        Key key = keyFactory.newKey(radioData.getId());
         datastore.delete(key);
     }
 
@@ -113,12 +113,12 @@ public class RadioDataService {
         QueryResults<Entity> results = datastore.run(query);
         while (results.hasNext()) {
             Entity currentEntity = results.next();
-            resultList.add(new radioData(
+            resultList.add(new RadioData(
                     currentEntity.getString("Location"),
-                    currentEntity.getDouble("DataValues"),
+                    currentEntity.getString("DataValues"),
                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
         }
-        resultList.sort((RadioData o1, radioData o2) -> o1.getRecordDate().compareTo(o2.getRecordDate()));
+        resultList.sort((RadioData o1, RadioData o2) -> o1.getRecordDate().compareTo(o2.getRecordDate()));
 	addEntry(location, resultList);
         return resultList;
 	    }
