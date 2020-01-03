@@ -14,6 +14,7 @@ RUN sed -i 's|</exclusions>|</exclusions>-->|g' /DomesticEnvironmentLogger/monit
 RUN sed -i 's|>1.8<|>1.9<|g' /DomesticEnvironmentLogger/monitor/pom.xml
 RUN sed -i 's|@Autowired|//@Autowired|g' /DomesticEnvironmentLogger/monitor/src/main/java/com/bambooradical/monitor/repository/*.java
 RUN sed -i 's|@PostConstruct|//@PostConstruct|g' /DomesticEnvironmentLogger/monitor/src/main/java/com/bambooradical/monitor/repository/*.java
+RUN sed -i 's|@Bean|//@Bean|g' /DomesticEnvironmentLogger/monitor/src/main/java/com/bambooradical/monitor/Application.java
 RUN rm /DomesticEnvironmentLogger/monitor/src/main/resources/application.properties
 
 RUN cd /DomesticEnvironmentLogger/monitor/ \
