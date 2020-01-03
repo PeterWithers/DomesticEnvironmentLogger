@@ -31,11 +31,13 @@ import java.util.List;
 import java.util.Map;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @since 6 July 2019 4:23:27 PM (creation date)
  * @author : Peter Withers <peter-gthb@bambooradical.com>
  */
+@Service
 public class DayOfDataGcsFileStore {
 
     @Autowired

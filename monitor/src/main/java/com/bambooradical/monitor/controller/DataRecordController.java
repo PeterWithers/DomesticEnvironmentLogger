@@ -45,15 +45,16 @@ public class DataRecordController {
     DataRecordService dataRecordService;
     @Autowired
     EnergyRecordService energyRecordService;
-    @Autowired
-//    RadioDataRepository radioDataRepository;
 //    @Autowired
+//    RadioDataRepository radioDataRepository;
+    @Autowired
     RadioDataService radioDataService;
     @Autowired
     MagnitudeRecordService magnitudeRecordService;
-
-//    private final DayOfDataFileStore dataFileStore = new DayOfDataFileStore();
-    private final DayOfDataGcsFileStore dataFileStore = new DayOfDataGcsFileStore();
+    //@Autowired
+    //DayOfDataFileStore dataFileStore;
+    @Autowired
+    DayOfDataGcsFileStore dataFileStore;
 
     @RequestMapping("/add")
     public List<DataRecord> addRecord(

@@ -7,11 +7,13 @@ import com.bambooradical.monitor.model.DailyOverview;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import org.springframework.stereotype.Service;
 
 /**
  * @since 6 July 2019 4:23:27 PM (creation date)
  * @author : Peter Withers <peter-gthb@bambooradical.com>
  */
+@Service
 public class DayOfDataFileStore {
 
     public InputStream getOverviewStream() {
