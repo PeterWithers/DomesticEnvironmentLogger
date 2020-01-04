@@ -63,18 +63,19 @@ public class RadioDataService {
         for (List<RadioData> records : radioDataLocationMap.values()) {
             resultList.addAll(records);
         }
-/*        Query<Entity> query = Query.newEntityQueryBuilder()
-                .setKind("RadioData")
-                .build();
-        QueryResults<Entity> results = datastore.run(query);
-        while (results.hasNext()) {
-            Entity currentEntity = results.next();
-            resultList.add(new RadioData(
-                    currentEntity.getString("Location"),
-                    currentEntity.getDouble("DataValues"),
-                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
+        if (resultList.isEmpty()) {
+            Query<Entity> query = Query.newEntityQueryBuilder()
+                    .setKind("RadioData")
+                    .build();
+            QueryResults<Entity> results = datastore.run(query);
+            while (results.hasNext()) {
+                Entity currentEntity = results.next();
+                resultList.add(new RadioData(
+                        currentEntity.getString("Location"),
+                        currentEntity.getString("DataValues"),
+                        new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
+            }
         }
-	*/
         return resultList;
     }
 
@@ -110,7 +111,7 @@ public class RadioDataService {
 
     public List<RadioData> findByLocationOrderByRecordDateAsc(String location, final Pageable pageable) {
 	    List<RadioData> records = radioDataLocationMap.get(location);
-	    if(records != null){
+	    if (records != null){
 		    return records;
 	    } else {
         // todo: handle Pageable values
@@ -129,7 +130,7 @@ public class RadioDataService {
                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L)));
         }
         resultList.sort((RadioData o1, RadioData o2) -> o1.getRecordDate().compareTo(o2.getRecordDate()));
-	addEntry(location, resultList);
+	    addEntry(location, resultList);
         return resultList;
 	    }
     }
