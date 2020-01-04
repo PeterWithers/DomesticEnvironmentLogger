@@ -122,7 +122,7 @@ public class KnmiDataController {
         bufferedReader.close();
 //        response.append("<br/><a href=\"/monitor/clear\">clear cache</a><br/>");
         response.append("<br/><a href=\"/monitor/energy\">energy viewer</a><br/>");
-        dataRecordService.clearCachedData(); // todo: it is better to update rather than clear this
+        //dataRecordService.clearCachedData(); // todo: it is better to update rather than clear this
         return response.toString();
     }
 }
