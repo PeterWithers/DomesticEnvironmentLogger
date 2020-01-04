@@ -23,6 +23,12 @@ RUN sed -i 's|RadioDataService|RadioDataRepository|g' /DomesticEnvironmentLogger
 RUN sed -i 's|MagnitudeRecordService|MagnitudeRecordRepository|g' /DomesticEnvironmentLogger/monitor/src/main/java/com/bambooradical/monitor/controller/DataRecordController.java
 RUN sed -i 's|DayOfDataGcsFileStore|DayOfDataFileStore|g' /DomesticEnvironmentLogger/monitor/src/main/java/com/bambooradical/monitor/controller/DataRecordController.java
 
+RUN mv /DomesticEnvironmentLogger/monitor/src/main/webapp /DomesticEnvironmentLogger/monitor/src/main/resources/static
+
+RUN wget http://.../js/jquery.min.js -P /DomesticEnvironmentLogger/monitor/src/main/resources/static/js/
+RUN wget http://.../js/moment.js -P /DomesticEnvironmentLogger/monitor/src/main/resources/static/js/
+RUN wget http://.../js/Chart.min.js -P /DomesticEnvironmentLogger/monitor/src/main/resources/static/js/
+
 RUN rm /DomesticEnvironmentLogger/monitor/src/main/resources/application.properties
 
 RUN cd /DomesticEnvironmentLogger/monitor/ \
@@ -31,6 +37,7 @@ RUN cd /DomesticEnvironmentLogger/monitor/ \
 RUN cd /DomesticEnvironmentLogger/monitor/ \
     && mvn install
 
+EXPOSE 8080
 #WORKDIR /target
 VOLUME ["/data"]
 CMD java -jar /DomesticEnvironmentLogger/monitor/target/monitor-1.0-SNAPSHOT.jar
