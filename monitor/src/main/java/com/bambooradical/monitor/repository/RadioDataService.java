@@ -42,16 +42,27 @@ public class RadioDataService {
         keyFactory = datastore.newKeyFactory().setKind("RadioData");
     }
 
+    private synchronized void addEntry(RadioData radioData){
+        List<RadioData> records = radioDataLocationMap.get(radioData.getLocation());
+        if (records != null) {
+            // only append, if null then require a query to populate the full list first
+            records.add(radioData);
+        }
+    }
+
     private synchronized void addEntry(String location, List<RadioData> records){
         radioDataLocationMap.put(location, records);
     }
 
-    private synchronized void clearEntry(String location){
+    /*private synchronized void clearEntry(String location){
         radioDataLocationMap.remove(location);
-    }
+    }*/
 
     public List<RadioData> findAll() {
         List<RadioData> resultList = new ArrayList<>();
+        for (List<RadioData> records : radioDataLocationMap.values()) {
+            resultList.addAll(records);
+        }
 /*        Query<Entity> query = Query.newEntityQueryBuilder()
                 .setKind("RadioData")
                 .build();
@@ -88,9 +99,8 @@ public class RadioDataService {
                 .set("DataValues", radioData.getDataValues())
                 .set("RecordDate", Timestamp.of(radioData.getRecordDate()))
                 .build();
-	clearEntry(radioData.getLocation());
+	    addEntry(radioData);
         return datastore.put(entity);
-
     }
 
     public void delete(RadioData radioData) {
