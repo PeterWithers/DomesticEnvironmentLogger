@@ -11,10 +11,18 @@ $(document).ready(function () {
     $.getJSON("/monitor/listRadioData", function (radioDataArray) {
         $.each(radioDataArray, function (index, radioData) {
             var radioDataIdex = "radioData" + index;
-            $("<tr><td>" + radioData.location + " " + radioData.recordDate + "</td></tr><tr id=\"" + radioDataIdex + "\"></tr>").appendTo("#radioDataTable");
+            $("<tr><td>" + /*radioData.location + " " +*/ radioData.recordDate + "</td></tr><tr><td id=\"" + radioDataIdex + "\"/></tr>").appendTo("#radioDataTable");
+            var pathAttribute = "M0 60";
+            var totalLength = 0;
             $.each(radioData.dataValues.split(" "), function (splitIndex, value) {
-                $("<td>" + value + "</td>").appendTo("#" + radioDataIdex);
+                totalLength += (value/100);
+                pathAttribute += " V " + ((splitIndex % 2 == 0)? "0" : "60");
+                pathAttribute += " h " + (value/100);
             });
+            var pathElement = $(document.createElementNS('http://www.w3.org/2000/svg','path')).attr({d:pathAttribute,stroke:'green','stroke-width':1,fill:'none'});
+            var svgElement = $(document.createElementNS('http://www.w3.org/2000/svg','svg')).attr({height:60,width:totalLength});
+            pathElement.appendTo(svgElement);
+            svgElement.appendTo("#" + radioDataIdex);
         });
     });
 });

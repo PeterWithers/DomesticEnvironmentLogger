@@ -835,6 +835,8 @@ public class DataRecordController {
                 + "<br/>"
                 + "<br/><a href=\"/spectrogram.html\">spectrogram</a>"
                 + "<br/>"
+                + "<br/><a href=\"/radiodata.html\">radio</a>"
+                + "<br/>"
                 + "<a href=\"energy\">energy graph</a>"
                 + "<br/>"
                 + "<a href=\"energy?add=true\">add energy</a>"
