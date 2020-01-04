@@ -343,6 +343,36 @@ void requestRGB(String locationString, bool refresh) {
     }
 }
 
+void sendRadioData(String locationString, String dataValues) {
+    WiFiClient client;
+    if (!client.connect(reportingServer, httpPort)) {
+        Serial.println("connection failed requestRGB");
+        sendMessage("connection%20failed%20requestRGB");
+        return;
+    }
+    String connectionString = "GET ";
+    connectionString += "/monitor/addRadioData?location=";
+    connectionString += locationString;
+    connectionString += "&dataValues=";
+    connectionString += dataValues;
+    connectionString += " HTTP/1.1\r\n";
+    connectionString += "Host: ";
+    connectionString += reportingServer;
+    connectionString += "\r\n";
+    connectionString += "Connection: close\r\n\r\n";
+    Serial.println(connectionString);
+    client.print(connectionString);
+    //unsigned long timeout = millis();
+    while (client.connected() || client.available())
+    {
+        if (client.available()) {
+            String line = client.readStringUntil('\r');
+            Serial.println(line);
+        }
+        client.stop();
+    }
+}
+
 void serialiseTemperatureData(int sensorIndex, String &url, String &telemetryString, String &errorString) {
     sensors_event_t event;
     int sensorRetries = 3;
@@ -632,7 +662,7 @@ ICACHE_RAM_ATTR void rfRawCallback(const uint16_t* pulses, size_t length) {
                 for (uint8_t outputIndex = 0; outputIndex < indexCurrent; outputIndex++) {
                     Serial.print(pulsesLast[outputIndex]);
                     Serial.print(" ");
-                    resultLength += snprintf(restultString + resultLength, maxLength - resultLength, " %u", pulsesLast[outputIndex]);
+                    resultLength += snprintf(restultString + resultLength, maxLength - resultLength, "%u+", pulsesLast[outputIndex]);
                 }
                 Serial.println();
                 rf433Results = String(restultString);
@@ -876,9 +906,10 @@ void loop() {
 #ifdef TX433PIN
     if (rf433Results != "") {
         String urlencodedString = urlEncode(rf433Results);
+        sendRadioData(locationString, rf433Results);
         rf433Results = "";
         Serial.println(urlencodedString);
-        sendMessage(urlencodedString);
+        //sendMessage(urlencodedString);
     }
 rf433.enableReceiver();
     rf433.loop();
