@@ -71,7 +71,7 @@ String locationString = "second%20top%20floorA";
 #define ON_BOARD_BUTTON    14
 */
 
-//
+/*
 String locationString = "front%20door4";
 #define VCC_VOLTAGE_MONITOR
 #define POWER_DHT_VIA_GPIO
@@ -80,7 +80,7 @@ String locationString = "front%20door4";
 #define ON_BOARD_BUTTON     14
 #define RX433PIN            13 // D7
 #define TX433PIN            -1 
-//
+/*
 
 /*
 // String locationString = "rearwall%20top%20floor";
@@ -133,16 +133,16 @@ String locationString = "frontwall%20top%20floor";
 //#define EXTERNAL_BUTTON1    4
 // D6
 // #define EXTERNAL_BUTTON2    12
-/*
+//
 String locationString = "aquariumA";
 #define VCC_VOLTAGE_MONITOR
 #define DHTPIN              2
 //#define BUTTONPIN           5
-//#define GREEN_LED_PIN       13
-//#define RED_LED_PIN         12
-//#define BLUE_LED_PIN        14
+#define GREEN_LED_PIN       13
+#define RED_LED_PIN         12
+#define BLUE_LED_PIN        14
 #define DS18b20_PIN         0
-+*/
+//
 
 /*
 String locationString = "aquariumB1";
@@ -228,6 +228,9 @@ int segmentMessageIndex = -1;
 
 void sendMessage(String messageString) {
     Serial.println(messageString);
+    //uint32_t freeHeap = ESP.getFreeHeap();
+    //Serial.println("Heap:");
+    //Serial.println(freeHeap);
     WiFiClientSecure client;
     client.setFingerprint(messageServerFingerprint);
     if (!client.connect(messageServer, httpsPort)) {
@@ -247,6 +250,9 @@ void sendMessage(String messageString) {
     connectionString += "Connection: close\r\n\r\n";
     Serial.println(connectionString);
     client.print(connectionString);
+    //freeHeap = ESP.getFreeHeap();
+    //Serial.println("Heap:");
+    //Serial.println(freeHeap);
     while (client.connected() || client.available())
     {
       if (client.available())
@@ -259,6 +265,9 @@ void sendMessage(String messageString) {
 }
 
 void requestRGB(String locationString, bool refresh) {
+    //uint32_t freeHeap = ESP.getFreeHeap();
+    //Serial.println("Heap:");
+    //Serial.println(freeHeap);
     WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
         Serial.println("connection failed requestRGB");
@@ -344,6 +353,9 @@ void requestRGB(String locationString, bool refresh) {
 }
 
 void sendRadioData(String locationString, String dataValues) {
+    //uint32_t freeHeap = ESP.getFreeHeap();
+    //Serial.println("Heap:");
+    //Serial.println(freeHeap);
     WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
         Serial.println("connection failed requestRGB");
@@ -475,6 +487,9 @@ void sendMonitoredData() {
     String url = "/monitor/add?location=";
     url += locationString;
     String telemetryString = "";
+    //uint32_t freeHeap = ESP.getFreeHeap();
+    //Serial.println("Heap:");
+    //Serial.println(freeHeap);
 #ifdef DHTPIN
 #ifdef DHTPOWERPIN
     pinMode(DHTPOWERPIN, OUTPUT);
@@ -554,6 +569,9 @@ void sendMonitoredData() {
     telemetryString += "v";
 
     Serial.println(telemetryString);
+    //freeHeap = ESP.getFreeHeap();
+    //Serial.println("Heap:");
+    //Serial.println(freeHeap);
     WiFiClient client;
     if (!client.connect(reportingServer, httpPort)) {
         Serial.println("connection failed");
@@ -634,6 +652,16 @@ String urlEncode(String inputString) {
 
 #ifdef TX433PIN
 String rf433Results = "";
+/*
+ICACHE_RAM_ATTR void rf433Callback(const String &protocol, const String &message, int status, size_t repeats, const String &deviceID) {
+    if (status == VALID) {
+        rf433Results += protocol + "_" + message;
+        uint32_t freeHeap = ESP.getFreeHeap();
+        Serial.println("Heap:");
+        Serial.println(freeHeap);
+    }
+}
+*/
 uint16_t pulsesLast[100];
 uint16_t matchCount = 0;
 uint8_t indexCurrent = 0;
@@ -664,6 +692,7 @@ ICACHE_RAM_ATTR void rfRawCallback(const uint16_t* pulses, size_t length) {
                     Serial.print(" ");
                     resultLength += snprintf(restultString + resultLength, maxLength - resultLength, "%u+", pulsesLast[outputIndex]);
                 }
+                //resultLength += snprintf(restultString + resultLength - 1, maxLength - resultLength - 1, ",");
                 Serial.println();
                 rf433Results = String(restultString);
             }
@@ -784,7 +813,11 @@ void setup() {
 #endif
 
 #ifdef TX433PIN
+  //uint32_t freeHeap = ESP.getFreeHeap();
+  //Serial.println("Heap:");
+  //Serial.println(freeHeap);
   Serial.println("initReceiver");
+  //rf433.setCallback(rf433Callback);  
   rf433.setPulseTrainCallBack(rfRawCallback);
   rf433.initReceiver(RX433PIN);
 #endif
