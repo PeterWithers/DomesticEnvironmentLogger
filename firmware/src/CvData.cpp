@@ -13,7 +13,7 @@
 #include <string.h>
 #include "CvData.h"
 
-int CvData::getCvData() {
+void CvData::getCvData() {
 }
 
 void CvData::postCvData() {

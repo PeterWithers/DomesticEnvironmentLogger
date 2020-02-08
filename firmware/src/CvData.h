@@ -20,7 +20,7 @@
 
 class CvData {
 public:
-    int getCvData();
+    void getCvData();
     void postCvData();
 private:
 };

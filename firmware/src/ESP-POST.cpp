@@ -9,7 +9,7 @@
  * Author : Peter Withers <peter-gthb@bambooradical.com>
  */
 
-#include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
 #include <WiFiClientSecure.h>
 #include <WiFiUdp.h>
 #include <Adafruit_Sensor.h>
@@ -20,8 +20,10 @@
 #include <DallasTemperature.h>
 #include <ESPiLight.h>
 
-const char* ssid = "";
-const char* password = "";
+const char* ssid1 = "";
+const char* password1 = "";
+const char* ssid2 = "";
+const char* password2 = "";
 const char* reportingServer = "";
 const char* messageServer = "";
 const char messageServerFingerprint[] PROGMEM = "";
@@ -36,6 +38,8 @@ const int httpsPort = 443;
 // UDP is used to broadcast button events
 WiFiUDP udp;
 unsigned int localUdpPort = 2233;
+
+ESP8266WiFiMulti wiFiMulti;
 
 const unsigned long dataSendDelayMs = 20 * 60 * 1000;
 const unsigned long buttonDataSendDelayMs = 30 * 1000;
@@ -80,7 +84,7 @@ String locationString = "front%20door4";
 #define ON_BOARD_BUTTON     14
 #define RX433PIN            13 // D7
 #define TX433PIN            -1 
-/*
+*/
 
 /*
 // String locationString = "rearwall%20top%20floor";
@@ -137,7 +141,7 @@ String locationString = "frontwall%20top%20floor";
 String locationString = "aquariumA";
 #define VCC_VOLTAGE_MONITOR
 #define DHTPIN              2
-//#define BUTTONPIN           5
+#define BUTTONPIN           5
 #define GREEN_LED_PIN       13
 #define RED_LED_PIN         12
 #define BLUE_LED_PIN        14
@@ -304,7 +308,7 @@ void requestRGB(String locationString, bool refresh) {
         Serial.println(line);
         if (line[15] == ';') {
             if (line[7] == ':' || line[7] == 'T') {
-                for (int substringIndex = 0; substringIndex < line.length() && segmentIndex < SEGMENTSIZE; substringIndex += 15) {
+                for (unsigned int substringIndex = 0; substringIndex < line.length() && segmentIndex < SEGMENTSIZE; substringIndex += 15) {
                     if (line[substringIndex + 15] == ';') {
                         if (line[substringIndex + 7] == ':' || line[substringIndex + 7] == 'T') {
                             String redString = line.substring(substringIndex + 1, substringIndex + 3);
@@ -624,7 +628,7 @@ String urlEncode(String inputString) {
     char currentChar;
     char msv;
     char lsv;
-    for (int index = 0; index < inputString.length(); index++) {
+    for (unsigned int index = 0; index < inputString.length(); index++) {
         currentChar = inputString.charAt(index);
         if (currentChar == ' ') {
             encodedString += '+';
@@ -747,14 +751,15 @@ void setup() {
     pinMode(BUTTONPIN, INPUT_PULLUP);
     attachInterrupt(BUTTONPIN, requestRGBInterrupt, CHANGE);
 #endif
-    WiFi.mode(WIFI_STA);
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
+    //WiFi.mode(WIFI_STA);
+    wiFiMulti.addAP(ssid1, password1);
+    wiFiMulti.addAP(ssid2, password2);
+    while (wiFiMulti.run() != WL_CONNECTED) {
         delay(500);
         Serial.println(".");
     }
-    Serial.println("Connected: ");
-    Serial.println(ssid);
+    //Serial.println("Connected: ");
+    //Serial.println(ssid);
     sendMessage(startMessage);
     sendMessage(urlEncode(ESP.getResetReason()));
 #ifdef GREEN_LED_PIN
@@ -824,6 +829,10 @@ void setup() {
 }
 
 void loop() {
+    while (wiFiMulti.run() != WL_CONNECTED) {
+        delay(500);
+        Serial.println(".");
+    }
 #ifdef TX433PIN
     rf433.disableReceiver();
 #endif
