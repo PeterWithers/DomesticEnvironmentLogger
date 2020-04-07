@@ -94,22 +94,22 @@ public class DataRecordService {
         if (humidity != null) {
             builder.set("Humidity", humidity);
         }
-	if (dataRecord.getTvoc() != null) {
+        if (dataRecord.getTvoc() != null) {
             builder.set("tvoc", dataRecord.getTvoc());
         }
         if (dataRecord.getCo2() != null) {
             builder.set("co2", dataRecord.getCo2());
         }
-        if (dataRecord.getDustAvg()!= null) {
+        if (dataRecord.getDustAvg() != null) {
             builder.set("dustAvg", dataRecord.getDustAvg());
         }
-        if (dataRecord.getDustQ1()!= null) {
+        if (dataRecord.getDustQ1() != null) {
             builder.set("dustQ1", dataRecord.getDustQ1());
         }
-        if (dataRecord.getDustQ2()!= null) {
+        if (dataRecord.getDustQ2() != null) {
             builder.set("dustQ2", dataRecord.getDustQ2());
         }
-        if (dataRecord.getDustQ3()!= null) {
+        if (dataRecord.getDustQ3() != null) {
             builder.set("dustQ3", dataRecord.getDustQ3());
         }
         if (dataRecord.getPa() != null) {
@@ -119,10 +119,14 @@ public class DataRecordService {
         if (temperature != null) {
             builder.set("Temperature", temperature);
         }
+        if (dataRecord.getError() != null) {
+            builder.set("Error", dataRecord.getError());
+        }
+        if (dataRecord.getVoltage() != null) {
+            builder.set("Voltage", dataRecord.getVoltage());
+        }
         FullEntity entity = builder
-                .set("Error", dataRecord.getError())
                 .set("Location", dataRecord.getLocation())
-                .set("Voltage", dataRecord.getVoltage())
                 .set("RecordDate", Timestamp.of(dataRecord.getRecordDate()))
                 .build();
         datastore.put(entity);
