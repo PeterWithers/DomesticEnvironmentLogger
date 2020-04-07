@@ -100,6 +100,18 @@ public class DataRecordService {
         if (dataRecord.getCo2() != null) {
             builder.set("co2", dataRecord.getCo2());
         }
+        if (dataRecord.getDustAvg()!= null) {
+            builder.set("dustAvg", dataRecord.getDustAvg());
+        }
+        if (dataRecord.getDustQ1()!= null) {
+            builder.set("dustQ1", dataRecord.getDustQ1());
+        }
+        if (dataRecord.getDustQ2()!= null) {
+            builder.set("dustQ2", dataRecord.getDustQ2());
+        }
+        if (dataRecord.getDustQ3()!= null) {
+            builder.set("dustQ3", dataRecord.getDustQ3());
+        }
         if (dataRecord.getPa() != null) {
             builder.set("pa", dataRecord.getPa());
         }

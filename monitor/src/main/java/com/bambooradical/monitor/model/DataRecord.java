@@ -25,6 +25,10 @@ public class DataRecord implements Serializable {
     private Float humidity;
     private Integer pa;
     private Integer tvoc;
+    private Integer dustAvg;
+    private Float dustQ1;
+    private Float dustQ2;
+    private Float dustQ3;
     private Integer co2;
     private Float voltage;
     private String location;
@@ -35,10 +39,14 @@ public class DataRecord implements Serializable {
     public DataRecord() {
     }
 
-    public DataRecord(Float temperature, Float humidity, Integer tvoc, Integer co2, Integer pa, Float voltage, String location, String error, Date recordDate) {
+    public DataRecord(Float temperature, Float humidity, Integer tvoc, Integer co2, Integer dustAvg, Float dustQ1, Float dustQ2, Float dustQ3, Integer pa, Float voltage, String location, String error, Date recordDate) {
         this.temperature = temperature;
         this.humidity = humidity;
-	this.tvoc = tvoc;
+        this.tvoc = tvoc;
+        this.dustAvg = dustAvg;
+        this.dustQ1 = dustQ1;
+        this.dustQ2 = dustQ2;
+        this.dustQ3 = dustQ3;
         this.co2 = co2;
         this.pa = pa;
         this.voltage = voltage;
@@ -49,8 +57,8 @@ public class DataRecord implements Serializable {
 
     @Override
     public String toString() {
-	return String.format("DataRecord[id=%d, temperature=%.2f, humidity=%.2f, tvoc=%d, co2=%d, pa=%d, voltage=%.2f, location='%s', error='%s', date='%s']", id,
-                temperature, humidity, tvoc, co2, pa, voltage, location, error, recordDate);
+        return String.format("DataRecord[id=%d, temperature=%.2f, humidity=%.2f, tvoc=%d, co2=%d, dustAvg=%d, dustQ1=%.2f, dustQ2=%.2f, dustQ3=%.2f, pa=%d, voltage=%.2f, location='%s', error='%s', date='%s']", id,
+                temperature, humidity, tvoc, co2, dustAvg, dustQ1, dustQ2, dustQ3, pa, voltage, location, error, recordDate);
     }
 
     public Long getId() {
@@ -99,6 +107,22 @@ public class DataRecord implements Serializable {
 
     public void setCo2(Integer co2) {
         this.co2 = co2;
+    }
+
+    public Integer getDustAvg() {
+        return dustAvg;
+    }
+
+    public Float getDustQ1() {
+        return dustQ1;
+    }
+
+    public Float getDustQ2() {
+        return dustQ2;
+    }
+
+    public Float getDustQ3() {
+        return dustQ3;
     }
 
     public Float getVoltage() {

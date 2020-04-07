@@ -67,6 +67,10 @@ public class DataRecordController {
             @RequestParam(value = "co2Min", required = false) Integer co2Min,
             @RequestParam(value = "co2Avg", required = false) Integer co2Avg,
             @RequestParam(value = "co2Max", required = false) Integer co2Max,
+            @RequestParam(value = "dustAvg", required = false) Integer dustAvg,
+            @RequestParam(value = "dustQ1", required = false) Float dustQ1,
+            @RequestParam(value = "dustQ2", required = false) Float dustQ2,
+            @RequestParam(value = "dustQ3", required = false) Float dustQ3,
             @RequestParam(value = "paMin", required = false) Integer paMin,
             @RequestParam(value = "paAvg", required = false) Integer paAvg,
             @RequestParam(value = "paMax", required = false) Integer paMax,
@@ -78,7 +82,7 @@ public class DataRecordController {
         List<DataRecord> returnRecords = new ArrayList<>();
         if (temperature != null) {
             for (int index = 0; index < temperature.length; index++) {
-                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, null, null, null, voltage, location + returnRecords.size(), error, new Date());
+                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, null, null, null, null, null, null, null, voltage, location + returnRecords.size(), error, new Date());
 //                dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
@@ -86,25 +90,31 @@ public class DataRecordController {
         }
         if (humidity != null) {
             for (int index = returnRecords.size(); index < humidity.length; index++) {
-                final DataRecord dataRecord = new DataRecord(null, humidity[index], null, null, null, voltage, location + returnRecords.size(), error, new Date());
+                final DataRecord dataRecord = new DataRecord(null, humidity[index], null, null, null, null, null, null, null, voltage, location + returnRecords.size(), error, new Date());
 //                dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
             }
         }
 	if (tvocMin != null) {
-            final DataRecord dataMinRecord = new DataRecord(null, null, tvocMin, co2Min, paMin, null, location + "Min", error, new Date());
+            final DataRecord dataMinRecord = new DataRecord(null, null, tvocMin, co2Min, null, null, null, null, paMin, null, location + "Min", error, new Date());
 //                dataRecordRepository.save(dataRecord);
             dataRecordService.save(dataMinRecord);
             returnRecords.add(dataMinRecord);
-            final DataRecord dataAvgRecord = new DataRecord(null, null, tvocAvg, co2Avg, paAvg, null, location + "Avg", error, new Date());
+            final DataRecord dataAvgRecord = new DataRecord(null, null, tvocAvg, co2Avg, null, null, null, null, paAvg, null, location + "Avg", error, new Date());
 //                dataRecordRepository.save(dataRecord);
             dataRecordService.save(dataAvgRecord);
             returnRecords.add(dataAvgRecord);
-            final DataRecord dataMaxRecord = new DataRecord(null, null, tvocMax, co2Max, paMax, null, location + "Max", error, new Date());
+            final DataRecord dataMaxRecord = new DataRecord(null, null, tvocMax, co2Max, null, null, null, null, paMax, null, location + "Max", error, new Date());
 //                dataRecordRepository.save(dataRecord);
             dataRecordService.save(dataMaxRecord);
             returnRecords.add(dataMaxRecord);
+        }
+	if (dustAvg != null) {
+            final DataRecord dustRecord = new DataRecord(null, null, null, null, dustAvg, dustQ1, dustQ2, dustQ3, null, null, location, error, new Date());
+//                dataRecordRepository.save(dataRecord);
+            dataRecordService.save(dustRecord);
+            returnRecords.add(dustRecord);
         }
         if (magnitudes != null && !magnitudes.isEmpty()) {
             magnitudeRecordService.save(magnitudes, maxMsError, location, new Date());
@@ -227,8 +237,8 @@ public class DataRecordController {
     }
 
     @RequestMapping("/listRadioData")
-    public List<RadioData> listRadioData() {
-        return radioDataService.findAll();
+    public List<RadioData> listRadioData(@RequestParam(value = "location", required = true) String location, @RequestParam(value = "date", required = false, defaultValue = "") String dateString) {
+        return radioDataService.findByLocationOrderByRecordDateAsc(location, null);
 //        return radioDataRepository.findAll();
     }
 

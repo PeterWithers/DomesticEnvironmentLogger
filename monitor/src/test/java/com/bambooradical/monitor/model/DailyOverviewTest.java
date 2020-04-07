@@ -91,7 +91,7 @@ public class DailyOverviewTest {
     public void testAddRecord() {
         System.out.println("addRecord");
         DailyOverview instance = new DailyOverview();
-        instance.addRecord("2016-06-06", new DataRecord(1.9F, 1F, null, null, null, null, "location", null, null));
+        instance.addRecord("2016-06-06", new DataRecord(1.9F, 1F, null, null, null, null, null, null, null, null, "location", null, null));
         instance.calculateSummaryData();
         assertEquals(true, instance.hasDate("2016-06-06"));
         assertEquals(false, instance.hasDate("2011-11-02"));
