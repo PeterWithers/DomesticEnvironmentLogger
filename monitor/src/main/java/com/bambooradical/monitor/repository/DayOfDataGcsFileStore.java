@@ -174,7 +174,7 @@ public class DayOfDataGcsFileStore {
                                     (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
 				    (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("tvoc") : null,
                                     (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("co2") : null,
-                                    (currentEntity.contains("dustAvg")) ? (int) currentEntity.getDouble("dustAvg") : null,
+                                    (currentEntity.contains("dustAvg")) ? (int) currentEntity.getLong("dustAvg") : null,
                                     (currentEntity.contains("dustQ1")) ? (float) currentEntity.getDouble("dustQ1") : null,
                                     (currentEntity.contains("dustQ2")) ? (float) currentEntity.getDouble("dustQ2") : null,
                                     (currentEntity.contains("dustQ3")) ? (float) currentEntity.getDouble("dustQ3") : null,
