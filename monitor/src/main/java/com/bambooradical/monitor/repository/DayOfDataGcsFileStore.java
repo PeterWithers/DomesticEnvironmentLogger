@@ -172,15 +172,16 @@ public class DayOfDataGcsFileStore {
                             final DataRecord dataRecord = new DataRecord(
                                     (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
                                     (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
-				    (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("tvoc") : null,
+                                    (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("tvoc") : null,
                                     (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("co2") : null,
                                     (currentEntity.contains("dustAvg")) ? (int) currentEntity.getLong("dustAvg") : null,
                                     (currentEntity.contains("dustQ1")) ? (float) currentEntity.getDouble("dustQ1") : null,
                                     (currentEntity.contains("dustQ2")) ? (float) currentEntity.getDouble("dustQ2") : null,
                                     (currentEntity.contains("dustQ3")) ? (float) currentEntity.getDouble("dustQ3") : null,
                                     (currentEntity.contains("pa")) ? (int) currentEntity.getDouble("pa") : null,
-                                    (float) currentEntity.getDouble("Voltage"), currentEntity.getString("Location"),
-                                    currentEntity.getString("Error"),
+                                    (currentEntity.contains("Voltage")) ? (float) currentEntity.getDouble("Voltage") : null,
+                                    currentEntity.getString("Location"),
+                                    (currentEntity.contains("Error")) ? currentEntity.getString("Error") : null,
                                     new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
 //                        updateRecordArrays(dataRecord);
                             dailyOverview.addRecord(dateKey, dataRecord);
