@@ -40,8 +40,13 @@ public class DataViewController {
         return "redirect:/monitor/charts";
     }
 
-    @RequestMapping("/_ah/health")
-    public ResponseEntity<String> healthCheck() {
+    @RequestMapping("/liveness_check")
+    public ResponseEntity<String> livenessCheck() {
+        return new ResponseEntity<>("ok", HttpStatus.OK);
+    }
+
+    @RequestMapping("/readiness_check")
+    public ResponseEntity<String> readinessCheck() {
         return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
