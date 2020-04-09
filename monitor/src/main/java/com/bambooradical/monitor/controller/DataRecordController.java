@@ -61,7 +61,7 @@ public class DataRecordController {
             @RequestParam(value = "temperature", required = false) Float[] temperature,
             @RequestParam(value = "humidity", required = false) Float[] humidity,
             @RequestParam(value = "voltage", required = false) Float voltage,
-	    @RequestParam(value = "tvocMin", required = false) Integer tvocMin,
+            @RequestParam(value = "tvocMin", required = false) Integer tvocMin,
             @RequestParam(value = "tvocAvg", required = false) Integer tvocAvg,
             @RequestParam(value = "tvocMax", required = false) Integer tvocMax,
             @RequestParam(value = "co2Min", required = false) Integer co2Min,
@@ -96,7 +96,7 @@ public class DataRecordController {
                 returnRecords.add(dataRecord);
             }
         }
-	if (tvocMin != null) {
+        if (tvocMin != null) {
             final DataRecord dataMinRecord = new DataRecord(null, null, tvocMin, co2Min, null, null, null, null, paMin, null, location + "Min", error, new Date());
 //                dataRecordRepository.save(dataRecord);
             dataRecordService.save(dataMinRecord);
@@ -110,7 +110,7 @@ public class DataRecordController {
             dataRecordService.save(dataMaxRecord);
             returnRecords.add(dataMaxRecord);
         }
-	if (dustAvg != null) {
+        if (dustAvg != null) {
             final DataRecord dustRecord = new DataRecord(null, null, null, null, dustAvg, dustQ1, dustQ2, dustQ3, null, null, location, error, new Date());
 //                dataRecordRepository.save(dataRecord);
             dataRecordService.save(dustRecord);
@@ -242,6 +242,11 @@ public class DataRecordController {
 //        return radioDataRepository.findAll();
     }
 
+    @RequestMapping("/_ah/health")
+    public String healthCheck() {
+        return "ok";
+    }
+
     private String getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder temperatureBuilder = new StringBuilder();
         temperatureBuilder.append("[\n");
@@ -274,6 +279,70 @@ public class DataRecordController {
         }
         humidityBuilder.append("]");
         return humidityBuilder.toString();
+    }
+    private String getDustAvgArray(final String sensorLocation, Date startDate, Date endDate) {
+        StringBuilder dustBuilder = new StringBuilder();
+        dustBuilder.append("[\n");
+        for (final DataRecord record : dataRecordService.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
+            final Integer dust = record.getDustAvg();
+            if (dust != null) {
+                dustBuilder.append("{ x: ");
+                dustBuilder.append(record.getRecordDate().getTime());
+                dustBuilder.append(", y: ");
+                dustBuilder.append(dust);
+                dustBuilder.append("},");
+            }
+        }
+        dustBuilder.append("]");
+        return dustBuilder.toString();
+    }
+    private String getDustQ1Array(final String sensorLocation, Date startDate, Date endDate) {
+        StringBuilder dustBuilder = new StringBuilder();
+        dustBuilder.append("[\n");
+        for (final DataRecord record : dataRecordService.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
+            final Float dust = record.getDustQ1();
+            if (dust != null) {
+                dustBuilder.append("{ x: ");
+                dustBuilder.append(record.getRecordDate().getTime());
+                dustBuilder.append(", y: ");
+                dustBuilder.append(dust);
+                dustBuilder.append("},");
+            }
+        }
+        dustBuilder.append("]");
+        return dustBuilder.toString();
+    }
+    private String getDustQ2Array(final String sensorLocation, Date startDate, Date endDate) {
+        StringBuilder dustBuilder = new StringBuilder();
+        dustBuilder.append("[\n");
+        for (final DataRecord record : dataRecordService.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
+            final Float dust = record.getDustQ2();
+            if (dust != null) {
+                dustBuilder.append("{ x: ");
+                dustBuilder.append(record.getRecordDate().getTime());
+                dustBuilder.append(", y: ");
+                dustBuilder.append(dust);
+                dustBuilder.append("},");
+            }
+        }
+        dustBuilder.append("]");
+        return dustBuilder.toString();
+    }
+    private String getDustQ3Array(final String sensorLocation, Date startDate, Date endDate) {
+        StringBuilder dustBuilder = new StringBuilder();
+        dustBuilder.append("[\n");
+        for (final DataRecord record : dataRecordService.findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(sensorLocation, startDate, endDate)) {
+            final Float dust = record.getDustQ3();
+            if (dust != null) {
+                dustBuilder.append("{ x: ");
+                dustBuilder.append(record.getRecordDate().getTime());
+                dustBuilder.append(", y: ");
+                dustBuilder.append(dust);
+                dustBuilder.append("},");
+            }
+        }
+        dustBuilder.append("]");
+        return dustBuilder.toString();
     }
 
     private String getVoltageArray(final String sensorLocation, Date startDate, Date endDate) {
@@ -751,6 +820,50 @@ public class DataRecordController {
                 + "            pointHoverBorderColor: \"rgba(160,200,100, 1)\","
                 + "            data: "
                 + getHumidityArray("frontwall top floor2", startDate, endDate)
+                + "        },"
+                + "{\n"
+                + "            label: 'dust avg',\n"
+                + "            backgroundColor: \"rgba(211,158,100, 0.2)\",\n"
+                + "            borderColor: \"rgba(211,158,100, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(211,158,100, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(211,158,100, 1)\","
+                + "            data: "
+                + getDustAvgArray("air_monitor_01", startDate, endDate)
+                + "        },"
+                + "{\n"
+                + "            label: 'dust Q1',\n"
+                + "            backgroundColor: \"rgba(211,138,100, 0.2)\",\n"
+                + "            borderColor: \"rgba(211,138,100, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(211,138,100, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(211,158,100, 1)\","
+                + "            data: "
+                + getDustQ1Array("air_monitor_01", startDate, endDate)
+                + "        },"
+                + "{\n"
+                + "            label: 'dust Q2',\n"
+                + "            backgroundColor: \"rgba(211,118,100, 0.2)\",\n"
+                + "            borderColor: \"rgba(211,118,100, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(211,118,100, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(211,158,100, 1)\","
+                + "            data: "
+                + getDustQ2Array("air_monitor_01", startDate, endDate)
+                + "        },"
+                + "{\n"
+                + "            label: 'dust Q3',\n"
+                + "            backgroundColor: \"rgba(211,98,100, 0.2)\",\n"
+                + "            borderColor: \"rgba(211,98,100, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(211,98,100, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(211,158,200, 1)\","
+                + "            data: "
+                + getDustQ3Array("air_monitor_01", startDate, endDate)
                 + "        }"
                 + "]\n"
                 + "    },\n"
