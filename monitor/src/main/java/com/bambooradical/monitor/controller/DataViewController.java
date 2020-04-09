@@ -16,6 +16,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -39,8 +41,8 @@ public class DataViewController {
     }
 
     @RequestMapping("/_ah/health")
-    public String healthCheck() {
-        return "ok";
+    public ResponseEntity<String> healthCheck() {
+        return new ResponseEntity<>("ok", HttpStatus.OK);
     }
 
     @RequestMapping("/monitor")
@@ -214,7 +216,7 @@ public class DataViewController {
         model.addAttribute("energyDataW3a", getGraphPointList("W3a", pageRequest, linear, startDate, endDate, waterPricePerUnit));
         model.addAttribute("energyDataW4", getGraphPointList("W4", pageRequest, linear, startDate, endDate, waterPricePerUnit));
         model.addAttribute("energyDataE3a", getGraphPointList("E3a", pageRequest, linear, startDate, endDate, electPricePerUnit));
-	model.addAttribute("energyDataE3a_d", getGraphPointList("E3a_d", pageRequest, linear, startDate, endDate, electPricePerUnit));
+        model.addAttribute("energyDataE3a_d", getGraphPointList("E3a_d", pageRequest, linear, startDate, endDate, electPricePerUnit));
         model.addAttribute("energyDataE4", getGraphPointList("E4", pageRequest, linear, startDate, endDate, electPricePerUnit));
         return "energyviewer";
     }
