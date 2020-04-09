@@ -242,11 +242,6 @@ public class DataRecordController {
 //        return radioDataRepository.findAll();
     }
 
-    @RequestMapping("/_ah/health")
-    public String healthCheck() {
-        return "ok";
-    }
-
     private String getTemperatureArray(final String sensorLocation, Date startDate, Date endDate) {
         StringBuilder temperatureBuilder = new StringBuilder();
         temperatureBuilder.append("[\n");

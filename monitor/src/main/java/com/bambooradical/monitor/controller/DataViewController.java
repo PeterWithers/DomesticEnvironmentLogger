@@ -38,6 +38,11 @@ public class DataViewController {
         return "redirect:/monitor/charts";
     }
 
+    @RequestMapping("/_ah/health")
+    public String healthCheck() {
+        return "ok";
+    }
+
     @RequestMapping("/monitor")
     public String getChart(Model model) {
         return "dataviewer";
