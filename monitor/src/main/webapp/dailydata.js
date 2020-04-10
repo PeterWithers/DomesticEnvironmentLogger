@@ -225,46 +225,48 @@ $(document).ready(function () {
     var columnLabels = [];
     $("<table id=\"buttonsTable\"/>").appendTo("body");
     $("<tr id=\"headerRow\"><td id=\"emptyCell\"/></tr>").appendTo("#buttonsTable");
-    ///monitor/
-    $.getJSON("DayOfData2020-04-07.json", function (locationData) {
-        Object.keys(locationData).sort().forEach(function (locationKey) {
-            var channelData = locationData[locationKey];
-            var locationString = channelData.location;
-            console.log(locationString);
-            var locationId = channelData.location.replace(/ /g, "_");
-            var dateX = new Date(channelData.recordDate);
-            if (typeof graphDataChannels[locationId] === 'undefined') {
-                graphDataChannels[locationId] = {
-                    "temperature": [],
-                    "humidity": [],
-                    "dustAvg": [],
-                    "dustQ1": [],
-                    "dustQ2": [],
-                    "dustQ3": [],
-                };
-                $("<tr id=\"" + locationId + "\"><td>" + locationId + "</td></tr>").appendTo("#buttonsTable");
-                $("<td id=\"temperature_" + locationId + "\">").appendTo("#" + locationId);
-                $("<td id=\"humidity_" + locationId + "\">").appendTo("#" + locationId);
-                $("<td id=\"dustAvg_" + locationId + "\">").appendTo("#" + locationId);
-                $("<td id=\"dustQ1_" + locationId + "\">").appendTo("#" + locationId);
-                $("<td id=\"dustQ2_" + locationId + "\">").appendTo("#" + locationId);
-                $("<td id=\"dustQ3_" + locationId + "\">").appendTo("#" + locationId);
-                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'temperature')\">temperature</button>").appendTo("#temperature_" + locationId);
-                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'humidity')\">humidity</button>").appendTo("#humidity_" + locationId);
-                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustAvg')\">dustAvg</button>").appendTo("#dustAvg_" + locationId);
-                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ1')\">dustQ1</button>").appendTo("#dustQ1_" + locationId);
-                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ2')\">dustQ2</button>").appendTo("#dustQ2_" + locationId);
-                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ3')\">dustQ3</button>").appendTo("#dustQ3_" + locationId);
-            }
-            graphDataChannels[locationId]["temperature"].push({'x': dateX, 'y': channelData.temperature});
-            graphDataChannels[locationId]["humidity"].push({'x': dateX, 'y': channelData.humidity});
-            graphDataChannels[locationId]["dustAvg"].push({'x': dateX, 'y': channelData.dustAvg});
-            graphDataChannels[locationId]["dustQ1"].push({'x': dateX, 'y': channelData.dustQ1});
-            graphDataChannels[locationId]["dustQ2"].push({'x': dateX, 'y': channelData.dustQ2});
-            graphDataChannels[locationId]["dustQ3"].push({'x': dateX, 'y': channelData.dustQ3});
+    $.each([5,6,7,8,9,10], function(index, value) {
+        $.getJSON("/monitor/DayOfData2020-04-" + value + ".json", function (locationData) {
+            Object.keys(locationData).sort().forEach(function (locationKey) {
+                var channelData = locationData[locationKey];
+                var locationString = channelData.location;
+                console.log(locationString);
+                var locationId = channelData.location.replace(/ /g, "_");
+                var dateX = new Date(channelData.recordDate);
+                if (typeof graphDataChannels[locationId] === 'undefined') {
+                    graphDataChannels[locationId] = {
+                        "temperature": [],
+                        "humidity": [],
+                        "dustAvg": [],
+                        "dustQ1": [],
+                        "dustQ2": [],
+                        "dustQ3": [],
+                    };
+                    $("<tr id=\"" + locationId + "\"><td>" + locationId + "</td></tr>").appendTo("#buttonsTable");
+                    $("<td id=\"temperature_" + locationId + "\">").appendTo("#" + locationId);
+                    $("<td id=\"humidity_" + locationId + "\">").appendTo("#" + locationId);
+                    $("<td id=\"dustAvg_" + locationId + "\">").appendTo("#" + locationId);
+                    $("<td id=\"dustQ1_" + locationId + "\">").appendTo("#" + locationId);
+                    $("<td id=\"dustQ2_" + locationId + "\">").appendTo("#" + locationId);
+                    $("<td id=\"dustQ3_" + locationId + "\">").appendTo("#" + locationId);
+                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'temperature')\">temperature</button>").appendTo("#temperature_" + locationId);
+                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'humidity')\">humidity</button>").appendTo("#humidity_" + locationId);
+                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustAvg')\">dustAvg</button>").appendTo("#dustAvg_" + locationId);
+                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ1')\">dustQ1</button>").appendTo("#dustQ1_" + locationId);
+                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ2')\">dustQ2</button>").appendTo("#dustQ2_" + locationId);
+                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ3')\">dustQ3</button>").appendTo("#dustQ3_" + locationId);
+                }
+                graphDataChannels[locationId]["temperature"].push({'x': dateX, 'y': channelData.temperature});
+                graphDataChannels[locationId]["humidity"].push({'x': dateX, 'y': channelData.humidity});
+                graphDataChannels[locationId]["dustAvg"].push({'x': dateX, 'y': channelData.dustAvg});
+                graphDataChannels[locationId]["dustQ1"].push({'x': dateX, 'y': channelData.dustQ1});
+                graphDataChannels[locationId]["dustQ2"].push({'x': dateX, 'y': channelData.dustQ2});
+                graphDataChannels[locationId]["dustQ3"].push({'x': dateX, 'y': channelData.dustQ3});
+            });
         });
     });
 });
+
 function addChannel(locationId, locationString, dataChannel) {
     console.log(locationId);
     console.log(dataChannel);
