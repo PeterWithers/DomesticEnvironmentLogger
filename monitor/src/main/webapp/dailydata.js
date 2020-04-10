@@ -85,11 +85,11 @@ var channelColours = {
         label: 'aquarium0',
         backgroundColor: "rgba(75, 92, 192, 0.2)",
         borderColor: "rgba(75, 92, 192, 1)"},
-    'aquariuma1': {
+    'aquariumA1': {
         label: 'aquariuma1',
         backgroundColor: "rgba(123,123,123, 0.2)",
         borderColor: "rgba(75, 92, 192, 1)"},
-    'aquariuma0': {
+    'aquariumA0': {
         label: 'aquariuma0',
         backgroundColor: "rgba(75, 92, 192, 0.2)",
         borderColor: "rgba(75, 92, 192, 1)"},
@@ -137,7 +137,7 @@ var channelColours = {
         label: 'frontwall top floor0',
         backgroundColor: "rgba(200,200,100, 0.2)",
         borderColor: "rgba(200,200,100, 1)"},
-    'second top floora0': {
+    'second top floorA0': {
         label: 'second top floora0',
         backgroundColor: "rgba(179,181,198, 0.2)",
         borderColor: "rgba(179,181,198, 1)"},
@@ -189,6 +189,10 @@ var channelColours = {
         label: 'windspeeddeelen',
         backgroundColor: "rgba(123,123,123, 0.2)",
         borderColor: "rgba(123,123,123, 1)"},
+    'air_monitor_01': {
+        label: 'windspeeddeelen',
+        backgroundColor: "rgba(211,118,100, 0.2)",
+        borderColor: "rgba(211,118,100, 1)"},        
 };
 
 $(document).ready(function () {
@@ -225,104 +229,53 @@ $(document).ready(function () {
     $.getJSON("DayOfData2020-04-07.json", function (locationData) {
         Object.keys(locationData).sort().forEach(function (locationKey) {
             var channelData = locationData[locationKey];
-            var locationId = locationKey.replace(/ /g, "_");
-            $("<tr id=\"" + locationId + "\"><td>" + locationKey + "</td></tr>").appendTo("#buttonsTable");
-            for (var value in columnLabels) {
-                $("<td id=\"" + columnLabels[value] + "_" + locationId + "\">").appendTo("#" + locationId);
+            var locationString = channelData.location;
+            console.log(locationString);
+            var locationId = channelData.location.replace(/ /g, "_");
+            var dateX = new Date(channelData.recordDate);
+            if (typeof graphDataChannels[locationId] === 'undefined') {
+                graphDataChannels[locationId] = {
+                    "temperature": [],
+                    "humidity": [],
+                    "dustAvg": [],
+                    "dustQ1": [],
+                    "dustQ2": [],
+                    "dustQ3": [],
+                };
+                $("<tr id=\"" + locationId + "\"><td>" + locationId + "</td></tr>").appendTo("#buttonsTable");
+                $("<td id=\"temperature_" + locationId + "\">").appendTo("#" + locationId);
+                $("<td id=\"humidity_" + locationId + "\">").appendTo("#" + locationId);
+                $("<td id=\"dustAvg_" + locationId + "\">").appendTo("#" + locationId);
+                $("<td id=\"dustQ1_" + locationId + "\">").appendTo("#" + locationId);
+                $("<td id=\"dustQ2_" + locationId + "\">").appendTo("#" + locationId);
+                $("<td id=\"dustQ3_" + locationId + "\">").appendTo("#" + locationId);
+                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'temperature')\">temperature</button>").appendTo("#temperature_" + locationId);
+                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'humidity')\">humidity</button>").appendTo("#humidity_" + locationId);
+                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustAvg')\">dustAvg</button>").appendTo("#dustAvg_" + locationId);
+                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ1')\">dustQ1</button>").appendTo("#dustQ1_" + locationId);
+                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ2')\">dustQ2</button>").appendTo("#dustQ2_" + locationId);
+                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ3')\">dustQ3</button>").appendTo("#dustQ3_" + locationId);
             }
-//            $("<div>'" + locationKey + "': {</div>").appendTo("body");
-//        $("<div>label: '" + locationKey + "',</div>").appendTo("body");
-//        $("<div>backgroundColor: \"rgba(123,123,123, 0.2)\",</div>").appendTo("body");
-//        $("<div>borderColor: \"rgba(123,123,123, 1)\"},</div>").appendTo("body");
-            $.each(channelData, function (channelKey, yearMonthData) {
-                if (columnLabels.indexOf(channelKey) < 0) {
-                    columnLabels.push(channelKey);
-                    $("<td>" + channelKey + "</td>").appendTo("#headerRow");
-                    $("<td id=\"" + channelKey + "_" + locationId + "\"/>").appendTo("#" + locationId);
-                }
-                var locationChannel = (locationId + "_" + channelKey).split(" ").join("_");
-                graphDataChannels[locationChannel] = {"avg": [], "min": [], "Q1": [], "Q2": [], "Q3": [], "max": []};
-                Object.keys(yearMonthData).sort().forEach(function (yearMonthKey) {
-                    $.each(yearMonthData[yearMonthKey], function (setKey, daysOfData) {
-                        $.each(daysOfData, function (index, daysValue) {
-                            if (daysValue > 0) {
-                                var yearMonthParts = yearMonthKey.split("-");
-                                var dateX = new Date(yearMonthParts[0], parseInt(yearMonthParts[1]) - 1, index);
-                                graphDataChannels[locationChannel][setKey].push({'x': dateX, 'y': daysValue});
-                            }
-                        });
-                    });
-                });
-                console.log(locationKey);
-                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelMin('" + locationKey + "', '" + locationChannel + "')\">min</button>").appendTo("#" + channelKey + "_" + locationId);
-                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelAvg('" + locationKey + "', '" + locationChannel + "')\">avg</button>").appendTo("#" + channelKey + "_" + locationId);
-                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelMax('" + locationKey + "', '" + locationChannel + "')\">max</button>").appendTo("#" + channelKey + "_" + locationId);
-                $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationKey].borderColor + " 3px solid; background:" + channelColours[locationKey].backgroundColor + ";\" onclick=\"addChannelQ123('" + locationKey + "', '" + locationChannel + "')\">Q1 Q2 Q3</button>").appendTo("#" + channelKey + "_" + locationId);
-            });
+            graphDataChannels[locationId]["temperature"].push({'x': dateX, 'y': channelData.temperature});
+            graphDataChannels[locationId]["humidity"].push({'x': dateX, 'y': channelData.humidity});
+            graphDataChannels[locationId]["dustAvg"].push({'x': dateX, 'y': channelData.dustAvg});
+            graphDataChannels[locationId]["dustQ1"].push({'x': dateX, 'y': channelData.dustQ1});
+            graphDataChannels[locationId]["dustQ2"].push({'x': dateX, 'y': channelData.dustQ2});
+            graphDataChannels[locationId]["dustQ3"].push({'x': dateX, 'y': channelData.dustQ3});
         });
     });
 });
-function addChannelAvg(locationKey, locationChannel) {
+function addChannel(locationId, locationString, dataChannel) {
+    console.log(locationId);
+    console.log(dataChannel);
+    graphDataChannels[locationId][dataChannel].sort(function(a, b){return a.x-b.x});
     dailyChart.data.datasets.push({
-        label: locationChannel + " avg",
-        data: graphDataChannels[locationChannel].avg,
-        backgroundColor: channelColours[locationKey].backgroundColor,
-        borderColor: channelColours[locationKey].borderColor,
+        label: locationId + "_" + dataChannel,
+        data: graphDataChannels[locationId][dataChannel],
+        backgroundColor: channelColours[locationString].backgroundColor,
+        borderColor: channelColours[locationString].borderColor,
         fill: false,
         pointRadius: 0
-    });
-    dailyChart.update();
-}
-function addChannelMin(locationKey, locationChannel) {
-    dailyChart.data.datasets.push({
-        label: locationChannel + " min",
-        data: graphDataChannels[locationChannel].min,
-        backgroundColor: channelColours[locationKey].backgroundColor,
-        borderColor: channelColours[locationKey].borderColor,
-        fill: false,
-        showLine: false
-//        pointRadius: 0
-    });
-    dailyChart.update();
-}
-function addChannelQ123(locationKey, locationChannel) {
-    dailyChart.data.datasets.push({
-        label: locationChannel + " Q1",
-        data: graphDataChannels[locationChannel].Q1,
-        backgroundColor: channelColours[locationKey].backgroundColor,
-        borderColor: channelColours[locationKey].backgroundColor,
-        fill: false,
-//        showLine: false,
-        pointRadius: 0
-    });
-    dailyChart.data.datasets.push({
-        label: locationChannel + " Q2",
-        data: graphDataChannels[locationChannel].Q2,
-        backgroundColor: channelColours[locationKey].backgroundColor,
-        borderColor: channelColours[locationKey].borderColor,
-        fill: false,
-        pointRadius: 0
-    });
-    dailyChart.data.datasets.push({
-        label: locationChannel + " Q3",
-        data: graphDataChannels[locationChannel].Q3,
-        backgroundColor: channelColours[locationKey].backgroundColor,
-        borderColor: channelColours[locationKey].backgroundColor,
-        fill: -2,
-//        showLine: false,
-        pointRadius: 0
-    });
-    dailyChart.update();
-}
-function addChannelMax(locationKey, locationChannel) {
-    dailyChart.data.datasets.push({
-        label: locationChannel + " max",
-        data: graphDataChannels[locationChannel].max,
-        backgroundColor: channelColours[locationKey].backgroundColor,
-        borderColor: channelColours[locationKey].borderColor,
-        fill: false,
-        showLine: false
-//        pointRadius: 0
     });
     dailyChart.update();
 }
