@@ -32,7 +32,7 @@ public class DataRecordService {
 
     final DayOfDataGcsFileStore dayOfDataFileStore = new DayOfDataGcsFileStore();
 
-    private static final HashMap<String, List<DataRecord>> DAILY_PEEKS = new HashMap<>();
+    //private static final HashMap<String, List<DataRecord>> DAILY_PEEKS = new HashMap<>();
     private static final HashMap<String, List<DataRecord>> DAILY_RECORDS = new HashMap<>();
 //    private static final DailyOverview dailyOverview = new DailyOverview();
 
@@ -45,16 +45,16 @@ public class DataRecordService {
         DAILY_RECORDS.put(keyString, dayRecordsList);
     }
 
-    private synchronized void updateDayPeeksList(final String keyString, final List<DataRecord> dayPeekList) {
+    /*private synchronized void updateDayPeeksList(final String keyString, final List<DataRecord> dayPeekList) {
         DAILY_PEEKS.put(keyString, dayPeekList);
-    }
+    }*/
 
     private synchronized void updateRecordArrays(DataRecord updatedRecord) {
         String recordLocation = updatedRecord.getLocation();
         LocalDate recordDate = new LocalDate(updatedRecord.getRecordDate());
         String dateKey = recordDate.toString("yyyy-MM-dd");
         String keyString = dateKey + "_" + recordLocation;
-        DAILY_PEEKS.remove(keyString);
+        //DAILY_PEEKS.remove(keyString);
         final List<DataRecord> dayRecordsList = DAILY_RECORDS.get(keyString);
         if (dayRecordsList == null) {
             final List<DataRecord> dayRecords = new ArrayList<>();
@@ -83,7 +83,7 @@ public class DataRecordService {
     }
 
     public void clearCachedData() {
-        DAILY_PEEKS.clear();
+        //DAILY_PEEKS.clear();
         DAILY_RECORDS.clear();
     }
 
@@ -168,7 +168,7 @@ public class DataRecordService {
 //        return resultList;
     }
 
-    public void updateDailyPeeks(String dateKey, final DataRecord dataRecord, HashMap<String, List<DataRecord>> storedPeekData) {
+    /*public void updateDailyPeeks(String dateKey, final DataRecord dataRecord, HashMap<String, List<DataRecord>> storedPeekData) {
         DataRecord firstRecord = dataRecord;
         DataRecord lastRecord = null;
         DataRecord minHumidityRecord = null;
@@ -270,7 +270,7 @@ public class DataRecordService {
         }
         updateDayPeeksList(dateKey + "_" + location, arrayDataRecord);
         storedPeekData.put(dateKey + "_" + location, arrayDataRecord);
-    }
+    }*/
 
     private void findDailyRecords(String location, LocalDate startDate, LocalDate endDate, List<DataRecord> resultList) {
         for (LocalDate date = startDate; date.isBefore(endDate.plusDays(1)); date = date.plusDays(1)) {
@@ -285,7 +285,7 @@ public class DataRecordService {
         }
     }
 
-    private void findDailyPeeks(String location, LocalDate startDate, LocalDate endDate, List<DataRecord> resultList) {
+    /*private void findDailyPeeks(String location, LocalDate startDate, LocalDate endDate, List<DataRecord> resultList) {
 //    public Set<String> findDailyPeeks(String location, Date startDate, Date endDate, List<DataRecord> resultList) {
 //        Set<String> dateKeys = new HashSet<>();
 //        if (DAILY_PEEKS.isEmpty()) {
@@ -344,7 +344,7 @@ public class DataRecordService {
 //                }
 //            }
 //        }
-    }
+    }*/
     //    public HashMap<DataRecord> findByRecordDateBetweenOrderByRecordDateAsc(String[] locations, Date startDate, Date endDate) {
 
     public List<DataRecord> findByLocationStartsWithIgnoreCaseAndRecordDateBetweenOrderByRecordDateAsc(String location, Date startDate, Date endDate) {
@@ -353,11 +353,11 @@ public class DataRecordService {
         List<DataRecord> resultList = new ArrayList<>();
         LocalDate start = new LocalDate(startDate);
         LocalDate end = new LocalDate(endDate);
-        if (daysBetween < 14) {
+        //if (daysBetween < 14) {
             findDailyRecords(location, start, end, resultList);
-        } else {
-            findDailyPeeks(location, start, end, resultList);
-        }
+        //} else {
+            //findDailyPeeks(location, start, end, resultList);
+        //}
         resultList.sort((DataRecord o1, DataRecord o2) -> o1.getRecordDate().compareTo(o2.getRecordDate()));
         return resultList;
     }
