@@ -253,19 +253,39 @@ function calculateData() {
                         "dustQ2": [],
                         "dustQ3": [],
                     };
-                    $("<tr id=\"" + locationId + "\"><td>" + locationId + "</td></tr>").appendTo("#buttonsTable");
-                    $("<td id=\"temperature_" + locationId + "\">").appendTo("#" + locationId);
-                    $("<td id=\"humidity_" + locationId + "\">").appendTo("#" + locationId);
-                    $("<td id=\"dustAvg_" + locationId + "\">").appendTo("#" + locationId);
-                    $("<td id=\"dustQ1_" + locationId + "\">").appendTo("#" + locationId);
-                    $("<td id=\"dustQ2_" + locationId + "\">").appendTo("#" + locationId);
-                    $("<td id=\"dustQ3_" + locationId + "\">").appendTo("#" + locationId);
-                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'temperature')\">temperature</button>").appendTo("#temperature_" + locationId);
-                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'humidity')\">humidity</button>").appendTo("#humidity_" + locationId);
-                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustAvg')\">dustAvg</button>").appendTo("#dustAvg_" + locationId);
-                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ1')\">dustQ1</button>").appendTo("#dustQ1_" + locationId);
-                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ2')\">dustQ2</button>").appendTo("#dustQ2_" + locationId);
-                    $("<button style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ3')\">dustQ3</button>").appendTo("#dustQ3_" + locationId);
+                    if ($("#" + locationId).length == 0) {
+                        $("<tr id=\"" + locationId + "\"><td>" + locationId + "</td></tr>").appendTo("#buttonsTable");
+                        $("<td id=\"temperature_" + locationId + "\">").appendTo("#" + locationId);
+                        $("<td id=\"humidity_" + locationId + "\">").appendTo("#" + locationId);
+                        $("<td id=\"dustAvg_" + locationId + "\">").appendTo("#" + locationId);
+                        $("<td id=\"dustQ1_" + locationId + "\">").appendTo("#" + locationId);
+                        $("<td id=\"dustQ2_" + locationId + "\">").appendTo("#" + locationId);
+                        $("<td id=\"dustQ3_" + locationId + "\">").appendTo("#" + locationId);
+                        $("<button hidden=\"true\" style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'temperature')\">temperature</button>").appendTo("#temperature_" + locationId);
+                        $("<button hidden=\"true\" style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'humidity')\">humidity</button>").appendTo("#humidity_" + locationId);
+                        $("<button hidden=\"true\" style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustAvg')\">dustAvg</button>").appendTo("#dustAvg_" + locationId);
+                        $("<button hidden=\"true\" style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ1')\">dustQ1</button>").appendTo("#dustQ1_" + locationId);
+                        $("<button hidden=\"true\" style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ2')\">dustQ2</button>").appendTo("#dustQ2_" + locationId);
+                        $("<button hidden=\"true\" style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\" onclick=\"addChannel('" + locationId + "', '" + locationString + "', 'dustQ3')\">dustQ3</button>").appendTo("#dustQ3_" + locationId);
+                    }
+                }
+                if (channelData.temperature !== undefined) {
+                    $("#temperature_" + locationId).children().show();
+                }
+                if (channelData.humidity !== undefined) {
+                    $("#humidity_" + locationId).children().show();
+                }
+                if (channelData.dustAvg !== undefined) {
+                    $("#dustAvg_" + locationId).children().show();
+                }
+                if (channelData.dustQ1 !== undefined) {
+                    $("#dustQ1_" + locationId).children().show();
+                }
+                if (channelData.dustQ2 !== undefined) {
+                    $("#dustQ2_" + locationId).children().show();
+                }
+                if (channelData.dustQ3 !== undefined) {
+                    $("#dustQ3_" + locationId).children().show();
                 }
                 graphDataChannels[locationId]["temperature"].push({'x': dateX, 'y': channelData.temperature});
                 graphDataChannels[locationId]["humidity"].push({'x': dateX, 'y': channelData.humidity});
