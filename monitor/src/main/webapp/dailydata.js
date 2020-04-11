@@ -192,7 +192,7 @@ var channelColours = {
     'air_monitor_01': {
         label: 'windspeeddeelen',
         backgroundColor: "rgba(211,118,100, 0.2)",
-        borderColor: "rgba(211,118,100, 1)"},        
+        borderColor: "rgba(211,118,100, 1)"},
 };
 
 $(document).ready(function () {
@@ -225,8 +225,19 @@ $(document).ready(function () {
     var columnLabels = [];
     $("<table id=\"buttonsTable\"/>").appendTo("body");
     $("<tr id=\"headerRow\"><td id=\"emptyCell\"/></tr>").appendTo("#buttonsTable");
-    $.each([5,6,7,8,9,10], function(index, value) {
-        $.getJSON("/monitor/DayOfData2020-04-" + value + ".json", function (locationData) {
+    $("<tr><td><input type=\"number\" id=\"startDay\" value=\"1\"/></td><td><input type=\"number\" id=\"spanDays\" value=\"7\"/></td></tr>").appendTo("#buttonsTable");
+    $("<button onclick=\"calculateData()\">calculateData</button>").appendTo("#buttonsTable");
+});
+
+function calculateData() {
+    dailyChart.data.datasets = [];
+    graphDataChannels = {};
+    var endDate = new Date();
+    endDate.setDate(endDate.getDate() + $("#startDay").val());
+    var startDate = new Date();
+    startDate.setDate(startDate.getDate() - $("#spanDays").val() - $("#startDay").val())
+    for (var currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
+        $.getJSON("/monitor/DayOfData" + currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getDate() + ".json", function (locationData) {
             Object.keys(locationData).sort().forEach(function (locationKey) {
                 var channelData = locationData[locationKey];
                 var locationString = channelData.location;
@@ -264,13 +275,15 @@ $(document).ready(function () {
                 graphDataChannels[locationId]["dustQ3"].push({'x': dateX, 'y': channelData.dustQ3});
             });
         });
-    });
-});
+    };
+}
 
 function addChannel(locationId, locationString, dataChannel) {
     console.log(locationId);
     console.log(dataChannel);
-    graphDataChannels[locationId][dataChannel].sort(function(a, b){return a.x-b.x});
+    graphDataChannels[locationId][dataChannel].sort(function (a, b) {
+        return a.x - b.x
+    });
     dailyChart.data.datasets.push({
         label: locationId + "_" + dataChannel,
         data: graphDataChannels[locationId][dataChannel],
