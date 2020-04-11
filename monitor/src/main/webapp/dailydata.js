@@ -225,7 +225,7 @@ $(document).ready(function () {
     var columnLabels = [];
     $("<table id=\"buttonsTable\"/>").appendTo("body");
     $("<tr id=\"headerRow\"><td id=\"emptyCell\"/></tr>").appendTo("#buttonsTable");
-    $("<tr><td><input type=\"number\" id=\"startDay\" value=\"1\"/></td><td><input type=\"number\" id=\"spanDays\" value=\"7\"/></td></tr>").appendTo("#buttonsTable");
+    $("<tr><td><input type=\"number\" id=\"startDay\" value=\"-1\"/></td><td><input type=\"number\" id=\"spanDays\" value=\"7\"/></td></tr>").appendTo("#buttonsTable");
     $("<button onclick=\"calculateData()\">calculateData</button>").appendTo("#buttonsTable");
 });
 
@@ -233,9 +233,9 @@ function calculateData() {
     dailyChart.data.datasets = [];
     graphDataChannels = {};
     var endDate = new Date();
-    endDate.setDate(endDate.getDate() + $("#startDay").val());
+    endDate.setDate(endDate.getDate() + parseInt($("#startDay").val()));
     var startDate = new Date();
-    startDate.setDate(startDate.getDate() - $("#spanDays").val() - $("#startDay").val())
+    startDate.setDate(startDate.getDate() - parseInt($("#spanDays").val()) - parseInt($("#startDay").val()));
     for (var currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
         $.getJSON("/monitor/DayOfData" + currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getDate() + ".json", function (locationData) {
             Object.keys(locationData).sort().forEach(function (locationKey) {
