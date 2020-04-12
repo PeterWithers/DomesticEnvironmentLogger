@@ -112,6 +112,9 @@ public class DataRecordService {
         if (dataRecord.getDustQ3() != null) {
             builder.set("dustQ3", dataRecord.getDustQ3());
         }
+        if (dataRecord.getDustOutliers() != null) {
+            builder.set("dustOutliers", dataRecord.getDustOutliers());
+        }
         if (dataRecord.getPa() != null) {
             builder.set("pa", dataRecord.getPa());
         }
