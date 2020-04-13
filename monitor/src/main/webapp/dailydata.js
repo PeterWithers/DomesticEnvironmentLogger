@@ -280,19 +280,21 @@ function updateChannels() {
         var locationId = $(this).attr("locationId");
         var locationString = $(this).attr("locationString");
         var channelName = $(this).attr("channelName");
-        console.log(locationId);
-        console.log(channelName);
-        graphDataChannels[locationId][channelName].sort(function (a, b) {
-            return a.x - b.x
-        });
-        dailyChart.data.datasets.push({
-            label: locationId + "_" + channelName,
-            data: graphDataChannels[locationId][channelName],
-            backgroundColor: channelColours[locationString].backgroundColor,
-            borderColor: channelColours[locationString].borderColor,
-            fill: false,
-            pointRadius: 0
-        });
+        if (channelData[channelName] !== undefined) {
+            console.log(locationId);
+            console.log(channelName);
+            graphDataChannels[locationId][channelName].sort(function (a, b) {
+                return a.x - b.x
+            });
+            dailyChart.data.datasets.push({
+                label: locationId + "_" + channelName,
+                data: graphDataChannels[locationId][channelName],
+                backgroundColor: channelColours[locationString].backgroundColor,
+                borderColor: channelColours[locationString].borderColor,
+                fill: false,
+                pointRadius: 0
+            });
+        }
     });
     dailyChart.update();
 }
