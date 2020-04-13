@@ -237,7 +237,7 @@ function loadDataFiles() {
     var startDate = new Date();
     startDate.setDate(endDate.getDate() - parseInt($("#spanDays").val() - 1));
     for (var currentDate = startDate; currentDate <= endDate; currentDate.setDate(currentDate.getDate() + 1)) {
-        $.getJSON("DayOfData" + currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getDate() + ".json", function (locationData) {
+        $.getJSON("monitor/DayOfData" + currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1) + "-" + currentDate.getDate() + ".json", function (locationData) {
             Object.keys(locationData).sort().forEach(function (locationKey) {
                 var channelData = locationData[locationKey];
                 var locationString = channelData.location;
