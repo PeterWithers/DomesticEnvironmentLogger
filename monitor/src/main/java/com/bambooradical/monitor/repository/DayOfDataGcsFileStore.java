@@ -156,7 +156,7 @@ public class DayOfDataGcsFileStore {
             if (!hasDate) {
                 try {
                     final List<DataRecord> dataRecordList = getDataRecordList(dateKey);
-                    
+
                     for (final DataRecord dataRecord : dataRecordList) {
                         dailyOverview.addRecord(dateKey, dataRecord);
 //                            updateDailyPeeks(dateKey, dataRecord, storedPeekData);
@@ -175,12 +175,19 @@ public class DayOfDataGcsFileStore {
                     final List<DataRecord> dataRecordList = new ArrayList<>();
                     while (results.hasNext()) {
                         Entity currentEntity = results.next();
+                        Float dustAvg;
+                        try {
+                            dustAvg = (currentEntity.contains("dustAvg")) ? (float) currentEntity.getDouble("dustAvg") : null;
+                        } catch (ClassCastException castException) {
+                            // early dustAvg records were a long value so we catch that here
+                            dustAvg = (currentEntity.contains("dustAvg")) ? (float) currentEntity.getLong("dustAvg") : null;
+                        }
                         final DataRecord dataRecord = new DataRecord(
                                 (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
                                 (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
                                 (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("tvoc") : null,
                                 (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("co2") : null,
-                                (currentEntity.contains("dustAvg")) ? (float) currentEntity.getDouble("dustAvg") : null,
+                                dustAvg,
                                 (currentEntity.contains("dustQ1")) ? (float) currentEntity.getDouble("dustQ1") : null,
                                 (currentEntity.contains("dustQ2")) ? (float) currentEntity.getDouble("dustQ2") : null,
                                 (currentEntity.contains("dustQ3")) ? (float) currentEntity.getDouble("dustQ3") : null,
