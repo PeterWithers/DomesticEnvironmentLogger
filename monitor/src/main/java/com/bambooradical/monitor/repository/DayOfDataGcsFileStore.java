@@ -53,14 +53,16 @@ public class DayOfDataGcsFileStore {
 
     public InputStream getDayOfDataStream(int yyyy, int MM, int dd) {
         String dateKey = String.format("%04d-%02d-%02d", yyyy, MM, dd);
-        GcsFilename dayOfDataOverviewFileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey);
+        // todo: verify that this is using GMT without daylight savings times otherwise the result changes with the season
+        boolean isToday = dateKey.equals(new LocalDate().toString("yyyy-MM-dd"));
+        GcsFilename dayOfDataOverviewFileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey + (isToday ? "_tmp" : ""));
         GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(dayOfDataOverviewFileName, 0, 2097152);
         return Channels.newInputStream(readChannel);
     }
 
-    public List<DataRecord> getDataRecordList(final String dateKey) throws IOException {
+    private List<DataRecord> getDataRecordList(final String dateKey) throws IOException {
         GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
-        GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey);
+        GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey); // do not return the today tmp files here
         final List<DataRecord> dataRecordList;
         ObjectMapper dayMapper = new ObjectMapper();
         dayMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -70,11 +72,14 @@ public class DayOfDataGcsFileStore {
         return dataRecordList;
     }
 
-    public void storeDayOfData(List<DataRecord> dataRecordList, final String dateKey) {
+    public void storeDayOfData(List<DataRecord> dataRecordList, final String dateKey, boolean isToday) {
         try {
             GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
             ObjectMapper daylyMapper = new ObjectMapper();
-            GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey);
+            // delete any old temp is today files
+            gcsService.delete(new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey + "_tmp"));
+            // store the days data and if it is today then store it as a temp file that will be deleted next time
+            GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey + (isToday ? "_tmp" : ""));
             daylyMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, instance);
             daylyMapper.writeValue(Channels.newOutputStream(outputChannel), dataRecordList);
@@ -126,9 +131,10 @@ public class DayOfDataGcsFileStore {
 //        }
 
         for (LocalDate date = new LocalDate(startDate); date.isBefore(new LocalDate(endDate).plusDays(1)); date = date.plusDays(1)) {
+            // todo: verify that this is using GMT without daylight savings times otherwise the result changes with the season
             String dateKey = date.toString("yyyy-MM-dd");
             boolean hasDate = false;
-            if (!date.equals(new LocalDate())) {
+            final boolean isToday = dateKey.equals(new LocalDate().toString("yyyy-MM-dd"));
 //                    for (String currentKey : storedPeekData.keySet()) {
 //                        if (currentKey.toLowerCase().startsWith(dateKey + "_")) {
 //                            if (!DAILY_RECORDS.containsKey(currentKey)) {
@@ -146,52 +152,53 @@ public class DayOfDataGcsFileStore {
 //                        // break;
 //                    }
 //                }
-                hasDate = dailyOverview.hasDate(dateKey);
-                if (!hasDate) {
-                    try {
-                        final List<DataRecord> dataRecordList = getDataRecordList(dateKey);
-
-                        for (final DataRecord dataRecord : dataRecordList) {
-                            dailyOverview.addRecord(dateKey, dataRecord);
+            hasDate = dailyOverview.hasDate(dateKey);
+            if (!hasDate) {
+                try {
+                    final List<DataRecord> dataRecordList = getDataRecordList(dateKey);
+                    
+                    for (final DataRecord dataRecord : dataRecordList) {
+                        dailyOverview.addRecord(dateKey, dataRecord);
 //                            updateDailyPeeks(dateKey, dataRecord, storedPeekData);
-                            loadedMoreData = true;
-                        }
-                    } catch (IOException exception) {
-                        Query<Entity> query = Query.newEntityQueryBuilder()
-                                .setKind("DataRecord")
-                                .setFilter(StructuredQuery.CompositeFilter.and(
-                                        StructuredQuery.PropertyFilter.ge("RecordDate", Timestamp.of(date.toDate())),
-                                        StructuredQuery.PropertyFilter.le("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
-                                ))
-                                .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
-                                .build();
-                        QueryResults<Entity> results = datastore.run(query);
-                        final List<DataRecord> dataRecordList = new ArrayList<>();
-                        while (results.hasNext()) {
-                            Entity currentEntity = results.next();
-                            final DataRecord dataRecord = new DataRecord(
-                                    (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
-                                    (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
-                                    (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("tvoc") : null,
-                                    (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("co2") : null,
-                                    (currentEntity.contains("dustAvg")) ? (float) currentEntity.getLong("dustAvg") : null,
-                                    (currentEntity.contains("dustQ1")) ? (float) currentEntity.getDouble("dustQ1") : null,
-                                    (currentEntity.contains("dustQ2")) ? (float) currentEntity.getDouble("dustQ2") : null,
-                                    (currentEntity.contains("dustQ3")) ? (float) currentEntity.getDouble("dustQ3") : null,
-                                    (currentEntity.contains("dustOutliers")) ? (float) currentEntity.getDouble("dustOutliers") : null,
-                                    (currentEntity.contains("pa")) ? (int) currentEntity.getDouble("pa") : null,
-                                    (currentEntity.contains("Voltage")) ? (float) currentEntity.getDouble("Voltage") : null,
-                                    currentEntity.getString("Location"),
-                                    (currentEntity.contains("Error")) ? currentEntity.getString("Error") : null,
-                                    new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
-//                        updateRecordArrays(dataRecord);
-                            dailyOverview.addRecord(dateKey, dataRecord);
-//                            updateDailyPeeks(dateKey, dataRecord, storedPeekData);
-                            loadedMoreData = true;
-                            dataRecordList.add(dataRecord);
-                        }
-                        storeDayOfData(dataRecordList, dateKey);
+                        loadedMoreData = true;
                     }
+                } catch (IOException exception) {
+                    Query<Entity> query = Query.newEntityQueryBuilder()
+                            .setKind("DataRecord")
+                            .setFilter(StructuredQuery.CompositeFilter.and(
+                                    StructuredQuery.PropertyFilter.ge("RecordDate", Timestamp.of(date.toDate())),
+                                    StructuredQuery.PropertyFilter.le("RecordDate", Timestamp.of(date.plusDays(1).toDate()))
+                            ))
+                            .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
+                            .build();
+                    QueryResults<Entity> results = datastore.run(query);
+                    final List<DataRecord> dataRecordList = new ArrayList<>();
+                    while (results.hasNext()) {
+                        Entity currentEntity = results.next();
+                        final DataRecord dataRecord = new DataRecord(
+                                (currentEntity.contains("Temperature")) ? (float) currentEntity.getDouble("Temperature") : null,
+                                (currentEntity.contains("Humidity")) ? (float) currentEntity.getDouble("Humidity") : null,
+                                (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("tvoc") : null,
+                                (currentEntity.contains("tvoc")) ? (int) currentEntity.getDouble("co2") : null,
+                                (currentEntity.contains("dustAvg")) ? (float) currentEntity.getDouble("dustAvg") : null,
+                                (currentEntity.contains("dustQ1")) ? (float) currentEntity.getDouble("dustQ1") : null,
+                                (currentEntity.contains("dustQ2")) ? (float) currentEntity.getDouble("dustQ2") : null,
+                                (currentEntity.contains("dustQ3")) ? (float) currentEntity.getDouble("dustQ3") : null,
+                                (currentEntity.contains("dustOutliers")) ? (float) currentEntity.getDouble("dustOutliers") : null,
+                                (currentEntity.contains("pa")) ? (int) currentEntity.getDouble("pa") : null,
+                                (currentEntity.contains("Voltage")) ? (float) currentEntity.getDouble("Voltage") : null,
+                                currentEntity.getString("Location"),
+                                (currentEntity.contains("Error")) ? currentEntity.getString("Error") : null,
+                                new Date(currentEntity.getTimestamp("RecordDate").getSeconds() * 1000L));
+//                        updateRecordArrays(dataRecord);
+                        if (!isToday) {
+                            dailyOverview.addRecord(dateKey, dataRecord);
+                            loadedMoreData = true;
+                        }
+//                            updateDailyPeeks(dateKey, dataRecord, storedPeekData);
+                        dataRecordList.add(dataRecord);
+                    }
+                    storeDayOfData(dataRecordList, dateKey, isToday);
                 }
             }
         }
@@ -202,6 +209,7 @@ public class DayOfDataGcsFileStore {
 //        mapper.configure(JsonParser.Feature.IGNORE_UNDEFINED, true);
 //        mapper.enable(SerializationFeature.INDENT_OUTPUT);
 //                outputMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+// todo: verify that this is using GMT without daylight savings times otherwise the result changes with the season
 //            String todayDateKey = new LocalDate().toString("yyyy-MM-dd");
 //            final HashMap<String, List<DataRecord>> storedData = new HashMap<>();
 //            for (String currentKey : DAILY_PEEKS.keySet()) {
