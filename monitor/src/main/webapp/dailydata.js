@@ -280,7 +280,7 @@ function updateChannels() {
         var locationId = $(this).attr("locationId");
         var locationString = $(this).attr("locationString");
         var channelName = $(this).attr("channelName");
-        if (channelData[channelName] !== undefined) {
+        if (graphDataChannels[locationId] !== undefined) {
             console.log(locationId);
             console.log(channelName);
             graphDataChannels[locationId][channelName].sort(function (a, b) {
