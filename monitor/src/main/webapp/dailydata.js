@@ -225,7 +225,7 @@ $(document).ready(function () {
     var columnLabels = [];
     $("<table id=\"buttonsTable\"/>").appendTo("body");
     $("<tr id=\"headerRow\"><td id=\"emptyCell\"/></tr>").appendTo("#buttonsTable");
-    $("<tr><td><input type=\"number\" id=\"spanDays\" value=\"7\"/></td><td><input type=\"number\" id=\"startDay\" value=\"-1\"/></td></tr>").appendTo("#buttonsTable");
+    $("<tr><td>span: <input type=\"number\" id=\"spanDays\" value=\"7\"/></td><td>start: <input type=\"number\" id=\"startDay\" value=\"0\"/></td></tr>").appendTo("#buttonsTable");
     $("<tr><td><button onclick=\"calculateData()\">calculateData</button></td></tr>").appendTo("#buttonsTable");
 });
 
