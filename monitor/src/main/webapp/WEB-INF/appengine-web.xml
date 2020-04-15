@@ -3,9 +3,9 @@
   <threadsafe>true</threadsafe>
   <runtime>java8</runtime>
   <automatic-scaling>
-    <max_idle_instances>1</max_idle_instances>
-    <min_pending_latency>automatic</min_pending_latency>
-    <max_pending_latency>30ms</max_pending_latency>
+    <max-idle-instances>1</max-idle-instances>
+    <min-pending-latency>automatic</min-pending-latency>
+    <max-pending-latency>30ms</max-pending-latency>
   </automatic-scaling>
   <instance-class>F1</instance-class>
 </appengine-web-app>
