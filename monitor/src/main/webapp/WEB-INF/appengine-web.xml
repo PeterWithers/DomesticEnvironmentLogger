@@ -5,4 +5,5 @@
   <manual-scaling>
     <instances>1</instances>
   </manual-scaling>
+  <instance-class>F1</instance-class>
 </appengine-web-app>
