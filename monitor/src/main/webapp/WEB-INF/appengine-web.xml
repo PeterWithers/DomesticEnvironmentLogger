@@ -2,10 +2,10 @@
   <version>1</version>
   <threadsafe>true</threadsafe>
   <runtime>java8</runtime>
-  <automatic_scaling>
+  <automatic-scaling>
     <max_idle_instances>1</max_idle_instances>
     <min_pending_latency>automatic</min_pending_latency>
     <max_pending_latency>30ms</max_pending_latency>
-  </automatic_scaling>
+  </automatic-scaling>
   <instance-class>F1</instance-class>
 </appengine-web-app>
