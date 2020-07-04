@@ -6,9 +6,9 @@ package com.bambooradical.monitor.repository;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
+//import com.google.cloud.datastore.KeyFactory;
 import java.util.Date;
-import javax.annotation.PostConstruct;
+//import javax.annotation.PostConstruct;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,17 +24,17 @@ public class MagnitudeRecordService {
     @Autowired
     Datastore datastore;
 
-    private KeyFactory keyFactory;
+//    private KeyFactory keyFactory;
 
-    @PostConstruct
-    public void initializeKeyFactories() {
-        keyFactory = datastore.newKeyFactory().setKind("MagnitudeRecords");
-    }
+//    @PostConstruct
+//    public void initializeKeyFactories() {
+//        keyFactory = datastore.newKeyFactory().setKind("MagnitudeRecords");
+//    }
 
     public void save(String magnitudes, String maxMsError, String location, Date recordDate) {
         String dateKey = new LocalDate(recordDate).toString("yyyy-MM-dd");
         String timeKey = new LocalDateTime(recordDate).toString("HH:mm");
-        Key magnitudeRecordsKey = keyFactory.newKey(dateKey + "_" + location);
+        Key magnitudeRecordsKey = datastore.newKeyFactory().setKind("MagnitudeRecords").newKey(dateKey + "_" + location);
         Entity magnitudeRecordsEntity = datastore.get(magnitudeRecordsKey);
         if (magnitudeRecordsEntity == null) {
             datastore.add(Entity.newBuilder(magnitudeRecordsKey)
@@ -53,7 +53,7 @@ public class MagnitudeRecordService {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("{");
         String dateKey = (dateString.isEmpty()) ? new LocalDate().toString("yyyy-MM-dd") : dateString;
-        Key magnitudeRecordsKey = keyFactory.newKey(dateKey + "_" + location);
+        Key magnitudeRecordsKey = datastore.newKeyFactory().setKind("MagnitudeRecords").newKey(dateKey + "_" + location);
         Entity magnitudeRecordsEntity = datastore.get(magnitudeRecordsKey);
         if (magnitudeRecordsEntity != null) {
             for (String propertyName : magnitudeRecordsEntity.getNames()) {

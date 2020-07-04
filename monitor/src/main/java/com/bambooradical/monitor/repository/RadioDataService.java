@@ -10,7 +10,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.IncompleteKey;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
+//import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import javax.annotation.PostConstruct;
+//import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,12 +35,12 @@ public class RadioDataService {
 
     private static HashMap<String,List<RadioData>> radioDataLocationMap = new HashMap<>();
 
-    private KeyFactory keyFactory;
+//    private KeyFactory keyFactory;
 
-    @PostConstruct
-    public void initializeKeyFactories() {
-        keyFactory = datastore.newKeyFactory().setKind("RadioData");
-    }
+//    @PostConstruct
+//    public void initializeKeyFactories() {
+//        keyFactory = datastore.newKeyFactory().setKind("RadioData");
+//    }
 
     private synchronized void addEntry(RadioData radioData){
         List<RadioData> records = radioDataLocationMap.get(radioData.getLocation());
@@ -94,7 +94,7 @@ public class RadioDataService {
     }
 
     public Entity save(RadioData radioData) {
-        IncompleteKey key = keyFactory.setKind("RadioData").newKey();
+        IncompleteKey key = datastore.newKeyFactory().setKind("RadioData").newKey();
         FullEntity entity = FullEntity.newBuilder(key)
                 .set("Location", radioData.getLocation())
                 .set("DataValues", radioData.getDataValues())
@@ -105,7 +105,7 @@ public class RadioDataService {
     }
 
     public void delete(RadioData radioData) {
-        Key key = keyFactory.newKey(radioData.getId());
+        Key key = datastore.newKeyFactory().setKind("RadioData").newKey(radioData.getId());
         datastore.delete(key);
     }
 

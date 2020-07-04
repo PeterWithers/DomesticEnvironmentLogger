@@ -7,12 +7,12 @@ import com.bambooradical.monitor.model.ProgramRecord;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
+//import com.google.cloud.datastore.KeyFactory;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.PostConstruct;
+//import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,19 +26,19 @@ public class LightingService {
     @Autowired
     Datastore datastore;
 
-    private KeyFactory keyFactory;
+//    private KeyFactory keyFactory;
 
 //    private static final HashMap<String, String> HOURLY_PROGRAMS = new HashMap<>();
     private static final List<ProgramRecord> PROGRAM_RECORDS = new ArrayList<>();
 
-    @PostConstruct
-    public void initializeKeyFactories() {
-        keyFactory = datastore.newKeyFactory().setKind("LightSettings");
-    }
+//    @PostConstruct
+//    public void initializeKeyFactories() {
+//        keyFactory = datastore.newKeyFactory().setKind("LightSettings");
+//    }
 
     public List<ProgramRecord> getProgramRecords() throws ParseException {
         if (PROGRAM_RECORDS.isEmpty()) {
-            Key lightSettingsKey = keyFactory.newKey("defaultProgram");
+            Key lightSettingsKey = datastore.newKeyFactory().setKind("LightSettings").newKey("defaultProgram");
             Entity lightSettings = datastore.get(lightSettingsKey);
             if (lightSettings != null) {
                 for (String propertyName : lightSettings.getNames()) {
@@ -56,21 +56,21 @@ public class LightingService {
     }
 
     public void deleteProgram(final ProgramRecord programRecord) {
-        Key lightSettingsKey = keyFactory.newKey("defaultProgram");
+        Key lightSettingsKey = datastore.newKeyFactory().setKind("LightSettings").newKey("defaultProgram");
         Entity lightSettingsEntity = datastore.get(lightSettingsKey);
         datastore.update(Entity.newBuilder(lightSettingsEntity).remove(programRecord.getKey()).build());
         PROGRAM_RECORDS.clear();
     }
 
     public void updateProgram(final ProgramRecord programRecord) {
-        Key lightSettingsKey = keyFactory.newKey("defaultProgram");
+        Key lightSettingsKey = datastore.newKeyFactory().setKind("LightSettings").newKey("defaultProgram");
         Entity lightSettingsEntity = datastore.get(lightSettingsKey);
         datastore.update(Entity.newBuilder(lightSettingsEntity).set(programRecord.getKey(), programRecord.getProgramCode()).build());
         PROGRAM_RECORDS.clear();
     }
 
     public void addProgram(final ProgramRecord programRecord) {
-        Key lightSettingsKey = keyFactory.newKey("defaultProgram");
+        Key lightSettingsKey = datastore.newKeyFactory().setKind("LightSettings").newKey("defaultProgram");
         Entity lightSettingsEntity = datastore.get(lightSettingsKey);
         if (lightSettingsEntity == null) {
             datastore.add(Entity.newBuilder(lightSettingsKey).set(programRecord.getKey(), programRecord.getProgramCode()).build());

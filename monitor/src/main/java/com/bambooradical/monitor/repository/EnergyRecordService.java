@@ -10,7 +10,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.IncompleteKey;
 import com.google.cloud.datastore.Key;
-import com.google.cloud.datastore.KeyFactory;
+//import com.google.cloud.datastore.KeyFactory;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery.PropertyFilter;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import javax.annotation.PostConstruct;
+//import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,12 +35,12 @@ public class EnergyRecordService {
 
     private static HashMap<String,List<EnergyRecord>> energyRecordLocationMap = new HashMap<>();
 
-    private KeyFactory keyFactory;
+//    private KeyFactory keyFactory;
 
-    @PostConstruct
-    public void initializeKeyFactories() {
-        keyFactory = datastore.newKeyFactory().setKind("EnergyRecord");
-    }
+//    @PostConstruct
+//    public void initializeKeyFactories() {
+//        keyFactory = datastore.newKeyFactory().setKind("EnergyRecord");
+//    }
 
     private synchronized void addEntry(String meterLocation, List<EnergyRecord> records){
         energyRecordLocationMap.put(meterLocation, records);
@@ -82,7 +82,7 @@ public class EnergyRecordService {
     }
 
     public Entity save(EnergyRecord energyRecord) {
-        IncompleteKey key = keyFactory.setKind("EnergyRecord").newKey();
+        IncompleteKey key = datastore.newKeyFactory().setKind("EnergyRecord").newKey();
         FullEntity entity = FullEntity.newBuilder(key)
                 .set("MeterLocation", energyRecord.getMeterLocation())
                 .set("MeterValue", energyRecord.getMeterValue())
@@ -94,7 +94,7 @@ public class EnergyRecordService {
     }
 
     public void delete(EnergyRecord energyRecord) {
-        Key key = keyFactory.newKey(energyRecord.getId());
+        Key key = datastore.newKeyFactory().setKind("EnergyRecord").newKey(energyRecord.getId());
         datastore.delete(key);
     }
 

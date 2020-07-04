@@ -8,12 +8,12 @@ import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.IncompleteKey;
-import com.google.cloud.datastore.KeyFactory;
+//import com.google.cloud.datastore.KeyFactory;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import javax.annotation.PostConstruct;
+//import javax.annotation.PostConstruct;
 import org.joda.time.LocalDate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ public class DataRecordService {
     @Autowired
     Datastore datastore;
 
-    private KeyFactory keyFactory;
+    //private KeyFactory keyFactory;
 
     final DayOfDataGcsFileStore dayOfDataFileStore = new DayOfDataGcsFileStore();
 
@@ -36,10 +36,10 @@ public class DataRecordService {
     private static final HashMap<String, List<DataRecord>> DAILY_RECORDS = new HashMap<>();
 //    private static final DailyOverview dailyOverview = new DailyOverview();
 
-    @PostConstruct
-    public void initializeKeyFactories() {
-        keyFactory = datastore.newKeyFactory().setKind("DataRecord");
-    }
+////    @PostConstruct
+//    public void initializeKeyFactories() {
+//        keyFactory = datastore.newKeyFactory().setKind("DataRecord");
+//    }
 
     private synchronized void updateDayRecordsList(final String keyString, final List<DataRecord> dayRecordsList) {
         DAILY_RECORDS.put(keyString, dayRecordsList);
@@ -88,7 +88,7 @@ public class DataRecordService {
     }
 
     public void save(DataRecord dataRecord) {
-        IncompleteKey key = keyFactory.setKind("DataRecord").newKey();
+        IncompleteKey key = datastore.newKeyFactory().setKind("DataRecord").newKey();
         final Float humidity = dataRecord.getHumidity();
         final FullEntity.Builder<IncompleteKey> builder = FullEntity.newBuilder(key);
         if (humidity != null) {
