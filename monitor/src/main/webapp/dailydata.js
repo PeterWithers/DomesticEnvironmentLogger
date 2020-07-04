@@ -190,9 +190,11 @@ var channelColours = {
         backgroundColor: "rgba(123,123,123, 0.2)",
         borderColor: "rgba(123,123,123, 1)"},
     'air_monitor_01': {
-        label: 'windspeeddeelen',
         backgroundColor: "rgba(211,118,100, 0.2)",
         borderColor: "rgba(211,118,100, 1)"},
+    'tvoc_monitor_010': {
+        backgroundColor: "rgba(33,150,243, 0.2)",
+        borderColor: "rgba(33,150,243, 1)"},
 };
 
 $(document).ready(function () {
@@ -253,16 +255,19 @@ function loadDataFiles() {
                         "dustQ2": [],
                         "dustQ3": [],
                         "dustOutliers": [],
+                        "tvoc": [],
+                        "co2": [],
+                        "hPa": [],
                     };
                     if ($("#" + locationId).length == 0) {
                         $("<tr id=\"" + locationId + "\"><td>" + locationId + "</td></tr>").appendTo("#buttonsTable");
-                        $.each(["temperature", "humidity", "dustAvg", "dustQ1", "dustQ2", "dustQ3", "dustOutliers"], function( key, channelName) {
+                        $.each(["temperature", "humidity", "dustAvg", "dustQ1", "dustQ2", "dustQ3", "dustOutliers", "tvoc", "co2", "hPa"], function( key, channelName) {
                         $("<td id=\"" + channelName + "_" + locationId + "\">").appendTo("#" + locationId);
                         $("<div hidden=\"true\" style=\"margin: 0px 2px 0px 2px; border: " + channelColours[locationString].borderColor + " 3px solid; background:" + channelColours[locationString].backgroundColor + ";\"><input type=\"checkbox\" id='" + locationId + "_" + locationString + "_" + channelName + "', '" + locationString + "' onclick=\"updateChannels()\" locationId='" + locationId + "' locationString='" + locationString + "' channelName='" + channelName + "'><label>" + channelName + "</label></div>").appendTo("#" + channelName + "_" + locationId);
                         });
                     }
                 }
-                $.each(["temperature", "humidity", "dustAvg", "dustQ1", "dustQ2", "dustQ3", "dustOutliers"], function( key, channelName) {
+                $.each(["temperature", "humidity", "dustAvg", "dustQ1", "dustQ2", "dustQ3", "dustOutliers", "tvoc", "co2", "hPa"], function( key, channelName) {
                     if (channelData[channelName] !== undefined) {
                         $("#" + channelName + "_" + locationId).children().show();
                     }

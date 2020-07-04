@@ -115,8 +115,8 @@ public class DataRecordService {
         if (dataRecord.getDustOutliers() != null) {
             builder.set("dustOutliers", dataRecord.getDustOutliers());
         }
-        if (dataRecord.getKPa() != null) {
-            builder.set("kpa", dataRecord.getKPa());
+        if (dataRecord.getHPa() != null) {
+            builder.set("hPa", dataRecord.getHPa());
         }
         final Float temperature = dataRecord.getTemperature();
         if (temperature != null) {

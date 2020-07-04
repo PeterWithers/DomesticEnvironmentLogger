@@ -192,7 +192,7 @@ public class DayOfDataGcsFileStore {
                                 (currentEntity.contains("dustQ2")) ? (float) currentEntity.getDouble("dustQ2") : null,
                                 (currentEntity.contains("dustQ3")) ? (float) currentEntity.getDouble("dustQ3") : null,
                                 (currentEntity.contains("dustOutliers")) ? (float) currentEntity.getDouble("dustOutliers") : null,
-                                (currentEntity.contains("pa")) ? (float) currentEntity.getDouble("pa") : null,
+                                (currentEntity.contains("hPa")) ? (float) currentEntity.getDouble("hPa") : null,
                                 (currentEntity.contains("Voltage")) ? (float) currentEntity.getDouble("Voltage") : null,
                                 currentEntity.getString("Location"),
                                 (currentEntity.contains("Error")) ? currentEntity.getString("Error") : null,

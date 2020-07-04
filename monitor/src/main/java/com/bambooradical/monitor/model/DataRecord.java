@@ -23,7 +23,7 @@ public class DataRecord implements Serializable {
     private Long id;
     private Float temperature;
     private Float humidity;
-    private Float kpa;
+    private Float hPa;
     private Float tvoc;
     private Float dustAvg;
     private Float dustQ1;
@@ -40,7 +40,7 @@ public class DataRecord implements Serializable {
     public DataRecord() {
     }
 
-    public DataRecord(Float temperature, Float humidity, Float tvoc, Float co2, Float dustAvg, Float dustQ1, Float dustQ2, Float dustQ3, Float dustOutliers, Float kpa, Float voltage, String location, String error, Date recordDate) {
+    public DataRecord(Float temperature, Float humidity, Float tvoc, Float co2, Float dustAvg, Float dustQ1, Float dustQ2, Float dustQ3, Float dustOutliers, Float hPa, Float voltage, String location, String error, Date recordDate) {
         this.temperature = temperature;
         this.humidity = humidity;
         this.tvoc = tvoc;
@@ -50,7 +50,7 @@ public class DataRecord implements Serializable {
         this.dustQ3 = dustQ3;
         this.dustOutliers = dustOutliers;
         this.co2 = co2;
-        this.kpa = kpa;
+        this.hPa = hPa;
         this.voltage = voltage;
         this.location = location;
         this.error = error;
@@ -59,8 +59,8 @@ public class DataRecord implements Serializable {
 
     @Override
     public String toString() {
-        return String.format("DataRecord[id=%d, temperature=%.2f, humidity=%.2f, tvoc=%f, co2=%f, dustAvg=%f, dustQ1=%.2f, dustQ2=%.2f, dustQ3=%.2f, dustOutliers=%0.2f, kpa=%f, voltage=%.2f, location='%s', error='%s', date='%s']", id,
-                temperature, humidity, tvoc, co2, dustAvg, dustQ1, dustQ2, dustQ3, dustOutliers, kpa, voltage, location, error, recordDate);
+        return String.format("DataRecord[id=%d, temperature=%.2f, humidity=%.2f, tvoc=%f, co2=%f, dustAvg=%f, dustQ1=%.2f, dustQ2=%.2f, dustQ3=%.2f, dustOutliers=%0.2f, hPa=%f, voltage=%.2f, location='%s', error='%s', date='%s']", id,
+                temperature, humidity, tvoc, co2, dustAvg, dustQ1, dustQ2, dustQ3, dustOutliers, hPa, voltage, location, error, recordDate);
     }
 
     public Long getId() {
@@ -87,12 +87,12 @@ public class DataRecord implements Serializable {
         this.humidity = humidity;
     }
 
-    public Float getKPa() {
-        return kpa;
+    public Float getHPa() {
+        return hPa;
     }
 
-    public void setKPa(Float kpa) {
-        this.kpa = kpa;
+    public void setHPa(Float hPa) {
+        this.hPa = hPa;
     }
 
     public Float getTvoc() {

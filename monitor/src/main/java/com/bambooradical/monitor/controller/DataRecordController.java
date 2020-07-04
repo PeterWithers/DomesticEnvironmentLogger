@@ -72,9 +72,9 @@ public class DataRecordController {
             @RequestParam(value = "dustQ2", required = false) Float dustQ2,
             @RequestParam(value = "dustQ3", required = false) Float dustQ3,
             @RequestParam(value = "dustOutliers", required = false) Float dustOutliers,
-            @RequestParam(value = "paMin", required = false) Float paMin,
-            @RequestParam(value = "paAvg", required = false) Float paAvg,
-            @RequestParam(value = "paMax", required = false) Float paMax,
+            @RequestParam(value = "hPaMin", required = false) Float hPaMin,
+            @RequestParam(value = "hPaAvg", required = false) Float hPaAvg,
+            @RequestParam(value = "hPaMax", required = false) Float hPaMax,
             @RequestParam(value = "location", required = true) String location,
             @RequestParam(value = "magnitudes", required = false, defaultValue = "") String magnitudes,
             @RequestParam(value = "maxMsError", required = false, defaultValue = "") String maxMsError,
@@ -83,7 +83,7 @@ public class DataRecordController {
         List<DataRecord> returnRecords = new ArrayList<>();
         if (temperature != null) {
             for (int index = 0; index < temperature.length; index++) {
-                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, tvocAvg, co2Avg, null, null, null, null, null, null, voltage, location + returnRecords.size(), error, new Date());
+                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, tvocAvg, co2Avg, null, null, null, null, null, hPaAvg, voltage, location + returnRecords.size(), error, new Date());
 //                dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
