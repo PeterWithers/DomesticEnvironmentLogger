@@ -83,7 +83,7 @@ public class DataRecordController {
         List<DataRecord> returnRecords = new ArrayList<>();
         if (temperature != null) {
             for (int index = 0; index < temperature.length; index++) {
-                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, null, null, null, null, null, null, null, null, voltage, location + returnRecords.size(), error, new Date());
+                final DataRecord dataRecord = new DataRecord(temperature[index], (humidity != null && humidity.length > index) ? humidity[index] : null, tvocAvg, co2Avg, null, null, null, null, null, null, voltage, location + returnRecords.size(), error, new Date());
 //                dataRecordRepository.save(dataRecord);
                 dataRecordService.save(dataRecord);
                 returnRecords.add(dataRecord);
@@ -97,20 +97,20 @@ public class DataRecordController {
                 returnRecords.add(dataRecord);
             }
         }
-        if (tvocMin != null) {
-            final DataRecord dataMinRecord = new DataRecord(null, null, tvocMin, co2Min, null, null, null, null, null, paMin, null, location + "Min", error, new Date());
-//                dataRecordRepository.save(dataRecord);
-            dataRecordService.save(dataMinRecord);
-            returnRecords.add(dataMinRecord);
-            final DataRecord dataAvgRecord = new DataRecord(null, null, tvocAvg, co2Avg, null, null, null, null, null, paAvg, null, location + "Avg", error, new Date());
-//                dataRecordRepository.save(dataRecord);
-            dataRecordService.save(dataAvgRecord);
-            returnRecords.add(dataAvgRecord);
-            final DataRecord dataMaxRecord = new DataRecord(null, null, tvocMax, co2Max, null, null, null, null, null, paMax, null, location + "Max", error, new Date());
-//                dataRecordRepository.save(dataRecord);
-            dataRecordService.save(dataMaxRecord);
-            returnRecords.add(dataMaxRecord);
-        }
+//        if (tvocMin != null) {
+//            final DataRecord dataMinRecord = new DataRecord(null, null, tvocMin, co2Min, null, null, null, null, null, paMin, null, location + "Min", error, new Date());
+////                dataRecordRepository.save(dataRecord);
+//            dataRecordService.save(dataMinRecord);
+//            returnRecords.add(dataMinRecord);
+//            final DataRecord dataAvgRecord = new DataRecord(null, null, tvocAvg, co2Avg, null, null, null, null, null, paAvg, null, location + "Avg", error, new Date());
+////                dataRecordRepository.save(dataRecord);
+//            dataRecordService.save(dataAvgRecord);
+//            returnRecords.add(dataAvgRecord);
+//            final DataRecord dataMaxRecord = new DataRecord(null, null, tvocMax, co2Max, null, null, null, null, null, paMax, null, location + "Max", error, new Date());
+////                dataRecordRepository.save(dataRecord);
+//            dataRecordService.save(dataMaxRecord);
+//            returnRecords.add(dataMaxRecord);
+//        }
         if (dustAvg != null) {
             final DataRecord dustRecord = new DataRecord(null, null, null, null, dustAvg, dustQ1, dustQ2, dustQ3, dustOutliers, null, null, location, error, new Date());
 //                dataRecordRepository.save(dataRecord);
