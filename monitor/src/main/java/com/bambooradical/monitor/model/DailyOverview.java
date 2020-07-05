@@ -49,7 +49,7 @@ public class DailyOverview {
     }
 
     public void addRecord(final String dateKey, final DataRecord dataRecord) {
-        final String location = dataRecord.getLocation().toLowerCase();
+        final String location = dataRecord.getLocation().toLowerCase().replaceAll("_", "-");
         if (dataRecord.getHumidity() != null) {
             addRecord(dateKey, location, "humidity", dataRecord.getHumidity());
         }

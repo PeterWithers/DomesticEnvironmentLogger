@@ -281,7 +281,7 @@ public class DataRecordService {
             //System.out.println(dateKey);
             for (String currentKey : DAILY_RECORDS.keySet()) {
                 //	System.out.println(currentKey + ":" + dateKey + "_" + location.toLowerCase());
-                if (currentKey.toLowerCase().startsWith(dateKey + "_" + location.toLowerCase())) {
+                if (currentKey.toLowerCase().startsWith(dateKey + "_" + location.toLowerCase().replaceAll("_", "-"))) {
                     resultList.addAll(DAILY_RECORDS.get(currentKey));
                 }
             }
