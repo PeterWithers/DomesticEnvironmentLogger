@@ -195,6 +195,9 @@ var channelColours = {
     'tvoc_monitor_010': {
         backgroundColor: "rgba(33,150,243, 0.2)",
         borderColor: "rgba(33,150,243, 1)"},
+    'aquariumB10': {
+        backgroundColor: "rgba(0,150,136, 0.2)",
+        borderColor: "rgba(0,150,136, 1)"},
 };
 
 $(document).ready(function () {
