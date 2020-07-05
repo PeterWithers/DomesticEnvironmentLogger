@@ -87,11 +87,11 @@ public class DataRecord implements Serializable {
         this.humidity = humidity;
     }
 
-    public Float getHPa() {
+    public Float gethPa() {
         return hPa;
     }
 
-    public void setHPa(Float hPa) {
+    public void sethPa(Float hPa) {
         this.hPa = hPa;
     }
 
