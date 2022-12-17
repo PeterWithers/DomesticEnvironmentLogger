@@ -1,5 +1,5 @@
 runtime: java8
-#env: flex
+env: standard
 
 runtime_config:  # Optional
   jdk: openjdk8
