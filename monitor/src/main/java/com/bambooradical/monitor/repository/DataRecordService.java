@@ -11,7 +11,9 @@ import com.google.cloud.datastore.IncompleteKey;
 //import com.google.cloud.datastore.KeyFactory;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 //import javax.annotation.PostConstruct;
 import org.joda.time.LocalDate;
@@ -33,7 +35,12 @@ public class DataRecordService {
     final DayOfDataGcsFileStore dayOfDataFileStore = new DayOfDataGcsFileStore();
 
     //private static final HashMap<String, List<DataRecord>> DAILY_PEEKS = new HashMap<>();
-    private static final HashMap<String, List<DataRecord>> DAILY_RECORDS = new HashMap<>();
+    private static final HashMap<String, List<DataRecord>> DAILY_RECORDS = new LinkedHashMap<String, List<DataRecord>>() {
+        @Override
+        protected boolean removeEldestEntry(final Map.Entry eldest) {
+            return size() > 50;
+        }
+    };
 //    private static final DailyOverview dailyOverview = new DailyOverview();
 
 ////    @PostConstruct
