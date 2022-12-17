@@ -451,7 +451,7 @@ public class DataRecordController {
     }
 
     @RequestMapping("/load")
-    public String loadData(@RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "14") int spanDays) {
+    public String loadData(@RequestParam(value = "start", required = false, defaultValue = "0") int startDay, @RequestParam(value = "span", required = false, defaultValue = "365") int spanDays) {
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.DAY_OF_MONTH, startDay);
         Date endDate = calendar.getTime();
