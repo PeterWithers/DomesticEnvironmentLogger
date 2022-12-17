@@ -189,6 +189,10 @@ var channelColours = {
         label: 'windspeeddeelen',
         backgroundColor: "rgba(123,123,123, 0.2)",
         borderColor: "rgba(123,123,123, 1)"},
+    'upstairs_bathroom0': {
+        label: 'upstairs_bathroom0',
+        backgroundColor: 'rgba(255,99,193,0.2)',
+        borderColor: 'rgba(255,99,193,1)'},
 };
 
 $(document).ready(function () {
