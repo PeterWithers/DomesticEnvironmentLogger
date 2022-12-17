@@ -38,7 +38,7 @@ public class DataRecordService {
     private static final HashMap<String, List<DataRecord>> DAILY_RECORDS = new LinkedHashMap<String, List<DataRecord>>() {
         @Override
         protected boolean removeEldestEntry(final Map.Entry eldest) {
-            return size() > 50;
+            return size() > 125;
         }
     };
 //    private static final DailyOverview dailyOverview = new DailyOverview();

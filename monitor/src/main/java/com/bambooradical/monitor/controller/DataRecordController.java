@@ -601,6 +601,18 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(75, 92, 192, 1)\","
                 + "            data: "
+                + getTemperatureArray("upstairs_bathroom0", startDate, endDate)
+                + "        },"
+                + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'upstairs_bathroom0',\n"
+                + "            backgroundColor: \"rgba(255, 99, 193, 0.0)\",\n"
+                + "            borderColor: \"rgba(255, 99, 193, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(255, 99, 193, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(255, 99, 193, 1)\","
+                + "            data: "
                 + getTemperatureArray("aquariumA1", startDate, endDate)
                 + "        },"
                 + "{\n"
