@@ -216,6 +216,7 @@ $(document).ready(function () {
             datasets: []
         },
         options: {
+            animation: false,
             legend: {
                 display: false,
             },
