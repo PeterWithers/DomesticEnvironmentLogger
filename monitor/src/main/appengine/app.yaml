@@ -1,5 +1,7 @@
+# The appengine-web.xml appears to be overriding this configuration 
+
 runtime: java8
-env: standard
+instance_class: F1
 
 runtime_config:  # Optional
   jdk: openjdk8

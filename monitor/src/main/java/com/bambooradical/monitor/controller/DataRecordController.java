@@ -601,7 +601,7 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(75, 92, 192, 1)\","
                 + "            data: "
-                + getTemperatureArray("upstairs_bathroom0", startDate, endDate)
+                + getTemperatureArray("aquariumA1", startDate, endDate)
                 + "        },"
                 + "{\n"
                 //                + "        lineTension: 0\n"
@@ -613,7 +613,7 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(255, 99, 193, 1)\","
                 + "            data: "
-                + getTemperatureArray("aquariumA1", startDate, endDate)
+                + getTemperatureArray("upstairs_bathroom0", startDate, endDate)
                 + "        },"
                 + "{\n"
                 //                + "        lineTension: 0\n"
@@ -842,7 +842,7 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(211,158,100, 1)\","
                 + "            data: "
-                + getHumidityArray("upstairs_bathroom0", startDate, endDate)
+                + getDustAvgArray("air_monitor_01", startDate, endDate)
                 + "        },"
                 + "{\n"
                 //                + "        lineTension: 0\n"
@@ -854,7 +854,7 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(255, 99, 193, 1)\","
                 + "            data: "
-                + getDustAvgArray("air_monitor_01", startDate, endDate)
+                + getHumidityArray ("upstairs_bathroom0", startDate, endDate)
                 + "        },"
                 + "{\n"
                 + "            label: 'dust Q1',\n"
