@@ -5,7 +5,7 @@
   <automatic-scaling>
     <max-idle-instances>1</max-idle-instances>
     <min-pending-latency>automatic</min-pending-latency>
-    <max-pending-latency>400ms</max-pending-latency>
+    <max-pending-latency>2400ms</max-pending-latency>
   </automatic-scaling>
   <instance-class>F1</instance-class>
 </appengine-web-app>
