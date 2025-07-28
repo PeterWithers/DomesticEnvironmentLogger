@@ -147,7 +147,7 @@
                             var idKey = 'k' + splitValue2[0].replace('.', '-');
                             if ($('#' + idKey + dateString).length === 0) {
                             $('#targetTable' + dateString + ' tr:first').after('<tr id="' + idKey + dateString + '">');
-                            $('#' + idKey + dateString).append('<td>' + splitValue2[0] + '</td>');
+                            $('#' + idKey + dateString).append('<td style="font-size: 8px;">' + splitValue2[0] + '</td>');
                             }
                             for (index = columnCount; index <= requiredColumns; index++) {
                             $('#' + idKey + dateString + ' td:last').after('<td></td>');
