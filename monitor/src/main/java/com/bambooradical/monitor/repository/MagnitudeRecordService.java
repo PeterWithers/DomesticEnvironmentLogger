@@ -6,6 +6,7 @@ package com.bambooradical.monitor.repository;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Key;
+import com.google.cloud.datastore.StringValue;
 //import com.google.cloud.datastore.KeyFactory;
 import java.util.Date;
 //import javax.annotation.PostConstruct;
@@ -38,12 +39,12 @@ public class MagnitudeRecordService {
         Entity magnitudeRecordsEntity = datastore.get(magnitudeRecordsKey);
         if (magnitudeRecordsEntity == null) {
             datastore.add(Entity.newBuilder(magnitudeRecordsKey)
-                    .set(timeKey, magnitudes)
+                    .set(timeKey, StringValue.newBuilder(magnitudes).setExcludeFromIndexes(true).build())
                     .set(timeKey + "_maxMsError", maxMsError)
                     .build());
         } else { //if (!magnitudeRecordsEntity.contains(programRecord.getKey())) {
             datastore.update(Entity.newBuilder(magnitudeRecordsEntity)
-                    .set(timeKey, magnitudes)
+                    .set(timeKey, StringValue.newBuilder(magnitudes).setExcludeFromIndexes(true).build())
                     .set(timeKey + "_maxMsError", maxMsError)
                     .build());
         }

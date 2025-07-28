@@ -125,8 +125,10 @@
             $('#tableTarget').append('<table id="targetTable' + dateString + '" style="border-spacing: 0px;"><tr id="targetTableTitles' + dateString + '"><td>' + dateString + '</td></tr></table>');
             var locationParam = window.location.search.split('?')[1].split('&')[0];
             var typeParam = window.location.search.split('?')[1].split('&')[1];
-            var colourValue = parseInt(window.location.search.split('?')[1].split('&')[2]);
+            var colourValue = parseFloat(window.location.search.split('?')[1].split('&')[2]);
             var dataIndex = (typeParam == "rms")?2:(typeParam == "avg")?3:1;
+            var typeString = (dataIndex == 2)?'RMS':(dataIndex == 3)?'Average':'Peaks';
+            $('#titleTarget').html('<h1>' + locationParam + ' ' + typeString + ' ' + colourValue + '</h1>');
             $.getJSON('/monitor/magnitudes?location=' + locationParam + '&date=' + dateString,
                     function(data){
                     $.each(data,
@@ -136,9 +138,9 @@
                             var columnCount = $('#targetTableTitles' + dateString).children('td').length;
                             var requiredColumns = parseInt(key1.substring(0, 2)) * 3;
                             for (index = columnCount; index <= requiredColumns; index++) {
-                            $('#targetTableTitles' + dateString).append('<td style="max-width:20px; font-size: 8px;">__:__</td>');
+                            $('#targetTableTitles' + dateString).append('<td style="max-width:10px; font-size: 8px; transform: rotate(90deg);"">__:__</td>');
                             }
-                            $('#targetTableTitles' + dateString).append('<td style="max-width:20px; font-size: 8px;">' + key1 + '</td>');
+                            $('#targetTableTitles' + dateString).append('<td style="max-width:10px; font-size: 8px; transform: rotate(90deg);"">' + key1 + '</td>');
                             $.each(value1.split(';'), function(key2, value2) {
                             var splitValue2 = value2.split(' ');
                             if (splitValue2.length > 1){
@@ -150,7 +152,7 @@
                             for (index = columnCount; index <= requiredColumns; index++) {
                             $('#' + idKey + dateString + ' td:last').after('<td></td>');
                             }
-                            $('#' + idKey + dateString + ' td:last').after('<td style="max-width:20px; font-size: 3px; background:hsl(' + (Math.min((splitValue2[dataIndex] / colourValue) * 360, 360 - 50) + 50) + ', 100%, 50%);">' + splitValue2[dataIndex] + '</td>');
+                            $('#' + idKey + dateString + ' td:last').after('<td style="max-width:10px; font-size: 3px; transform: rotate(90deg);" background:hsl(' + (Math.min((splitValue2[dataIndex] / colourValue) * 360, 360 - 50) + 50) + ', 100%, 50%);">' + splitValue2[dataIndex] + '</td>');
 //                rgb(' + Math.round(splitValue2[dataIndex] / 8) + ', 0, ' + (255 - Math.round(splitValue2[dataIndex] / 2)) + ')
                             //$('#targetTable' + dateString + '').append('<tr>').append('<td>').attr('style', 'background:green;').text(key);
                             }   });
@@ -169,6 +171,13 @@
         <a href="?audio%20monitor&peeks&50">audio peeks</a><br/>
         <a href="?audio%20monitor&rms&50">audio RMS</a><br/>
         <a href="?audio%20monitor&avg&50">audio average</a><br/>
+        <a href="?ground_floor_vibration&peak&1">ground_floor_vibration peeks</a><br/>
+        <a href="?ground_floor_vibration&rms&1">ground_floor_vibration RMS</a><br/>
+        <a href="?top_floor_vibration&peak&1">top_floor_vibration peeks</a><br/>
+        <a href="?top_floor_vibration&rms&1">top_floor_vibration RMS</a><br/>
+        <a href="?ground_ksp56_vibration&peak&1">ground_ksp56_vibration peeks</a><br/>
+        <a href="?ground_ksp56_vibration&rms&1">ground_ksp56_vibration RMS</a><br/>
+        <div id="titleTarget"></div>
         <div id="tableTarget"></div>
         <button style="width: 100%" id="nextButton" onclick="loadMore()">Load More</button>
     </body>
