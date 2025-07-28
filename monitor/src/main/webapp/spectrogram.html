@@ -152,7 +152,7 @@
                             for (index = columnCount; index <= requiredColumns; index++) {
                             $('#' + idKey + dateString + ' td:last').after('<td></td>');
                             }
-                            $('#' + idKey + dateString + ' td:last').after('<td style="max-width:10px; font-size: 3px; transform: rotate(90deg); background:hsl(' + (Math.min((splitValue2[dataIndex] / colourValue) * 360, 360 - 50) + 50) + ', 100%, 50%);">' + splitValue2[dataIndex] + '</td>');
+                            $('#' + idKey + dateString + ' td:last').after('<td style="max-width:10px; font-size: 3px; transform: background:hsl(' + (Math.min((splitValue2[dataIndex] / colourValue) * 360, 360 - 50) + 50) + ', 100%, 50%);">' + splitValue2[dataIndex] + '</td>');
 //                rgb(' + Math.round(splitValue2[dataIndex] / 8) + ', 0, ' + (255 - Math.round(splitValue2[dataIndex] / 2)) + ')
                             //$('#targetTable' + dateString + '').append('<tr>').append('<td>').attr('style', 'background:green;').text(key);
                             }   });
