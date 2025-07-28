@@ -5,9 +5,9 @@ package com.bambooradical.monitor.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Temporal;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Temporal;
 import org.springframework.data.annotation.Id;
 
 /**
@@ -19,7 +19,7 @@ public class DataRecord implements Serializable {
 
     @Id
     @GeneratedValue
-    @javax.persistence.Id
+    @jakarta.persistence.Id
     private Long id;
     private Float temperature;
     private Float humidity;
@@ -34,7 +34,7 @@ public class DataRecord implements Serializable {
     private Float voltage;
     private String location;
     private String error;
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
     private Date recordDate;
 
     public DataRecord() {

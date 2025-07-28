@@ -6,9 +6,9 @@ package com.bambooradical.monitor.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.io.Serializable;
 import java.util.Date;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Temporal;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Temporal;
 import org.springframework.data.annotation.Id;
 
 /**
@@ -20,12 +20,12 @@ public class RadioData implements Serializable {
 
     @Id
     @GeneratedValue
-    @javax.persistence.Id
+    @jakarta.persistence.Id
     private Long id;
     private String location;
     private String dataValues;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Temporal(jakarta.persistence.TemporalType.TIMESTAMP)
     private Date recordDate;
 
     public RadioData() {

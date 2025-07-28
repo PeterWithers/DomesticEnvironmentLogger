@@ -170,7 +170,7 @@ public class DataViewController {
                 recordLast = record;
             }
         }
-        if (recordLast != null) {
+        if (recordLast != null && recordMin != null && recordMax != null) {
             // make sure the last record is included
             returnList.add(new RecordPoint(recordMin.getRecordDate().getTime(), recordMin.getHumidity()));
             returnList.add(new RecordPoint(recordMax.getRecordDate().getTime(), recordMax.getHumidity()));
@@ -196,7 +196,7 @@ public class DataViewController {
         calendar.add(Calendar.DAY_OF_MONTH, -spanDays);
         Date startDate = calendar.getTime();
 
-        final PageRequest pageRequest = new PageRequest(0, 1000);
+        final PageRequest pageRequest = PageRequest.of(0, 1000);
         model.addAttribute("addEnergy", addEnergy);
         model.addAttribute("startDay", startDay);
         model.addAttribute("spanDays", spanDays);
