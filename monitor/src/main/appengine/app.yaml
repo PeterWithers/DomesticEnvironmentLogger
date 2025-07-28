@@ -1,14 +1,10 @@
-# The appengine-web.xml appears to be overriding this configuration 
-
-runtime: java8
+runtime: java21
 instance_class: F1
 
-runtime_config:  # Optional
-  jdk: openjdk8
-
 handlers:
-- url: /.*
-  script: this field is required, but ignored
+  - url: /.*
+    secure: always
+    redirect_http_response_code: 301
 
 manual_scaling:
   instances: 1
@@ -19,7 +15,7 @@ liveness_check:
   timeout_sec: 4
   failure_threshold: 2
   success_threshold: 2
-  
+
 readiness_check:
   path: "/readiness_check"
   check_interval_sec: 5
