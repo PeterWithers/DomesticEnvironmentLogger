@@ -4,6 +4,7 @@ instance_class: F1
 entrypoint: java -jar monitor-1.0-SNAPSHOT.jar
 
 automatic_scaling:
+  max_instances: 1
   max_idle_instances: 1
   min_idle_instances: 0
   min_pending_latency: 30ms
