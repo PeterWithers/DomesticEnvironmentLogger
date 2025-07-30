@@ -137,10 +137,10 @@
                             if (key1.endsWith('maxMsError') && value1){
                                 let abnormal_accel_data = value1.includes("abnormal_accel_data");
                                 let FIFO_overflow = value1.includes("FIFO_overflow");
-                                let colour = (abnormal_accel_data && FIFO_overflow) ? "red" : (abnormal_accel_data) ? "yellow" : (FIFO_overflow) ? "orange" : "";
+                                let colour = (abnormal_accel_data && FIFO_overflow) ? "red" : (abnormal_accel_data) ? "purple" : (FIFO_overflow) ? "orange" : "";
                                 if (colour) {
                                     let time = key1.split('_')[0];
-                                    $('#targetTableTitles' + dateString).children('td:contains("' + time + '")').css('background-color', colour);
+                                    $('#targetTableTitles' + dateString).children('td:contains("' + time + '")').css('color', colour);
                                 }
                             }
                             if (!key1.endsWith('maxMsError')){
