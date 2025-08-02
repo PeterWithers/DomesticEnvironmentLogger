@@ -135,12 +135,17 @@
                             function(key1, value1){
 //            $.each(sampleData, function(key1, value1) {
                             if (key1.endsWith('maxMsError') && value1){
+                                let rebooted = value1.includes("reboot");
                                 let abnormal_accel_data = value1.includes("abnormal_accel_data");
                                 let FIFO_overflow = value1.includes("FIFO_overflow");
                                 let colour = (abnormal_accel_data && FIFO_overflow) ? "red" : (abnormal_accel_data) ? "purple" : (FIFO_overflow) ? "orange" : "";
                                 if (colour) {
                                     let time = key1.split('_')[0];
                                     $('#targetTableTitles' + dateString).children('td:contains("' + time + '")').css('color', colour);
+                                }
+                                if (rebooted) {
+                                    let time = key1.split('_')[0];
+                                    $('#targetTableTitles' + dateString).children('td:contains("' + time + '")').prepend('*');
                                 }
                             }
                             if (!key1.endsWith('maxMsError')){
