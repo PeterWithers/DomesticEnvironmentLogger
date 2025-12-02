@@ -20,6 +20,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import java.io.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -99,7 +102,7 @@ public class DataRecordController {
         }
 //        if (tvocMin != null) {
 //            final DataRecord dataMinRecord = new DataRecord(null, null, tvocMin, co2Min, null, null, null, null, null, paMin, null, location + "Min", error, new Date());
-////                dataRecordRepository.save(dataRecord);
+        ////                dataRecordRepository.save(dataRecord);
 //            dataRecordService.save(dataMinRecord);
 //            returnRecords.add(dataMinRecord);
 //            final DataRecord dataAvgRecord = new DataRecord(null, null, tvocAvg, co2Avg, null, null, null, null, null, paAvg, null, location + "Avg", error, new Date());
@@ -476,15 +479,21 @@ public class DataRecordController {
     }
 
     @RequestMapping("/DayOfData{yyyy}-{MM}-{dd}")
-    public void getDayOfData(HttpServletResponse response, @PathVariable("yyyy") int yyyy, @PathVariable("MM") int MM, @PathVariable("dd") int dd) throws IOException {
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.addHeader("Content-Transfer-Encoding", "text");
-        try (InputStream dayOfDataStream = dataFileStore.getDayOfDataStream(yyyy, MM, dd); OutputStream outputStream = response.getOutputStream()) {
+    public ResponseEntity<byte[]> getDayOfData(@PathVariable int yyyy, @PathVariable int MM, @PathVariable int dd) throws IOException {
+        try (InputStream in = dataFileStore.getDayOfDataStream(yyyy, MM, dd); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             byte[] bytes = new byte[1024];
-            int bytesRead = 0;
-            while ((bytesRead = dayOfDataStream.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, bytesRead);
+            int read;
+            while ((read = in.read(bytes)) != -1) {
+                out.write(bytes, 0, read);
             }
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.add("Content-Transfer-Encoding", "text");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(out.toByteArray());
         }
     }
 
