@@ -8,19 +8,15 @@ import com.bambooradical.monitor.model.DataRecord;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.appengine.tools.cloudstorage.GcsFileOptions;
-import com.google.appengine.tools.cloudstorage.GcsFilename;
-import com.google.appengine.tools.cloudstorage.GcsInputChannel;
-import com.google.appengine.tools.cloudstorage.GcsOutputChannel;
-import com.google.appengine.tools.cloudstorage.GcsService;
-import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
-import com.google.appengine.tools.cloudstorage.RetryParams;
+import com.google.cloud.ReadChannel;
 import com.google.cloud.Timestamp;
+import com.google.cloud.WriteChannel;
 import com.google.cloud.datastore.Datastore;
 import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.storage.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.Channels;
@@ -30,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.joda.time.LocalDate;
+import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,73 +40,98 @@ public class DayOfDataGcsFileStore {
     @Autowired
     Datastore datastore;
 
-    private final GcsService gcsService = GcsServiceFactory.createGcsService(new RetryParams.Builder().initialRetryDelayMillis(10).retryMaxAttempts(3).totalRetryPeriodMillis(100).build());
+    private final Storage storage = StorageOptions.getDefaultInstance().getService();
 
     public InputStream getOverviewStream() {
-        GcsFilename dailyOverviewFileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DailyOverview");
-        GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(dailyOverviewFileName, 0, 2097152);
-        return Channels.newInputStream(readChannel);
+        BlobId blobId = BlobId.of("example", "DailyOverview");
+        ReadChannel reader = storage.reader(blobId);
+        return Channels.newInputStream(reader);
     }
 
     public InputStream getDayOfDataStream(int yyyy, int MM, int dd) {
         String dateKey = String.format("%04d-%02d-%02d", yyyy, MM, dd);
-        // todo: verify that this is using GMT without daylight savings times otherwise the result changes with the season
-        boolean isToday = dateKey.equals(new LocalDate().toString("yyyy-MM-dd"));
-        GcsFilename dayOfDataOverviewFileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey + (isToday ? "_tmp" : ""));
-        GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(dayOfDataOverviewFileName, 0, 2097152);
-        return Channels.newInputStream(readChannel);
+        // using GMT without daylight savings times otherwise the result changes with the season
+        boolean isToday = dateKey.equals(new LocalDate(DateTimeZone.UTC).toString("yyyy-MM-dd"));
+        String objectName = "DayOfData" + dateKey + (isToday ? "_tmp" : "");
+        String bucketName = "staging.domesticenvironmentlogger.appspot.com";
+        BlobId blobId = BlobId.of(bucketName, objectName);
+        Blob blob = storage.get(blobId);
+        if (blob == null) {
+            return null;
+        }
+        ReadChannel reader = storage.reader(blobId);
+        return Channels.newInputStream(reader);
     }
 
     private List<DataRecord> getDataRecordList(final String dateKey) throws IOException {
-        GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
-        GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey); // do not return the today tmp files here
-        final List<DataRecord> dataRecordList;
-        ObjectMapper dayMapper = new ObjectMapper();
-        dayMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(fileName, 0, 2097152);
-        dataRecordList = dayMapper.readValue(Channels.newInputStream(readChannel), new TypeReference<List<DataRecord>>() {
-        });
-        return dataRecordList;
+        String objectName = "DayOfData" + dateKey; // do not return the today tmp files here
+        String bucketName = "staging.domesticenvironmentlogger.appspot.com";
+        BlobId blobId = BlobId.of(bucketName, objectName);
+        Blob blob = storage.get(blobId);
+        if (blob == null) {
+            return List.of();
+        }
+        try (ReadChannel readChannel = storage.reader(blobId);
+            InputStream inputStream = Channels.newInputStream(readChannel)) {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            return mapper.readValue(inputStream, new TypeReference<List<DataRecord>>() {});
+        }
     }
 
     public void storeDayOfData(List<DataRecord> dataRecordList, final String dateKey, boolean isToday) {
+        String bucketName = "staging.domesticenvironmentlogger.appspot.com";
+        String tmpObject = "DayOfData" + dateKey + "_tmp";
+        String finalObject = "DayOfData" + dateKey + (isToday ? "_tmp" : "");
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
         try {
-            GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
-            ObjectMapper daylyMapper = new ObjectMapper();
             // delete any old temp is today files
-            gcsService.delete(new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey + "_tmp"));
+            storage.delete(BlobId.of(bucketName, tmpObject));
             // store the days data and if it is today then store it as a temp file that will be deleted next time
-            GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DayOfData" + dateKey + (isToday ? "_tmp" : ""));
-            daylyMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, instance);
-            daylyMapper.writeValue(Channels.newOutputStream(outputChannel), dataRecordList);
-        } catch (IOException exception2) {
-            System.out.println(exception2.getMessage());
+            BlobId blobId = BlobId.of(bucketName, finalObject);
+            BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("application/json").build();
+            try (WriteChannel writer = storage.writer(blobInfo)) {
+                mapper.writeValue(Channels.newOutputStream(writer), dataRecordList);
+            }
+        } catch (IOException e) {
+            System.out.println("Failed to store DayOfData: " + e.getMessage());
         }
     }
 
     public void saveDailyOverview(DailyOverview dailyOverview) throws IOException {
         dailyOverview.calculateSummaryData();
-        ObjectMapper outputMapper = new ObjectMapper();
-        GcsFileOptions instance = GcsFileOptions.getDefaultInstance();
-        GcsFilename fileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DailyOverview");
-        GcsOutputChannel outputChannel = gcsService.createOrReplace(fileName, instance);
-        outputMapper.writeValue(Channels.newOutputStream(outputChannel), dailyOverview);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        String bucketName = "staging.domesticenvironmentlogger.appspot.com";
+        String objectName = "DailyOverview";
+        BlobId blobId = BlobId.of(bucketName, objectName);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).setContentType("application/json").build();
+        try (WriteChannel writer = storage.writer(blobInfo)) {
+            mapper.writeValue(Channels.newOutputStream(writer), dailyOverview);
+        }
     }
 
     public DailyOverview loadDailyOverview() {
-        try {
-            ObjectMapper dailyOverviewMapper = new ObjectMapper();
-            dailyOverviewMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            GcsFilename dailyOverviewFileName = new GcsFilename("staging.domesticenvironmentlogger.appspot.com", "DailyOverview");
-            GcsInputChannel readChannel = gcsService.openPrefetchingReadChannel(dailyOverviewFileName, 0, 2097152);
-            Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>> instanceMap = dailyOverviewMapper.readValue(Channels.newInputStream(readChannel), new TypeReference<Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>>>() {
-            });
+        String bucketName = "staging.domesticenvironmentlogger.appspot.com";
+        String objectName = "DailyOverview";
+        BlobId blobId = BlobId.of(bucketName, objectName);
+        Blob blob = storage.get(blobId);
+        if (blob == null) {
+            // File does not exist, return empty DailyOverview
+            return new DailyOverview();
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        try (ReadChannel readChannel = storage.reader(blobId);
+            InputStream inputStream = Channels.newInputStream(readChannel)) {
+            Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>> instanceMap = mapper.readValue(inputStream, new TypeReference<Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>>>() {});
             DailyOverview dailyOverview = new DailyOverview();
             dailyOverview.addData(instanceMap);
             return dailyOverview;
-        } catch (IOException exception) {
-            System.out.println(exception.getMessage());
+        } catch (IOException e) {
+            System.out.println("Failed to load DailyOverview: " + e.getMessage());
             return new DailyOverview();
         }
     }
@@ -134,7 +156,7 @@ public class DayOfDataGcsFileStore {
             // todo: verify that this is using GMT without daylight savings times otherwise the result changes with the season
             String dateKey = date.toString("yyyy-MM-dd");
             boolean hasDate = false;
-            final boolean isToday = dateKey.equals(new LocalDate().toString("yyyy-MM-dd"));
+            final boolean isToday = dateKey.equals(new LocalDate(DateTimeZone.UTC).toString("yyyy-MM-dd"));
 //                    for (String currentKey : storedPeekData.keySet()) {
 //                        if (currentKey.toLowerCase().startsWith(dateKey + "_")) {
 //                            if (!DAILY_RECORDS.containsKey(currentKey)) {
