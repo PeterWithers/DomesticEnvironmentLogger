@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -479,8 +479,7 @@ public class DataRecordController {
     public void getDayOfData(HttpServletResponse response, @PathVariable("yyyy") int yyyy, @PathVariable("MM") int MM, @PathVariable("dd") int dd) throws IOException {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.addHeader("Content-Transfer-Encoding", "text");
-        try (OutputStream outputStream = response.getOutputStream()) {
-            final InputStream dayOfDataStream = dataFileStore.getDayOfDataStream(yyyy, MM, dd);
+        try (InputStream dayOfDataStream = dataFileStore.getDayOfDataStream(yyyy, MM, dd); OutputStream outputStream = response.getOutputStream()) {
             byte[] bytes = new byte[1024];
             int bytesRead = 0;
             while ((bytesRead = dayOfDataStream.read(bytes)) != -1) {
@@ -854,7 +853,7 @@ public class DataRecordController {
                 + "            pointHoverBackgroundColor: \"#fff\",\n"
                 + "            pointHoverBorderColor: \"rgba(255, 99, 193, 1)\","
                 + "            data: "
-                + getHumidityArray ("upstairs_bathroom0", startDate, endDate)
+                + getHumidityArray("upstairs_bathroom0", startDate, endDate)
                 + "        },"
                 + "{\n"
                 + "            label: 'dust Q1',\n"
