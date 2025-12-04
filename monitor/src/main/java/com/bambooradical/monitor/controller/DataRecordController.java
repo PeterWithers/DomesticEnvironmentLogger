@@ -19,18 +19,19 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.GZIPOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import java.io.ByteArrayOutputStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 /**
  * @created: 19/11/2016 23:48:12
@@ -478,23 +479,25 @@ public class DataRecordController {
         }
     }
 
-    @RequestMapping("/DayOfData{yyyy}-{MM}-{dd}")
-    public ResponseEntity<byte[]> getDayOfData(@PathVariable int yyyy, @PathVariable int MM, @PathVariable int dd) throws IOException {
-        try (InputStream in = dataFileStore.getDayOfDataStream(yyyy, MM, dd); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            byte[] bytes = new byte[1024];
-            int read;
-            while ((read = in.read(bytes)) != -1) {
-                out.write(bytes, 0, read);
+    @GetMapping(value = "/DayOfData{yyyy}-{MM}-{dd}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<StreamingResponseBody> getDayOfData(@PathVariable int yyyy, @PathVariable int MM, @PathVariable int dd) throws IOException {
+        InputStream dataStream = dataFileStore.getDayOfDataStream(yyyy, MM, dd);
+        StreamingResponseBody stream = outputStream -> {
+            try (GZIPOutputStream gzipOut = new GZIPOutputStream(outputStream);
+                InputStream in = dataStream) {
+                byte[] buffer = new byte[8192];
+                int bytesRead;
+                while ((bytesRead = in.read(buffer)) != -1) {
+                    gzipOut.write(buffer, 0, bytesRead);
+                }
+                gzipOut.finish();
             }
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.add("Content-Transfer-Encoding", "text");
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(out.toByteArray());
-        }
+        };
+        return ResponseEntity.ok()
+            .header("Content-Encoding", "gzip")
+            .header("Content-Transfer-Encoding", "binary")
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(stream);
     }
 
     @RequestMapping("/charts")
@@ -706,6 +709,54 @@ public class DataRecordController {
                 + "            pointHoverBorderColor: \"rgba(160,200,100, 1)\","
                 + "            data: "
                 + getTemperatureArray("frontwall top floor2", startDate, endDate)
+                + "        },"
+                + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'upstairs_bathroom',\n"
+                + "            backgroundColor: \"rgba(160,200,100, 0.2)\",\n"
+                + "            borderColor: \"rgba(200, 162, 100, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(200, 162, 100, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(200, 162, 100, 1)\","
+                + "            data: "
+                + getTemperatureArray("upstairs_bathroom", startDate, endDate)
+                + "        },"
+                + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'kp56_shed',\n"
+                + "            backgroundColor: \"rgba(160,200,100, 0.2)\",\n"
+                + "            borderColor: \"rgba(200, 100, 168, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(200, 100, 168, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(200, 100, 168, 1)\","
+                + "            data: "
+                + getTemperatureArray("kp56_shed", startDate, endDate)
+                + "        },"
+                + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'kp56_bathroom',\n"
+                + "            backgroundColor: \"rgba(160,200,100, 0.2)\",\n"
+                + "            borderColor: \"rgba(200, 100, 168, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(200, 100, 168, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(200, 100, 168, 1)\","
+                + "            data: "
+                + getTemperatureArray("kp56_bathroom", startDate, endDate)
+                + "        },"
+                + "{\n"
+                //                + "        lineTension: 0\n"
+                + "            label: 'ground_ksp56_vibration',\n"
+                + "            backgroundColor: \"rgba(160,200,100, 0.2)\",\n"
+                + "            borderColor: \"rgba(200, 100, 168, 1)\",\n"
+                + "            pointBackgroundColor: \"rgba(200, 100, 168, 1)\",\n"
+                + "            pointBorderColor: \"#fff\",\n"
+                + "            pointHoverBackgroundColor: \"#fff\",\n"
+                + "            pointHoverBorderColor: \"rgba(200, 100, 168, 1)\","
+                + "            data: "
+                + getTemperatureArray("ksp56_vibration", startDate, endDate)
                 + "        }"
                 + "]\n"
                 + "    },\n"
