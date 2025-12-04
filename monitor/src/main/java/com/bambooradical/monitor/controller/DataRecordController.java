@@ -11,7 +11,7 @@ import com.bambooradical.monitor.repository.DayOfDataGcsFileStore;
 import com.bambooradical.monitor.repository.EnergyRecordService;
 import com.bambooradical.monitor.repository.RadioDataService;
 import com.bambooradical.monitor.repository.MagnitudeRecordService;
-import com.bambooradical.monitor.repository.RadioDataRepository;
+import com.google.cloud.Timestamp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,6 +21,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -483,8 +485,7 @@ public class DataRecordController {
     public ResponseEntity<StreamingResponseBody> getDayOfData(@PathVariable int yyyy, @PathVariable int MM, @PathVariable int dd) throws IOException {
         InputStream dataStream = dataFileStore.getDayOfDataStream(yyyy, MM, dd);
         StreamingResponseBody stream = outputStream -> {
-            try (GZIPOutputStream gzipOut = new GZIPOutputStream(outputStream);
-                InputStream in = dataStream) {
+            try (GZIPOutputStream gzipOut = new GZIPOutputStream(outputStream); InputStream in = dataStream) {
                 byte[] buffer = new byte[8192];
                 int bytesRead;
                 while ((bytesRead = in.read(buffer)) != -1) {
@@ -494,10 +495,39 @@ public class DataRecordController {
             }
         };
         return ResponseEntity.ok()
-            .header("Content-Encoding", "gzip")
-            .header("Content-Transfer-Encoding", "binary")
-            .contentType(MediaType.APPLICATION_JSON)
-            .body(stream);
+                .header("Content-Encoding", "gzip")
+                .header("Content-Transfer-Encoding", "binary")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(stream);
+    }
+
+    @GetMapping(value = "/DayOfEntities{yyyy}-{MM}-{dd}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<StreamingResponseBody> getDayOfEntities(
+            @PathVariable int yyyy,
+            @PathVariable int MM,
+            @PathVariable int dd) {
+
+        try {
+            // Construct UTC start and end of day
+            ZonedDateTime startUtc = ZonedDateTime.of(yyyy, MM, dd, 0, 0, 0, 0, ZoneOffset.UTC);
+            ZonedDateTime endUtc = startUtc.plusDays(1);
+
+            Timestamp startTs = Timestamp.of(Date.from(startUtc.toInstant()));
+            Timestamp endTs = Timestamp.of(Date.from(endUtc.toInstant()));
+
+            StreamingResponseBody stream = dataFileStore.loadDayOfEntities(startTs, endTs);
+
+            return ResponseEntity.ok()
+                    .header("Content-Encoding", "gzip")
+                    .header("Content-Transfer-Encoding", "binary")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(stream);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(outputStream -> {
+                outputStream.write(("{\"error\":\"Failed to fetch entities\"}").getBytes());
+            });
+        }
     }
 
     @RequestMapping("/charts")

@@ -6,6 +6,8 @@ package com.bambooradical.monitor.repository;
 import com.bambooradical.monitor.model.DailyOverview;
 import com.bambooradical.monitor.model.DataRecord;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.ReadChannel;
@@ -16,6 +18,7 @@ import com.google.cloud.datastore.Entity;
 import com.google.cloud.datastore.Query;
 import com.google.cloud.datastore.QueryResults;
 import com.google.cloud.datastore.StructuredQuery;
+import com.google.cloud.datastore.Value;
 import com.google.cloud.storage.*;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,10 +28,12 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 import org.joda.time.LocalDate;
 import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 /**
  * @since 6 July 2019 4:23:27 PM (creation date)
@@ -71,11 +76,11 @@ public class DayOfDataGcsFileStore {
         if (blob == null) {
             return List.of();
         }
-        try (ReadChannel readChannel = storage.reader(blobId);
-            InputStream inputStream = Channels.newInputStream(readChannel)) {
+        try (ReadChannel readChannel = storage.reader(blobId); InputStream inputStream = Channels.newInputStream(readChannel)) {
             ObjectMapper mapper = new ObjectMapper();
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            return mapper.readValue(inputStream, new TypeReference<List<DataRecord>>() {});
+            return mapper.readValue(inputStream, new TypeReference<List<DataRecord>>() {
+            });
         }
     }
 
@@ -124,9 +129,9 @@ public class DayOfDataGcsFileStore {
         }
         ObjectMapper mapper = new ObjectMapper();
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        try (ReadChannel readChannel = storage.reader(blobId);
-            InputStream inputStream = Channels.newInputStream(readChannel)) {
-            Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>> instanceMap = mapper.readValue(inputStream, new TypeReference<Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>>>() {});
+        try (ReadChannel readChannel = storage.reader(blobId); InputStream inputStream = Channels.newInputStream(readChannel)) {
+            Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>> instanceMap = mapper.readValue(inputStream, new TypeReference<Map<String, Map<String, Map<String, LinkedHashMap<String, float[]>>>>>() {
+            });
             DailyOverview dailyOverview = new DailyOverview();
             dailyOverview.addData(instanceMap);
             return dailyOverview;
@@ -265,4 +270,55 @@ public class DayOfDataGcsFileStore {
         }
     }
 
+    public StreamingResponseBody loadDayOfEntities(Timestamp startTs, Timestamp endTs) {
+        Query<Entity> query = Query.newEntityQueryBuilder()
+                .setKind("DataRecord")
+                .setFilter(StructuredQuery.CompositeFilter.and(
+                        StructuredQuery.PropertyFilter.ge("RecordDate", startTs),
+                        StructuredQuery.PropertyFilter.lt("RecordDate", endTs)
+                ))
+                .addOrderBy(StructuredQuery.OrderBy.asc("RecordDate"))
+                .build();
+
+        QueryResults<Entity> results = datastore.run(query);
+
+        return outputStream -> {
+            try (GZIPOutputStream gzipOut = new GZIPOutputStream(outputStream, 32 * 1024); JsonGenerator jsonGen = new JsonFactory().createGenerator(gzipOut)) {
+
+                jsonGen.writeStartArray();
+
+                while (results.hasNext()) {
+                    Entity entity = results.next();
+                    jsonGen.writeStartObject();
+
+                    for (String propName : entity.getNames()) {
+                        Value<?> val = entity.getValue(propName);
+                        Object value = val != null ? val.get() : null;
+
+                        if (value == null) {
+                            jsonGen.writeNullField(propName);
+                        } else if (value instanceof String) {
+                            jsonGen.writeStringField(propName, (String) value);
+                        } else if (value instanceof Long) {
+                            jsonGen.writeNumberField(propName, (Long) value);
+                        } else if (value instanceof Double) {
+                            jsonGen.writeNumberField(propName, (Double) value);
+                        } else if (value instanceof Boolean) {
+                            jsonGen.writeBooleanField(propName, (Boolean) value);
+                        } else if (value instanceof Timestamp) {
+                            jsonGen.writeStringField(propName,
+                                    ((Timestamp) value).toSqlTimestamp().toInstant().toString());
+                        } else {
+                            jsonGen.writeStringField(propName, value.toString());
+                        }
+                    }
+
+                    jsonGen.writeEndObject();
+                }
+
+                jsonGen.writeEndArray();
+                jsonGen.flush();
+            }
+        };
+    }
 }
